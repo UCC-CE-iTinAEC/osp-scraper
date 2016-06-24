@@ -53,7 +53,7 @@ class WebStorePipeline(object):
     @staticmethod
     def file_path(item):
         """given an item, return the base name of a file it can be saved to"""
-        return 'html/{:s}-{:d}'.format(hashlib.md5(to_bytes(item["url"])), item['retrieved'])
+        return 'html/{:s}-{:d}'.format(hashlib.md5(to_bytes(item["url"])), item['retrieved']) # XXX zero pad timestamp?
 
     def process_item(self, item, spider):
         # calculate metadata
@@ -132,4 +132,4 @@ class WebFilesPipeline(FilesPipeline):
         url_hash = hashlib.md5(to_bytes(request.url)).hexdigest()
         ext = os.path.splitext(request.url)[1].lower()
         retrieved = getattr(response, 'retrieved', 0)
-        return '{:s}/{:s}-{:d}{:s}'.format(ext[1:], url_hash, retrieved, ext)
+        return '{:s}/{:s}-{:d}{:s}'.format(ext[1:], url_hash, retrieved, ext) # XXX zero pad timestamp?
