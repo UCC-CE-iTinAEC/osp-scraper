@@ -1,6 +1,4 @@
 """A spider for testing WebStorePipeline
-
-based on https://github.com/scrapy/dirbot
 """
 
 import scrapy
@@ -21,8 +19,15 @@ class WebStoreTestSpider(Spider):
             url=response.url,
             content=response.body,
             source_url=response.meta.get('source_url'),
+            source_anchor=response.meta.get('source_anchor'),
             # XXX provenance?
         )
 
-        for link in response.css('div.cat-item a::attr(href)'):
-            yield scrapy.Request(response.urljoin(link.extract()), meta={'source_url': response.url})
+        for link in response.css('div.cat-item a'):
+            # extract the href & urljoin it to the current response
+            url = response.urljoin(link.xpath('@href').extract_first())
+
+            # merge text content of all child nodes of the link
+            anchor = " ".join(s.strip() for s in link.css('*::text').extract() if s.strip())
+
+            yield scrapy.Request(url, meta={'source_url': response.url,'source_anchor': anchor})

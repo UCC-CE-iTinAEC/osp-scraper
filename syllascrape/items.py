@@ -12,6 +12,7 @@ class BaseItem(scrapy.Item):
     url = scrapy.Field()
     domain = scrapy.Field()
     source_url = scrapy.Field()
+    source_anchor = scrapy.Field() # anchor text on source page
     retrieved = scrapy.Field() # integer seconds since epoch
     spider = scrapy.Field() # spider.name/1.0
     provenance = scrapy.Field() # freetext for description of origin for manual uploads
