@@ -12,6 +12,7 @@ from scrapy.utils.python import to_bytes
 import hashlib
 import os.path
 import time
+from io import BytesIO
 
 from . import items
 from .utils import extract_domain
@@ -27,7 +28,7 @@ class WebStorePipeline(object):
     storage.
     """
 
-    def __init__(self, store_url):
+    def __init__(self, store_uri):
         if not store_uri:
             raise NotConfigured
 
@@ -36,7 +37,7 @@ class WebStorePipeline(object):
 
     @classmethod
     def from_crawler(cls, crawler):
-        pipe = cls(crawler.settings['FILES_STORE'], crawler.settings)
+        pipe = cls(crawler.settings['FILES_STORE'],)
         pipe.crawler = crawler
         return pipe
 
@@ -53,13 +54,14 @@ class WebStorePipeline(object):
     @staticmethod
     def file_path(item):
         """given an item, return the base name of a file it can be saved to"""
-        return 'html/{:s}-{:d}'.format(hashlib.md5(to_bytes(item["url"])), item['retrieved']) # XXX zero pad timestamp?
+        url_hash = hashlib.md5(to_bytes(item["url"])).hexdigest()
+        return 'html/{:s}-{:d}'.format(url_hash, item['retrieved']) # XXX zero pad timestamp?
 
     def process_item(self, item, spider):
         # calculate metadata
         item["domain"] = extract_domain(item["url"])
-        item["checksum"] = hashlib.md5(to_bytes(item["contents"])).hexdigest()
-        item["length"] = len(item["contents"])
+        item["checksum"] = hashlib.md5(to_bytes(item["content"])).hexdigest()
+        item["length"] = len(item["content"])
         item["spider"] = spider.version_string
         item["retrieved"] = int(time.time())
 
@@ -68,10 +70,10 @@ class WebStorePipeline(object):
         path = self.file_path(item)
 
         # save the raw bytes
-        self.store.persist_file("%s.html" % path, BytesIO(item["contents"]), None)
+        self.store.persist_file("%s.html" % path, BytesIO(item["content"]), None)
 
         # jsonify the item's metadata
-        json_buf = BytesIO(self.encoder.encode({k:v for k, v in item.items() if k != 'contents'}))
+        json_buf = BytesIO(self.encoder.encode({k:v for k, v in item.items() if k != 'content'}).encode('utf-8'))
         self.store.persist_file("%s.json" % path, json_buf, None)
 
         return item
@@ -95,7 +97,7 @@ class WebFilesPipeline(FilesPipeline):
         # callback executed when all files for an item have been downloaded
         super().item_completed(results, item, info)
 
-        for d in item[self.files_result_field]:
+        for d in item.get(self.files_result_field, ()):
             i = items.FileItem()
             i["url"] = d["url"]
             i["domain"] = extract_domain(d["url"])

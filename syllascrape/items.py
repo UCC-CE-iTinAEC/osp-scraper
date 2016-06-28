@@ -6,7 +6,7 @@
 # http://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-
+from pprint import pformat
 
 class BaseItem(scrapy.Item):
     url = scrapy.Field()
@@ -27,6 +27,10 @@ class BaseItem(scrapy.Item):
 
 class PageItem(BaseItem):
     content = scrapy.Field() # raw bytes
+
+    # custom repr so we don't show the entire page when logging
+    def __repr__(self):
+        return pformat({k:v for k, v in self.items() if k != 'content'})
 
 class FileItem(BaseItem):
     pass
