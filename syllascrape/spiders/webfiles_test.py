@@ -18,10 +18,12 @@ class WebFilesTestSpider(Spider):
 
     def parse(self, response):
 
-        file_urls = [x for x in ((r.xpath('@src').extract_first(), {'source_anchor': r.xpath('@alt').extract_first()})
-                                 for r in response.css('img'))
-                     if x[0] is not None
-                    ]
+        file_urls = []
+        for r in response.css('img'):
+            src = r.xpath('@src').extract_first()
+            if src is not None:
+                alt = r.xpath('@alt').extract_first() or ''
+                file_urls.append((src, {'source_anchor': alt}))
 
         for link in response.css('a'):
             # extract the href & urljoin it to the current response
@@ -34,9 +36,6 @@ class WebFilesTestSpider(Spider):
                 file_urls.append((url, {'source_anchor': anchor}))
             else:
                 yield scrapy.Request(url, meta={'source_url': response.url,'source_anchor': anchor})
-
-        if file_urls:
-            self.logger.info("On page %r got file_urls %r", response.url, file_urls)
 
         yield PageItem(
             url=response.url,
