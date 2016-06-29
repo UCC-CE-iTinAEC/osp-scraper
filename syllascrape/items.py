@@ -17,8 +17,7 @@ class BaseItem(scrapy.Item):
     spider = scrapy.Field() # spider.name/1.0
     checksum = scrapy.Field() # MD5 sum of content
     length = scrapy.Field() # length of content
-
-    # XXX mimetype?
+    mimetype = scrapy.Field() # Content-Type header from response
 
 # we have slightly different items for `pages` (which contain raw content in memory)
 # and `files` (where bytes have be saved to storage already by scrapy). These items

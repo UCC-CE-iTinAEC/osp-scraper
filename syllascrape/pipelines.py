@@ -10,13 +10,14 @@ from scrapy.pipelines.files import FilesPipeline
 from scrapy.utils.serialize import ScrapyJSONEncoder
 from scrapy.utils.python import to_bytes
 
+import logging
 import hashlib
 import os.path
 import time
 from io import BytesIO
 
 from . import items
-from .utils import extract_domain
+from .utils import extract_domain, file_path, guess_extension
 
 class WebStorePipeline(object):
     """Stores web pages, similar to `FilesPipeline`.
@@ -28,6 +29,8 @@ class WebStorePipeline(object):
     We piggyback on WebFilesPipeline below, which uses singleton classes for S3/FS
     storage.
     """
+
+    logger = logging.getLogger(__name__)
 
     def __init__(self, store_uri):
         if not store_uri:
@@ -52,12 +55,6 @@ class WebStorePipeline(object):
         store_cls = FilesPipeline.STORE_SCHEMES[scheme]
         return store_cls(uri)
 
-    @staticmethod
-    def file_path(item):
-        """given an item, return the base name of a file it can be saved to"""
-        url_hash = hashlib.md5(to_bytes(item["url"])).hexdigest()
-        return 'html/{:s}-{:d}'.format(url_hash, item['retrieved'])
-
     def process_item(self, item, spider):
         # calculate metadata
         item["domain"] = extract_domain(item["url"])
@@ -66,16 +63,15 @@ class WebStorePipeline(object):
         item["spider"] = spider.version_string
         item["retrieved"] = int(time.time())
 
-        # source_url & source_anchor must be populated by the spider
-
-        path = self.file_path(item)
-
         # save the raw bytes
-        self.store.persist_file("%s.html" % path, BytesIO(item["content"]), None)
+        path = file_path(item['url'], item['retrieved'],
+                         default_ext=guess_extension(item['mimetype']))
+        self.store.persist_file(path, BytesIO(item["content"]), None)
 
         # jsonify the item's metadata
+        jpath = "%s.json" % os.path.splitext(path)[0]
         json_buf = BytesIO(self.encoder.encode(item.get_metadata()).encode('utf-8'))
-        self.store.persist_file("%s.json" % path, json_buf, None)
+        self.store.persist_file(jpath, json_buf, None)
 
         return item
 
@@ -83,7 +79,7 @@ class WebFilesPipeline(FilesPipeline):
     """A customized `FilesPipeline`
 
     Saves to a filesystem or S3 path specified in the `FILES_STORE` setting.
-    Pages will be named `<ext>/<url_hash>-<epoch>.<ext>`, with an accompanying
+    Files will be named `<ext>/<url_hash>-<epoch>.<ext>`, with an accompanying
     `.json` file containing metadata.
 
     This subclass effectively bypasses the `FILES_EXPIRES` setting; files
@@ -93,10 +89,11 @@ class WebFilesPipeline(FilesPipeline):
     the second item is a dict to pass as metadata to `scrapy.Request`.
     """
 
+    logger = logging.getLogger(__name__)
+
     def __init__(self, *args, **kwargs):
         self.encoder = ScrapyJSONEncoder()
         super().__init__(*args, **kwargs)
-
 
     def get_media_requests(self, item, info):
         # hook to generate requests. We expect files_urls_field to be a list of 2 tuples of (url, meta)
@@ -141,7 +138,5 @@ class WebFilesPipeline(FilesPipeline):
         # downloaded anew each time because the call to
         # `FilesStore.stat_file(..)` will 404.
 
-        url_hash = hashlib.md5(to_bytes(request.url)).hexdigest()
-        ext = os.path.splitext(request.url)[1].lower()
-        retrieved = getattr(response, 'retrieved', 0)
-        return '{:s}/{:s}-{:d}{:s}'.format(ext[1:], url_hash, retrieved, ext)
+        default_ext = guess_extension(response.headers['content-type'].decode('ascii')) if response else ''
+        return file_path(request.url, getattr(response, 'retrieved', 0), default_ext=default_ext)

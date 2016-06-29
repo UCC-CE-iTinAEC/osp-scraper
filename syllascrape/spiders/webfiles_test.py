@@ -32,7 +32,7 @@ class WebFilesTestSpider(Spider):
             # merge text content of all child nodes of the link
             anchor = " ".join(s.strip() for s in link.css('*::text').extract() if s.strip())
 
-            if os.path.splitext(url)[-1][1:] in self.settings['FILES_EXTENSIONS']:
+            if os.path.splitext(url)[-1][1:].lower() in self.settings['FILES_EXTENSIONS']:
                 file_urls.append((url, {'source_anchor': anchor}))
             else:
                 yield scrapy.Request(url, meta={'source_url': response.url,'source_anchor': anchor})
@@ -42,6 +42,7 @@ class WebFilesTestSpider(Spider):
             content=response.body,
             source_url=response.meta.get('source_url'),
             source_anchor=response.meta.get('source_anchor'),
+            mimetype = response.headers.get('content-type').decode('ascii'),
             file_urls = file_urls
         )
 
