@@ -2,7 +2,6 @@
 """
 
 import scrapy
-
 import os.path
 
 from . import Spider
@@ -16,9 +15,10 @@ class WebFilesTestSpider(Spider):
         "http://wearpants.org/",
     ]
 
-    def parse(self, response):
-
+    def parse_text(self, response):
         file_urls = []
+
+        # add all images to file_urls
         for r in response.css('img'):
             src = r.xpath('@src').extract_first()
             if src is not None:
@@ -32,6 +32,7 @@ class WebFilesTestSpider(Spider):
             # merge text content of all child nodes of the link
             anchor = " ".join(s.strip() for s in link.css('*::text').extract() if s.strip())
 
+            # if path ends with a known binary file extension download it, otherwise crawl it
             if os.path.splitext(url)[-1][1:].lower() in self.settings['FILES_EXTENSIONS']:
                 file_urls.append((url, {'source_anchor': anchor}))
             else:

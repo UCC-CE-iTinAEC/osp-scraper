@@ -23,7 +23,7 @@ class WebStorePipeline(object):
     """Stores web pages, similar to `FilesPipeline`.
 
     Saves to a filesystem or S3 path specified in the `FILES_STORE` setting.
-    Pages will be named `html/<url_hash>-<epoch>.html`, with an accompanying
+    Pages will be named `<ext>/<url_hash>-<epoch>.<ext>`, with an accompanying
     `.json` file containing metadata.
 
     We piggyback on WebFilesPipeline below, which uses singleton classes for S3/FS
