@@ -20,7 +20,6 @@ class WebStoreTestSpider(Spider):
             content=response.body,
             source_url=response.meta.get('source_url'),
             source_anchor=response.meta.get('source_anchor'),
-            # XXX provenance?
         )
 
         for link in response.css('div.cat-item a'):

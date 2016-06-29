@@ -15,7 +15,6 @@ class BaseItem(scrapy.Item):
     source_anchor = scrapy.Field() # anchor text on source page
     retrieved = scrapy.Field() # integer seconds since epoch
     spider = scrapy.Field() # spider.name/1.0
-    provenance = scrapy.Field() # freetext for description of origin for manual uploads
     checksum = scrapy.Field() # MD5 sum of content
     length = scrapy.Field() # length of content
 
@@ -28,10 +27,16 @@ class BaseItem(scrapy.Item):
 
 class PageItem(BaseItem):
     content = scrapy.Field() # raw bytes
+    file_urls = scrapy.Field() # for use with WebFilesPipeline - list of 2-tuples of (url, meta dict)
+    files = scrapy.Field() # gets results of WebFilesPipeleine
+
+    def get_metadata(self):
+        """return a dict containing only metadata (dropping `content`, etc.)."""
+        return {k:v for k, v in self.items() if k not in ('content', 'file_urls', 'files')}
 
     # custom repr so we don't show the entire page when logging
     def __repr__(self):
-        return pformat({k:v for k, v in self.items() if k != 'content'})
+        return pformat(self.get_metadata())
 
 class FileItem(BaseItem):
     pass

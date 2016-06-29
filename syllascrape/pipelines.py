@@ -5,6 +5,7 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
+import scrapy
 from scrapy.pipelines.files import FilesPipeline
 from scrapy.utils.serialize import ScrapyJSONEncoder
 from scrapy.utils.python import to_bytes
@@ -65,7 +66,7 @@ class WebStorePipeline(object):
         item["spider"] = spider.version_string
         item["retrieved"] = int(time.time())
 
-        # XXX source_url & provenance?
+        # source_url & source_anchor must be populated by the spider
 
         path = self.file_path(item)
 
@@ -73,7 +74,7 @@ class WebStorePipeline(object):
         self.store.persist_file("%s.html" % path, BytesIO(item["content"]), None)
 
         # jsonify the item's metadata
-        json_buf = BytesIO(self.encoder.encode({k:v for k, v in item.items() if k != 'content'}).encode('utf-8'))
+        json_buf = BytesIO(self.encoder.encode(item.get_metadata()).encode('utf-8'))
         self.store.persist_file("%s.json" % path, json_buf, None)
 
         return item
@@ -87,11 +88,19 @@ class WebFilesPipeline(FilesPipeline):
 
     This subclass effectively bypasses the `FILES_EXPIRES` setting; files
     will be downloaded anew each time they are encountered.
+
+    `FILES_URLS_FIELD` should be a list of 2 tuples of `(url, meta)`, where
+    the second item is a dict to pass as metadata to `scrapy.Request`.
     """
 
     def __init__(self, *args, **kwargs):
         self.encoder = ScrapyJSONEncoder()
         super().__init__(*args, **kwargs)
+
+
+    def get_media_requests(self, item, info):
+        # hook to generate requests. We expect files_urls_field to be a list of 2 tuples of (url, meta)
+        return [scrapy.Request(url, meta=meta) for url, meta in item.get(self.files_urls_field, [])]
 
     def item_completed(self, results, item, info):
         # callback executed when all files for an item have been downloaded
@@ -103,12 +112,12 @@ class WebFilesPipeline(FilesPipeline):
             i["domain"] = extract_domain(d["url"])
             i["checksum"] = d["checksum"]
             i["retrieved"] = d["retrieved"]
+            i["source_anchor"] = d["source_anchor"]
             i["spider"] = info.spider.version_string
             i["source_url"] = item["url"]
-            i["provenance"] = item["provenance"]
 
             path = os.path.splitext(d['path'])[0]
-            json_buf = BytesIO(self.encoder.encode(i))
+            json_buf = BytesIO(self.encoder.encode(i).encode('utf-8'))
             self.store.persist_file("%s.json" % path, json_buf, None)
 
         return item
@@ -123,6 +132,7 @@ class WebFilesPipeline(FilesPipeline):
         d = super().media_downloaded(response, request, info)
         d["retrieved"] = response.retrieved
         d["length"] = len(response.body)
+        d["source_anchor"] = response.meta["source_anchor"]
         return d
 
     def file_path(self, request, response=None, info=None):

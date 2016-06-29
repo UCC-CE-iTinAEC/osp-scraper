@@ -70,7 +70,8 @@ ITEM_PIPELINES = {
 }
 
 # Configure WebFilesPipeline & WebStorePipeline
-FILES_STORE = '/home/vagrant/tmp'
+FILES_STORE = '/home/vagrant/tmp/wearpants'
+FILES_EXTENSIONS = {'pdf', 'doc', 'docx'}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -92,3 +93,5 @@ FILES_STORE = '/home/vagrant/tmp'
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+LOG_LEVEL = 'INFO'
