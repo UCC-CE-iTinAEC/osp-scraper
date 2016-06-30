@@ -15,6 +15,7 @@ import hashlib
 import os.path
 import time
 from io import BytesIO
+from urllib.parse import urlparse
 
 from . import items
 from .utils import extract_domain, file_path, guess_extension

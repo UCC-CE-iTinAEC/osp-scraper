@@ -15,6 +15,7 @@ class WebFilesTestSpider(Spider):
         "/bogus/",
         "/blog/",
         "/petecode/",
+        "/documents/",
     ]
 
     start_urls = [

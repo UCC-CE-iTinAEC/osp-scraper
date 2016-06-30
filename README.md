@@ -8,8 +8,8 @@ install & use Scrapy; this README only highlights customizations for Syllascrape
 ## Settings
 
 `FILES_STORE` is the root path to save files. This may be a path on the local
-filesystem, or an S3 URL like `s3://<bucket>/<directory>`. If using S3, the
-bucket must already exist.
+filesystem, or an S3 URL like `s3://<bucket>/<prefix>/`. If using S3, the
+bucket must already exist. You must include the trailing slash when using S3.
 
 `FILES_EXTENSTIONS` is a set of binary filename extensions that should be
 downloaded (*without* leading `.`). All text files (HTML, XML, etc.) will be
