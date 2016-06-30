@@ -6,6 +6,7 @@ import os.path
 
 from ..items import PageItem
 from ..utils import guess_extension
+from .. import version
 
 class Spider(scrapy.spiders.Spider):
     """Base class for syllascrape spiders.
@@ -18,7 +19,7 @@ class Spider(scrapy.spiders.Spider):
     @property
     def version_string(self):
         """return the name/version"""
-        return "%s/%d" % (self.name, self.version)
+        return "%s/%s" % (self.name, version.git_revision)
 
     def parse(self, response):
         # we may end up with a binary response here (instead of in `file_urls`) if

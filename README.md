@@ -7,8 +7,9 @@ install & use Scrapy; this README only highlights customizations for Syllascrape
 
 ## Settings
 
-`FILES_STORE` is the root path to save files. This may be a path
-on the local filesystem, or an S3 URL like `s3://<bucket>/<directory>`
+`FILES_STORE` is the root path to save files. This may be a path on the local
+filesystem, or an S3 URL like `s3://<bucket>/<directory>`. If using S3, the
+bucket must already exist.
 
 `FILES_EXTENSTIONS` is a set of binary filename extensions that should be
 downloaded (*without* leading `.`). All text files (HTML, XML, etc.) will be
@@ -36,7 +37,7 @@ fields will be present, with missing values represented by the empty string.
 * source_url: url that linked to the file
 * source_anchor: anchor text on source page
 * retrieved: integer seconds since epoch
-* spider: spider.name/1.0
+* spider: spider.name/git-revision
 * checksum: MD5 of content
 * length: length of content
 * mimetype: Content-Type header from response
