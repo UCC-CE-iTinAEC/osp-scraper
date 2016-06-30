@@ -73,12 +73,13 @@ ITEM_PIPELINES = {
 FILES_STORE = '/home/vagrant/tmp/wearpants'
 FILES_EXTENSIONS = {'pdf', 'doc', 'docx'}
 
-# Downloader middleware to enforce allowed_domains for files - this should come first
+# Downloader middleware to enforce allowed_domains & allowed_paths for files - this should come first
 DOWNLOADER_MIDDLEWARES = {
     'syllascrape.downloadermiddlewares.OffsiteMiddleware': 50,
     'syllascrape.downloadermiddlewares.PrefixMiddleware': 51,
 }
 
+# prefix middleware - place after OffsiteMiddleware
 SPIDER_MIDDLEWARES = {
     'syllascrape.spidermiddlewares.PrefixMiddleware': 550,
 }
@@ -103,5 +104,3 @@ SPIDER_MIDDLEWARES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-
-LOG_LEVEL = 'INFO'
