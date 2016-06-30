@@ -31,4 +31,5 @@ def guess_extension(mimetype):
 
     Returns `unknown` if an extension could not be guessed
     """
-    return (mimetypes.guess_extension(mimetype.split(';')[0]) or '.unknown')[1:]
+    x = (mimetypes.guess_extension(mimetype.split(';')[0]) or '.unknown')[1:]
+    return x if x != 'htm' else 'html'

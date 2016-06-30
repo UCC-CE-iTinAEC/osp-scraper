@@ -46,4 +46,32 @@ class Spider(scrapy.spiders.Spider):
 
     def parse_text(self, response):
         """handler for text-based responses"""
-        raise NotImplementedError
+        file_urls = []
+
+        for url, anchor in self.extract_links(response):
+            # if path ends with a known binary file extension download it, otherwise crawl it
+            if os.path.splitext(url)[-1][1:].lower() in self.settings['FILES_EXTENSIONS']:
+                file_urls.append((url, {'source_anchor': anchor}))
+            else:
+                yield scrapy.Request(url, meta={'source_url': response.url,'source_anchor': anchor})
+
+        yield PageItem(
+            url=response.url,
+            content=response.body,
+            source_url=response.meta.get('source_url'),
+            source_anchor=response.meta.get('source_anchor'),
+            mimetype = response.headers.get('content-type').decode('ascii'),
+            file_urls = file_urls
+        )
+
+    def extract_links(self, response):
+        """return a list of (url, source_ancor) tuples extracted from the page"""
+
+        for link in response.css('a'):
+            # extract the href & urljoin it to the current response
+            url = response.urljoin(link.xpath('@href').extract_first())
+
+            # merge text content of all child nodes of the link
+            anchor = " ".join(s.strip() for s in link.css('*::text').extract() if s.strip())
+
+            yield (url, anchor)
