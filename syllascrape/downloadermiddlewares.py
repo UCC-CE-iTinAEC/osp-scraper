@@ -59,3 +59,39 @@ class OffsiteMiddleware(object):
         regex = r'^(.*\.)?(%s)$' % '|'.join(re.escape(d) for d in allowed_domains if d is not None)
         return re.compile(regex)
 
+
+class PrefixMiddleware(object):
+    """Middleware to enforce a spider's `allowed_paths` at the downloading layer.
+
+    This is needed because WebFilesPipeline ignores the PrefixMiddleware for spidering layer.
+
+
+    See `syllascrape.spidermiddlewares.PrefixMiddleware` for use.
+    """
+    def __init__(self, stats):
+        self.stats = stats
+        self.paths_seen = set()
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler.stats)
+
+    def process_request(self, request, spider):
+        if not (request.dont_filter or self.should_follow(request, spider)):
+            path = urlparse_cached(request).path
+            if path not in self.paths_seen:
+                self.paths_seen.add(path)
+                logger.debug("Filtered prefix request to %(path)r: %(request)s",
+                             {'path': path, 'request': request}, extra={'spider': spider})
+                self.stats.inc_value('prefix/paths', spider=spider)
+            self.stats.inc_value('prefix/filtered', spider=spider)
+
+            raise IgnoreRequest
+
+    def should_follow(self, request, spider):
+        path = urlparse_cached(request).path
+        return any(path.startswith(p) for p in self.get_allowed_paths(spider))
+
+    def get_allowed_paths(self, spider):
+        """Override this method to implement a different path policy"""
+        return getattr(spider, 'allowed_paths', ['/']) # allow all paths by default

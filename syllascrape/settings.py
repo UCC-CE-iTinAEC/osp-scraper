@@ -76,6 +76,11 @@ FILES_EXTENSIONS = {'pdf', 'doc', 'docx'}
 # Downloader middleware to enforce allowed_domains for files - this should come first
 DOWNLOADER_MIDDLEWARES = {
     'syllascrape.downloadermiddlewares.OffsiteMiddleware': 50,
+    'syllascrape.downloadermiddlewares.PrefixMiddleware': 51,
+}
+
+SPIDER_MIDDLEWARES = {
+    'syllascrape.spidermiddlewares.PrefixMiddleware': 550,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

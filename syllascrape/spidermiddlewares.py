@@ -6,7 +6,6 @@ from scrapy.utils.httpobj import urlparse_cached
 
 logger = logging.getLogger(__name__)
 
-
 class PrefixMiddleware(object):
     """
     Path prefix middleware. Based on from scrapy.spidermiddlewares.offsite.OffsiteMiddleware
@@ -40,10 +39,10 @@ class PrefixMiddleware(object):
                     path = urlparse_cached(x).path
                     if path not in self.paths_seen:
                         self.paths_seen.add(path)
-                        logger.debug("Filtered offsite request to %(path)r: %(request)s",
+                        logger.debug("Filtered prefix request to %(path)r: %(request)s",
                                      {'path': path, 'request': x}, extra={'spider': spider})
-                        self.stats.inc_value('offsite/paths', spider=spider)
-                    self.stats.inc_value('offsite/filtered', spider=spider)
+                        self.stats.inc_value('prefix/paths', spider=spider)
+                    self.stats.inc_value('prefix/filtered', spider=spider)
             else:
                 yield x
 
@@ -53,7 +52,7 @@ class PrefixMiddleware(object):
 
     def get_allowed_paths(self, spider):
         """Override this method to implement a different path policy"""
-        getattr(spider, 'allowed_paths', ['/']) # allow all paths by default
+        return getattr(spider, 'allowed_paths', ['/']) # allow all paths by default
 
     def spider_opened(self, spider):
         self.allowed_paths = self.get_allowed_paths(spider)
