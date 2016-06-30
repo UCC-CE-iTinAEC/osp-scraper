@@ -29,6 +29,9 @@ items:
 2. group by `url_hash`
 3. take the first item from each group.
 
+See `syllascrape.storage.newest_files` for a helper function that implements
+this algorithm.
+
 ### Metadata The following metadata is saved for each downloaded file; all
 fields will be present, with missing values represented by the empty string.
 
@@ -59,3 +62,9 @@ All spiders must have a string `name` (must be a valid Python identifier).
 
 Spiders provide several methods that can be overridden to customize which
 links are crawled; see the source for details.
+
+## Legacy Format
+
+A script to convert to the legacy data format is in
+`bin/write_legacy_logs.py`. Note that data files will be hard linked to save
+space.
