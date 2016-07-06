@@ -16,6 +16,15 @@ class Spider(scrapy.spiders.Spider):
     :cvar int version: a version number for the spider. This should be incremented by the developer for each version of code deployed to production
     """
 
+    def get_parameters(self):
+        """return dict of parameters for current spider run"""
+        # default values should match various middlewares
+        return {
+            'allowed_domains': getattr(self, 'allowed_domains', ['']),
+            'allowed_paths': getattr(self, 'allowed_paths', ['/']),
+            'start_urls': getattr(self, 'start_urls', []),
+        }
+
     def parse(self, response):
         # we may end up with a binary response here (instead of in `file_urls`) if
         # we are redirected from a `/plain` URL to a binary blob like `/plain.pdf`

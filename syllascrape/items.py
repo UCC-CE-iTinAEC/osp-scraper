@@ -16,6 +16,7 @@ class BaseItem(scrapy.Item):
     retrieved = scrapy.Field() # integer seconds since epoch
     spider_name = scrapy.Field() # spider name
     spider_revision = scrapy.Field() # git revision number of source code
+    spider_parameters = scrapy.Field() # dict of spider parameters
     checksum = scrapy.Field() # MD5 sum of content
     length = scrapy.Field() # length of content
     mimetype = scrapy.Field() # Content-Type header from response

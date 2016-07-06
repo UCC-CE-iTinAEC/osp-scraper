@@ -42,6 +42,7 @@ fields will be present, with missing values represented by the empty string.
 * retrieved: integer seconds since epoch
 * spider_name: spider name
 * spider_revision: git revision number for syllascrape code
+* spider_parameters: dict of spider parameters (starting urls, allowed domains, etc.)
 * checksum: MD5 of content
 * length: length of content
 * mimetype: Content-Type header from response
