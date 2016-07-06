@@ -19,6 +19,8 @@ from urllib.parse import urlparse
 
 from . import items
 from .utils import extract_domain, file_path, guess_extension
+from .version import git_revision
+
 
 class WebStorePipeline(object):
     """Stores web pages, similar to `FilesPipeline`.
@@ -61,7 +63,8 @@ class WebStorePipeline(object):
         item["domain"] = extract_domain(item["url"])
         item["checksum"] = hashlib.md5(to_bytes(item["content"])).hexdigest()
         item["length"] = len(item["content"])
-        item["spider"] = spider.version_string
+        item["spider_name"] = spider.name
+        item["spider_revision"] = git_revision
         item["retrieved"] = int(time.time())
 
         # save the raw bytes
@@ -111,7 +114,8 @@ class WebFilesPipeline(FilesPipeline):
             i["checksum"] = d["checksum"]
             i["retrieved"] = d["retrieved"]
             i["source_anchor"] = d["source_anchor"]
-            i["spider"] = info.spider.version_string
+            i["spider_name"] = info.spider.name
+            i["spider_revision"] = git_revision
             i["source_url"] = item["url"]
 
             path = os.path.splitext(d['path'])[0]

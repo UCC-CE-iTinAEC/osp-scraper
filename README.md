@@ -40,7 +40,8 @@ fields will be present, with missing values represented by the empty string.
 * source_url: url that linked to the file
 * source_anchor: anchor text on source page
 * retrieved: integer seconds since epoch
-* spider: spider.name/git-revision
+* spider_name: spider name
+* spider_revision: git revision number for syllascrape code
 * checksum: MD5 of content
 * length: length of content
 * mimetype: Content-Type header from response

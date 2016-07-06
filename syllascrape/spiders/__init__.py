@@ -16,11 +16,6 @@ class Spider(scrapy.spiders.Spider):
     :cvar int version: a version number for the spider. This should be incremented by the developer for each version of code deployed to production
     """
 
-    @property
-    def version_string(self):
-        """return the name/version"""
-        return "%s/%s" % (self.name, version.git_revision)
-
     def parse(self, response):
         # we may end up with a binary response here (instead of in `file_urls`) if
         # we are redirected from a `/plain` URL to a binary blob like `/plain.pdf`

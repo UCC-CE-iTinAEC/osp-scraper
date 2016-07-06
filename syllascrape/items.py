@@ -14,7 +14,8 @@ class BaseItem(scrapy.Item):
     source_url = scrapy.Field()
     source_anchor = scrapy.Field() # anchor text on source page
     retrieved = scrapy.Field() # integer seconds since epoch
-    spider = scrapy.Field() # spider.name/1.0
+    spider_name = scrapy.Field() # spider name
+    spider_revision = scrapy.Field() # git revision number of source code
     checksum = scrapy.Field() # MD5 sum of content
     length = scrapy.Field() # length of content
     mimetype = scrapy.Field() # Content-Type header from response
