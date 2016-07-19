@@ -70,7 +70,7 @@ class Spider(scrapy.spiders.Spider):
         )
 
     def extract_links(self, response):
-        """return a list of (url, source_ancor) tuples extracted from the page"""
+        """return a list of (url, source_anchor) tuples extracted from the page"""
 
         for link in response.css('a'):
             # extract the href & urljoin it to the current response
