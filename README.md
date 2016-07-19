@@ -70,3 +70,19 @@ links are crawled; see the source for details.
 A script to convert to the legacy data format is in
 `bin/write_legacy_logs.py`. Note that data files will be hard linked to save
 space.
+
+## Celery
+
+Syllascrape supports running spiders under
+[Celery](http://www.celeryproject.org/). Celery looks for a module
+`celeryconfig.py` somewhere on the PYTHONPATH. To start the celery worker,
+from the project directory run:
+
+    $ celery -A syllascrape worker -l info
+
+Also installed is [Flower](https://flower.readthedocs.io/en/latest/) a nice
+web UI for monitoring celery. Run it as:
+
+    $ flower -A syllascrape
+
+By default, it listens on http://localhost:5555/ .
