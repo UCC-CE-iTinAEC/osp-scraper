@@ -16,6 +16,8 @@ class Spider(scrapy.spiders.Spider):
     :cvar int version: a version number for the spider. This should be incremented by the developer for each version of code deployed to production
     """
 
+    name = "syllascrape_spider"
+
     def get_parameters(self):
         """return dict of parameters for current spider run"""
         # default values should match various middlewares
