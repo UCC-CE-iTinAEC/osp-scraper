@@ -32,8 +32,10 @@ items:
 See `syllascrape.storage.newest_files` for a helper function that implements
 this algorithm.
 
-### Metadata The following metadata is saved for each downloaded file; all
-fields will be present, with missing values represented by the empty string.
+### Metadata
+
+The following metadata is saved for each downloaded file; all fields will be
+present, with missing values represented by the empty string.
 
 * url: url of the file
 * domain: hostname & port
@@ -81,11 +83,9 @@ from the project directory run:
     $ celery -A syllascrape worker -l info
 
 Also installed is [Flower](https://flower.readthedocs.io/en/latest/) a nice
-web UI for monitoring celery. Run it as:
+web UI for [monitoring celery](http://localhost:5555/). Run it as:
 
     $ flower -A syllascrape
-
-By default, it listens on http://localhost:5555/ .
 
 ## Crawling from CSV
 
