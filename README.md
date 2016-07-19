@@ -86,3 +86,10 @@ web UI for monitoring celery. Run it as:
     $ flower -A syllascrape
 
 By default, it listens on http://localhost:5555/ .
+
+## Crawling from CSV
+
+The `bin/csv_prefix_crawler.py` takes a CSV file with a
+seed URL on each line, and fires of Celery crawl tasks. If the path component
+ends with a `/` it will be used-as is; otherwise the final path component is
+assumed to be a filename and will be dropped.

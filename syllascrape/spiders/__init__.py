@@ -2,6 +2,7 @@ import scrapy.spiders
 import scrapy.http
 from scrapy.utils.httpobj import urlparse_cached
 
+from urllib.parse import urlparse
 import os.path
 
 from ..items import PageItem
@@ -82,3 +83,22 @@ class Spider(scrapy.spiders.Spider):
             anchor = " ".join(s.strip() for s in link.css('*::text').extract() if s.strip())
 
             yield (url, anchor)
+
+
+def url_to_prefix_params(url):
+    """Generate parameters for a prefix spider.
+
+    If the path component ends with a `/` it will be used-as is; otherwise
+    the final path component is assumed to be a filename and will be dropped.
+
+    :arg str url: the seed url
+    :returns: parameters for :cls:`Spider`: `start_urls`, `allowed_domains`, `allowed_paths`
+    :rtype: dict
+    """
+    u = urlparse(url)
+
+    return {
+        'start_urls': [url],
+        'allowed_domains': [u.netloc],
+        'allowed_paths': [u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/']
+    }
