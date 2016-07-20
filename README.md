@@ -87,6 +87,17 @@ web UI for [monitoring celery](http://localhost:5555/). Run it as:
 
     $ flower -A syllascrape
 
+### Celery/Scrapy Integration
+Celery workers run as a daemon process & read tasks off a Redis queue.
+
+Each task fires off a subprocess running scrapy/twisted.
+
+When the subprocess exits, the task is finished.
+
+Celery then starts a new daemon process for the next incoming task. This is
+unusual - typically a daemon process handles 1000s of short tasks before
+respawning), but seems to be needed to run twisted.
+
 ## Crawling from CSV
 
 The `bin/csv_prefix_crawler.py` takes a CSV file with a
