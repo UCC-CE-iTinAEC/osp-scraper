@@ -93,3 +93,4 @@ ENV/
 
 # Scrapy overrides
 /syllascrape/settings/local.py
+/celeryconfig.py
