@@ -28,6 +28,11 @@ class Spider(scrapy.spiders.Spider):
             'start_urls': getattr(self, 'start_urls', []),
         }
 
+    def start_requests(self):
+        for r in super().start_requests():
+            r.meta['depth'] = 0
+            yield r
+
     def parse(self, response):
         # we may end up with a binary response here (instead of in `file_urls`) if
         # we are redirected from a `/plain` URL to a binary blob like `/plain.pdf`
@@ -59,9 +64,13 @@ class Spider(scrapy.spiders.Spider):
         for url, anchor in self.extract_links(response):
             # if path ends with a known binary file extension download it, otherwise crawl it
             if os.path.splitext(url)[-1][1:].lower() in self.settings['FILES_EXTENSIONS']:
-                file_urls.append((url, {'source_anchor': anchor}))
+                meta = self.process_file_url(response, url, anchor)
+                if meta:
+                    file_urls.append((url, meta))
             else:
-                yield scrapy.Request(url, meta={'source_url': response.url,'source_anchor': anchor})
+                meta = self.process_text_url(response, url, anchor)
+                if meta:
+                    yield scrapy.Request(url, meta=meta)
 
         yield PageItem(
             url=response.url,
@@ -84,6 +93,17 @@ class Spider(scrapy.spiders.Spider):
 
             yield (url, anchor)
 
+
+    def process_file_url(self, response, url, anchor):
+        """return `Request.meta` for a file url, or None to skip"""
+        return {'source_anchor': anchor,
+                'depth': response.meta.get('depth', 0) + 1}
+
+    def process_text_url(self, response, url, anchor):
+        """return `Request.meta` for a text url, or None to skip"""
+        return {'source_url': response.url,
+                'source_anchor': anchor,
+                'depth': response.meta.get('depth', 0) + 1}
 
 def url_to_prefix_params(url):
     """Generate parameters for a prefix spider.
