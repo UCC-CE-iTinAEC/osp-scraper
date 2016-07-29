@@ -57,3 +57,40 @@ class PrefixMiddleware(object):
     def spider_opened(self, spider):
         self.allowed_paths = self.get_allowed_paths(spider)
         self.paths_seen = set()
+
+
+
+
+class RequestDepthMiddleware(object):
+    """
+
+    """
+
+    def __init__(self, stats):
+        self.stats = stats
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler.stats)
+
+    def process_spider_output(self, response, result, spider):
+        for request in result:
+            if not isinstance(request, Request):
+                yield request
+            else:
+                # increment the observed depth
+                depth = response.meta['depth'] + 1
+                request.meta['depth'] = depth
+
+                if depth < request.meta.get('maxdepth', sys.maxsize):
+                    # observed depth less than max depth: record stats & yield request
+                    self.stats.inc_value('request_depth_count/%s' % depth, spider=spider)
+                    self.stats.max_value('request_depth_max', depth, spider=spider)
+                    yield request
+                else:
+                    # observed depth exceeds max depth; log & drop request
+                    logger.debug(
+                        "Ignoring link (depth > %(maxdepth)d): %(requrl)s ",
+                        {'maxdepth': request.maxdepth, 'requrl': request.url},
+                        extra={'spider': spider}
+                    )

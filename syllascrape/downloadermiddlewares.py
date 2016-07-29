@@ -95,3 +95,33 @@ class PrefixMiddleware(object):
     def get_allowed_paths(self, spider):
         """Override this method to implement a different path policy"""
         return getattr(spider, 'allowed_paths', ['/']) # allow all paths by default
+
+
+
+class RequestDepthMiddleware(object):
+
+
+    def __init__(self, stats):
+        self.stats = stats
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler.stats)
+
+    def process_request(self, request, spider):
+        if request.dont_filter:
+            return
+
+        depth = request.meta.get('depth', 0)
+        if depth < request.meta.get('maxdepth', sys.maxsize):
+            # observed depth less than max depth: record stats
+            self.stats.inc_value('request_depth_count/%s' % depth, spider=spider)
+            self.stats.max_value('request_depth_max', depth, spider=spider)
+        else:
+            # observed depth exceeds max depth; log & drop request
+            logger.debug(
+                "Ignoring link (depth > %(maxdepth)d): %(requrl)s ",
+                {'maxdepth': request.maxdepth, 'requrl': request.url},
+                extra={'spider': spider}
+            )
+            raise IgnoreRequest
