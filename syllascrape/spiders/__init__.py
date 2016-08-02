@@ -26,6 +26,8 @@ class Spider(scrapy.spiders.Spider):
             'allowed_domains': getattr(self, 'allowed_domains', ['']),
             'allowed_paths': getattr(self, 'allowed_paths', ['/']),
             'start_urls': getattr(self, 'start_urls', []),
+            'external_domain_max_depth': getattr(self, 'external_domain_max_depth', 0),
+            'external_path_max_depth': getattr(self, 'external_path_max_depth', 0),
         }
 
     def start_requests(self):
@@ -97,13 +99,15 @@ class Spider(scrapy.spiders.Spider):
     def process_file_url(self, response, url, anchor):
         """return `Request.meta` for a file url, or None to skip"""
         return {'source_anchor': anchor,
-                'depth': response.meta.get('depth', 0) + 1}
+                'depth': response.meta['depth'] + 1,
+                }
 
     def process_text_url(self, response, url, anchor):
         """return `Request.meta` for a text url, or None to skip"""
         return {'source_url': response.url,
                 'source_anchor': anchor,
-                'depth': response.meta.get('depth', 0) + 1}
+                'depth': response.meta['depth'] + 1,
+                }
 
 def url_to_prefix_params(url):
     """Generate parameters for a prefix spider.

@@ -34,16 +34,28 @@ class OffsiteMiddleware(object):
         except AttributeError:
             host_regex = spider._offsite_regex = self.get_host_regex(spider)
 
-        if not (request.dont_filter or self.should_follow(request, spider)):
-            domain = urlparse_cached(request).hostname
-            if domain and domain not in self.domains_seen:
-                self.domains_seen.add(domain)
-                logger.debug("Filtered offsite request to %(domain)r: %(request)s",
-                             {'domain': domain, 'request': request}, extra={'spider': spider})
-                self.stats.inc_value('offsite/domains', spider=spider)
-            self.stats.inc_value('offsite/filtered', spider=spider)
+        if request.dont_filter or self.should_follow(request, spider):
+            # domain is explicitly allowed, reset depth to zero
+            request.meta['depth'] = 0
+            return
+        else:
+            depth = request.meta['depth']
+            if depth < self.get_max_depth(spider):
+                # an external domain with less than max depth; record stats
+                self.stats.inc_value('request_depth_count/%s' % depth, spider=spider)
+                self.stats.max_value('request_depth_max', depth, spider=spider)
+                return
+            else:
+                # external domain crawled deeper than max depth; record stats & drop
+                domain = urlparse_cached(request).hostname
+                if domain and domain not in self.domains_seen:
+                    self.domains_seen.add(domain)
+                    logger.debug("Filtered offsite request to %(domain)r: %(request)s",
+                                 {'domain': domain, 'request': request}, extra={'spider': spider})
+                    self.stats.inc_value('offsite/domains', spider=spider)
+                self.stats.inc_value('offsite/filtered', spider=spider)
 
-            raise IgnoreRequest
+                raise IgnoreRequest
 
     def should_follow(self, request, spider):
         regex = spider._offsite_regex
@@ -60,11 +72,15 @@ class OffsiteMiddleware(object):
         return re.compile(regex)
 
 
+    def get_max_depth(self, spider):
+        """Get the maximum depth allowed for crawling external paths"""
+        return getattr(spider, 'external_domain_max_depth', 0)
+
+
 class PrefixMiddleware(object):
     """Middleware to enforce a spider's `allowed_paths` at the downloading layer.
 
     This is needed because WebFilesPipeline ignores the PrefixMiddleware for spidering layer.
-
 
     See `syllascrape.spidermiddlewares.PrefixMiddleware` for use.
     """
@@ -77,16 +93,28 @@ class PrefixMiddleware(object):
         return cls(crawler.stats)
 
     def process_request(self, request, spider):
-        if not (request.dont_filter or self.should_follow(request, spider)):
-            path = urlparse_cached(request).path
-            if path not in self.paths_seen:
-                self.paths_seen.add(path)
-                logger.debug("Filtered prefix request to %(path)r: %(request)s",
-                             {'path': path, 'request': request}, extra={'spider': spider})
-                self.stats.inc_value('prefix/paths', spider=spider)
-            self.stats.inc_value('prefix/filtered', spider=spider)
+        if request.dont_filter or self.should_follow(request, spider):
+            # path is explicitly allowed, reset depth to zero
+            request.meta['depth'] = 0
+            return
+        else:
+            depth = request.meta['depth']
+            if depth < self.get_max_depth(spider):
+                # an external path with less than max depth; record stats
+                self.stats.inc_value('request_depth_count/%s' % depth, spider=spider)
+                self.stats.max_value('request_depth_max', depth, spider=spider)
+                return
+            else:
+                # external path crawled deeper than max depth; record stats & drop
+                path = urlparse_cached(request).path
+                if path not in self.paths_seen:
+                    self.paths_seen.add(path)
+                    logger.debug("Filtered prefix request to %(path)r: %(request)s",
+                                 {'path': path, 'request': request}, extra={'spider': spider})
+                    self.stats.inc_value('prefix/paths', spider=spider)
+                self.stats.inc_value('prefix/filtered', spider=spider)
 
-            raise IgnoreRequest
+                raise IgnoreRequest
 
     def should_follow(self, request, spider):
         path = urlparse_cached(request).path
@@ -96,32 +124,6 @@ class PrefixMiddleware(object):
         """Override this method to implement a different path policy"""
         return getattr(spider, 'allowed_paths', ['/']) # allow all paths by default
 
-
-
-class RequestDepthMiddleware(object):
-
-
-    def __init__(self, stats):
-        self.stats = stats
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        return cls(crawler.stats)
-
-    def process_request(self, request, spider):
-        if request.dont_filter:
-            return
-
-        depth = request.meta.get('depth', 0)
-        if depth < request.meta.get('maxdepth', sys.maxsize):
-            # observed depth less than max depth: record stats
-            self.stats.inc_value('request_depth_count/%s' % depth, spider=spider)
-            self.stats.max_value('request_depth_max', depth, spider=spider)
-        else:
-            # observed depth exceeds max depth; log & drop request
-            logger.debug(
-                "Ignoring link (depth > %(maxdepth)d): %(requrl)s ",
-                {'maxdepth': request.maxdepth, 'requrl': request.url},
-                extra={'spider': spider}
-            )
-            raise IgnoreRequest
+    def get_max_depth(self, spider):
+        """Get the maximum depth allowed for crawling external paths"""
+        return getattr(spider, 'external_path_max_depth', 0)

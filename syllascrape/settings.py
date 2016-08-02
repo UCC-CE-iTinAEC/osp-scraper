@@ -79,8 +79,13 @@ DOWNLOADER_MIDDLEWARES = {
     'syllascrape.downloadermiddlewares.PrefixMiddleware': 51,
 }
 
-# prefix middleware - place after OffsiteMiddleware
 SPIDER_MIDDLEWARES = {
+    # disable builtin middlewares
+    'scrapy.spidermiddlewares.offsite.OffsiteMiddleware': None,
+    'scrapy.spidermiddlewares.depth.DepthMiddleware': None,
+
+    # use our middlewares instead
+    'syllascrape.spidermiddlewares.OffsiteMiddleware': 500,
     'syllascrape.spidermiddlewares.PrefixMiddleware': 550,
 }
 
