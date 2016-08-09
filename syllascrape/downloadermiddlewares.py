@@ -34,12 +34,16 @@ class OffsiteMiddleware(object):
         except AttributeError:
             host_regex = spider._offsite_regex = self.get_host_regex(spider)
 
+        # some requests for files come from scrapy itself (robots.txt, etc.)
+        if 'domain_depth' not in request.meta:
+            return
+
         if request.dont_filter or self.should_follow(request, spider):
             # domain is explicitly allowed, reset depth to zero
-            request.meta['depth'] = 0
+            request.meta['domain_depth'] = 0
             return
         else:
-            depth = request.meta['depth']
+            depth = request.meta['domain_depth']
             if depth < self.get_max_depth(spider):
                 # an external domain with less than max depth; record stats
                 self.stats.inc_value('request_depth_count/%s' % depth, spider=spider)
@@ -93,12 +97,16 @@ class PrefixMiddleware(object):
         return cls(crawler.stats)
 
     def process_request(self, request, spider):
+        # some requests for files come from scrapy itself (robots.txt, etc.)
+        if 'path_depth' not in request.meta:
+            return
+
         if request.dont_filter or self.should_follow(request, spider):
             # path is explicitly allowed, reset depth to zero
-            request.meta['depth'] = 0
+            request.meta['path_depth'] = 0
             return
         else:
-            depth = request.meta['depth']
+            depth = request.meta['path_depth']
             if depth < self.get_max_depth(spider):
                 # an external path with less than max depth; record stats
                 self.stats.inc_value('request_depth_count/%s' % depth, spider=spider)

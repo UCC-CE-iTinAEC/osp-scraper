@@ -32,6 +32,8 @@ def make_prefix_params(seed_urls):
 
     d['allowed_domains'] = list(d['allowed_domains'])
     d['allowed_paths'] = list(d['allowed_paths'])
+    d['external_path_max_depth'] = 0
+    d['external_domain_max_depth'] = 0
     return d
 
 def extract_urls(s):

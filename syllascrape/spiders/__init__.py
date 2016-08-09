@@ -14,7 +14,18 @@ class Spider(scrapy.spiders.Spider):
 
     Subclassers must override the `parse_text` method to implement a crawling strategy
 
-    :cvar int version: a version number for the spider. This should be incremented by the developer for each version of code deployed to production
+    Internals
+    =========
+
+    Scrapy's `meta` dictionary is used internally to pass extra metadata
+    between pages so it can be added to the final PageItem (`source_url` &
+    `source_anchor` are implemented this way).
+
+    The `meta` dictionary is also used for depth tracking - `domain_depth`
+    and `path_depth` items keep track of the depth of the crawl outside the
+    `allowed_paths` and `allowed_domains`. Depths are incremented in
+    `process_text_url` and checked / reset by the spider & downloader
+    middlewares.
     """
 
     name = "syllascrape_spider"
@@ -32,7 +43,8 @@ class Spider(scrapy.spiders.Spider):
 
     def start_requests(self):
         for r in super().start_requests():
-            r.meta['depth'] = 0
+            r.meta['domain_depth'] = 0
+            r.meta['path_depth'] = 0
             yield r
 
     def parse(self, response):
@@ -99,14 +111,16 @@ class Spider(scrapy.spiders.Spider):
     def process_file_url(self, response, url, anchor):
         """return `Request.meta` for a file url, or None to skip"""
         return {'source_anchor': anchor,
-                'depth': response.meta['depth'] + 1,
+                'domain_depth': response.meta['domain_depth'] + 1,
+                'path_depth': response.meta['path_depth'] + 1,
                 }
 
     def process_text_url(self, response, url, anchor):
         """return `Request.meta` for a text url, or None to skip"""
         return {'source_url': response.url,
                 'source_anchor': anchor,
-                'depth': response.meta['depth'] + 1,
+                'domain_depth': response.meta['domain_depth'] + 1,
+                'path_depth': response.meta['path_depth'] + 1,
                 }
 
 def url_to_prefix_params(url):
@@ -124,5 +138,7 @@ def url_to_prefix_params(url):
     return {
         'start_urls': [url],
         'allowed_domains': [u.netloc],
-        'allowed_paths': [u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/']
+        'allowed_paths': [u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/'],
+        'external_domain_max_depth': 1,
+        'external_path_max_depth': 0,
     }

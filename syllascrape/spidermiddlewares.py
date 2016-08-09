@@ -42,10 +42,10 @@ class PrefixMiddleware(object):
                 # we have a request
                 if x.dont_filter or self.should_follow(x, spider):
                     # path is explictly allowed, reset depth to zero
-                    x.meta['depth'] = 0
+                    x.meta['path_depth'] = 0
                     yield x
                 else:
-                    depth = x.meta['depth']
+                    depth = x.meta['path_depth']
                     if depth < self.external_path_max_depth:
                         # an external path with less than max depth; record stats & yield request
                         self.stats.inc_value('request_depth_count/%s' % depth, spider=spider)
@@ -101,10 +101,10 @@ class OffsiteMiddleware(object):
                 # we have a request
                 if x.dont_filter or self.should_follow(x, spider):
                     # domain is explictly allowed, reset depth to zero
-                    x.meta['depth'] = 0
+                    x.meta['domain_depth'] = 0
                     yield x
                 else:
-                    depth = x.meta['depth']
+                    depth = x.meta['domain_depth']
                     if depth < self.external_domain_max_depth:
                         # an external domain with less than max depth; record stats & yield request
                         self.stats.inc_value('request_depth_count/%s' % depth, spider=spider)
