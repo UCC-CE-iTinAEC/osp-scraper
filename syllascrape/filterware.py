@@ -1,7 +1,9 @@
 import logging
 import fnmatch
 import re
+from urllib.parse import parse_qs
 import attr
+
 
 from scrapy import signals
 from scrapy.http import Request
@@ -28,6 +30,8 @@ def check_filters(filters, request, reponse=None):
 
     return (False, None) # Deny by default
 
+## attr validators for internal use in Filter
+
 def _positive(instance, attribute, value):
     """attr validator that accepts positive numbers."""
     if value <= 0:
@@ -39,6 +43,15 @@ def _one_of(allowed_values):
     def _valid(instance, attribute, value):
         if value not in allowed_values:
             raise ValueError('%s must be one of %r' % (value, allowed_values))
+
+def _dict_of_str_str(instance, attribute, value):
+    """attr validator that accepts dict of str => str"""
+    if not isinstance(value, dict):
+        raise TypeError('%s must be a dict' % attribute.name)
+
+    for k, v in dict.items():
+        if not isinstance(k, str) or not isinstance(v, str):
+            raise TypeError('%s must contain strings', attribute.name)
 
 @attr.s(cmp=False)
 class Filter:
@@ -77,7 +90,7 @@ class Filter:
     # other filters
     source_anchor = attr.ib(validator=attr.validators.instance_of(str))
     file_type = attr.ib(validator=attr.validators.instance_of(str))
-    query = FIXME
+    query = attr.ib(validator=attr.validators.optional(_dict_of_str_str))
     max_depth = attr.ib(convert=int,
                         validator=attr.validators.optional(_positive_int))
 
@@ -88,11 +101,13 @@ class Filter:
         self = cls(*args, **kwargs)
 
         # regexes to apply to URLs
-        self._url_regexes = {x:self._compile_filter(getattr(self, x))
+        self._url_regexes = {x: self._compile_filter(getattr(self, x))
                                  for x in {'scheme', 'path', 'parameters', 'fragment', 'hostname', 'port'}}
 
         self._source_anchor_regex = self._compile_filter(self.source_anchor)
         self._file_type_regex = self._compile_filter(self.file_type)
+        self._query_regexes = {k: self._compile_filter(v) for k, v in self.query.items()}
+
 
         return self
 
@@ -108,7 +123,6 @@ class Filter:
 
         return re.compile(regex)
 
-
     def __call__(self, request, response):
         url = urlparse_cached(request)
 
@@ -119,20 +133,31 @@ class Filter:
                 ret = False
                 break
 
-        if ret: # still True
-            if not self._source_anchor_regex.match(request.meta['source_anchor']):
+        if ret: # still True after above loop
+            if not self._source_anchor_regex.match(request.meta['source_anchor']): # FIXME
                 ret = False
-            elif not self._file_type_regex.match(request.meta['file_type']):
+            elif not self._file_type_regex.match(request.meta['file_type']): # FIXME
                 ret = False
             elif request.depth > self.max_depth:
                 ret = False
             else:
-                # tests on query
-                pass
+                # test all regexes in query_regexes, ignoring unknown query args from URL
+                query = parse_qs(url.query)
+                for k, regex in self._query_regexes.items():
+                    if not ret:
+                        break # also break outer loop if we break out of inner one below
+                    try:
+                        l = query[k]
+                    except KeyError:
+                        # all keys must be present
+                        ret = False
+                        break
+                    else:
+                        # key present, test all args
+                        for a in l:
+                            if not regex.match(a):
+                                ret = False
+                                break # inner loop
 
+        # return, inverting if necessary
         return ret if not invert else not ret
-
-        # test against urlparse_cached(request) fields, request.meta and
-        # additional things from response (file_type?) if needed. test in
-        # order of likelihood of False result. Use parse_qsl on request.query
-        pass
