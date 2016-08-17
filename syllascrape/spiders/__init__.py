@@ -4,10 +4,12 @@ from scrapy.utils.httpobj import urlparse_cached
 
 from urllib.parse import urlparse
 import os.path
+import re
 
 from ..items import PageItem
 from ..utils import guess_extension
 from .. import version
+from ..filterware import Filter
 
 class Spider(scrapy.spiders.Spider):
     """Base class for syllascrape spiders.
@@ -21,7 +23,7 @@ class Spider(scrapy.spiders.Spider):
     between pages so it can be added to the final PageItem (`source_url` &
     `source_anchor` are implemented this way).
 
-    The `meta` dictionary is also used for depth tracking - `domain_depth`
+    The `meta` dictionary is also used for depth tracking - `depth`
     and `path_depth` items keep track of the depth of the crawl outside the
     `allowed_paths` and `allowed_domains`. Depths are incremented in
     `process_text_url` and checked / reset by the spider & downloader
@@ -34,17 +36,13 @@ class Spider(scrapy.spiders.Spider):
         """return dict of parameters for current spider run"""
         # default values should match various middlewares
         return {
-            'allowed_domains': getattr(self, 'allowed_domains', ['']),
-            'allowed_paths': getattr(self, 'allowed_paths', ['/']),
+            'filters': getattr(self, 'filters', []),
             'start_urls': getattr(self, 'start_urls', []),
-            'external_domain_max_depth': getattr(self, 'external_domain_max_depth', 0),
-            'external_path_max_depth': getattr(self, 'external_path_max_depth', 0),
         }
 
     def start_requests(self):
         for r in super().start_requests():
-            r.meta['domain_depth'] = 0
-            r.meta['path_depth'] = 0
+            r.meta['depth'] = 0
             yield r
 
     def parse(self, response):
@@ -111,34 +109,36 @@ class Spider(scrapy.spiders.Spider):
     def process_file_url(self, response, url, anchor):
         """return `Request.meta` for a file url, or None to skip"""
         return {'source_anchor': anchor,
-                'domain_depth': response.meta['domain_depth'] + 1,
-                'path_depth': response.meta['path_depth'] + 1,
+                'depth': response.meta['depth'] + 1,
                 }
 
     def process_text_url(self, response, url, anchor):
         """return `Request.meta` for a text url, or None to skip"""
         return {'source_url': response.url,
                 'source_anchor': anchor,
-                'domain_depth': response.meta['domain_depth'] + 1,
-                'path_depth': response.meta['path_depth'] + 1,
+                'depth': response.meta['depth'] + 1,
                 }
 
-def url_to_prefix_params(url):
-    """Generate parameters for a prefix spider.
+def url_to_prefix_filters(url):
+    """Generate filters for a prefix spider.
 
     If the path component ends with a `/` it will be used-as is; otherwise
     the final path component is assumed to be a filename and will be dropped.
 
     :arg str url: the seed url
-    :returns: parameters for :cls:`Spider`: `start_urls`, `allowed_domains`, `allowed_paths`
+    :returns: parameters for :cls:`Spider`: `start_urls`, `filters`
     :rtype: dict
     """
     u = urlparse(url)
 
     return {
         'start_urls': [url],
-        'allowed_domains': [u.netloc],
-        'allowed_paths': [u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/'],
-        'external_domain_max_depth': 1,
-        'external_path_max_depth': 0,
+
+        'filters': [
+            # allow paths starting with prefix, with matching hostname & port
+            Filter('allow', pattern='regex',
+                   hostname=re.escape(u.hostname),
+                   port=re.escape(u.port),
+                   path=re.escape(u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/')) + '.*'
+        ],
     }
