@@ -121,7 +121,7 @@ class Spider(scrapy.spiders.Spider):
                 'depth': response.meta['depth'] + 1,
                 }
 
-def url_to_prefix_filters(url):
+def url_to_prefix_params(url):
     """Generate filters for a prefix spider.
 
     If the path component ends with a `/` it will be used-as is; otherwise

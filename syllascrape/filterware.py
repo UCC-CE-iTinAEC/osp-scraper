@@ -90,7 +90,7 @@ class Filter:
     source_anchor = attr.ib(validator=attr.validators.instance_of(str))
     query = attr.ib(validator=attr.validators.optional(_dict_of_str_str))
     max_depth = attr.ib(convert=int,
-                        validator=attr.validators.optional(_positive_int))
+                        validator=attr.validators.optional(_positive))
 
     # XXX possible additions: max_length, response headers?
 
