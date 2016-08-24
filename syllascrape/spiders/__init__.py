@@ -138,9 +138,11 @@ def url_to_prefix_params(url):
         'allowed_file_types': {'pdf', 'doc', 'docx'},
         'filters': [
             # allow paths starting with prefix, with matching hostname & port
-            Filter('allow', pattern='regex',
-                   hostname=re.escape(u.hostname),
-                   port=re.escape(u.port),
-                   path=re.escape(u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/')) + '.*'
+            Filter.compile('allow', pattern='regex',
+                           hostname=re.escape(u.hostname) if u.hostname is not None else None,
+                           port=re.escape(u.port) if u.port is not None else None,
+                           path=re.escape(u.path if u.path.endswith('/') else
+                                          os.path.dirname(u.path) + '/') + '.*'
+                           )
         ],
     }

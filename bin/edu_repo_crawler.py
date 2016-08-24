@@ -32,10 +32,10 @@ def make_prefix_params(seed_urls):
 
         path = u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/'
 
-        d['filters'].append(Filter.compile(
+        d['filters'].append(Filter.compile('allow',
             pattern='regex',
-            hostname=re.escape(u.hostname),
-            port=re.escape(u.port),
+            hostname=re.escape(u.hostname) if u.hostname is not None else None,
+            port=re.escape(u.port) if u.port is not None else None,
             path=re.escape(path) + ".*"
         ))
     return d

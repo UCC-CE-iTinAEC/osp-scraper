@@ -32,10 +32,10 @@ def check_filters(filters, request, reponse=None):
 
 ## attr validators for internal use in Filter
 
-def _positive(instance, attribute, value):
-    """attr validator that accepts positive numbers."""
-    if value <= 0:
-        raise ValueError('%s must be strictly positive' % attibute.name)
+def _positive_int(instance, attribute, value):
+    """attr validator that accepts positive ints"""
+    if not isinstance(value, int) or value <= 0:
+        raise ValueError('%s must be a strictly positive int' % attribute.name)
 
 def _one_of(allowed_values):
     """construct an attr validator that accepts only `allowed_values`"""
@@ -49,9 +49,12 @@ def _dict_of_str_str(instance, attribute, value):
     if not isinstance(value, dict):
         raise TypeError('%s must be a dict' % attribute.name)
 
-    for k, v in dict.items():
+    for k, v in value.items():
         if not isinstance(k, str) or not isinstance(v, str):
             raise TypeError('%s must contain strings', attribute.name)
+
+# an optional string attr validator
+_optional_str = attr.validators.optional(attr.validators.instance_of(str))
 
 @attr.s(cmp=False)
 class Filter:
@@ -75,22 +78,21 @@ class Filter:
 
     # configuration
     action = attr.ib(validator=_one_of({'allow', 'deny'}))
-    pattern = attr.ib(validator=_one_of({'literal', 'glob', 'regex'}))
-    invert = attr.ib(validator=attr.validators.instance_of(bool))
+    pattern = attr.ib(validator=_one_of({'literal', 'glob', 'regex'}), default='regex')
+    invert = attr.ib(validator=attr.validators.instance_of(bool), default=False)
 
     # filters on request URL
-    scheme = attr.ib(validator=attr.validators.instance_of(str))
-    path = attr.ib(validator=attr.validators.instance_of(str))
-    parameters = attr.ib(validator=attr.validators.instance_of(str))
-    fragment = attr.ib(validator=attr.validators.instance_of(str))
-    hostname = attr.ib(validator=attr.validators.instance_of(str))
-    port = attr.ib(validator=attr.validators.instance_of(str))
+    scheme = attr.ib(validator=_optional_str, default=None)
+    path = attr.ib(validator=_optional_str, default=None)
+    parameters = attr.ib(validator=_optional_str, default=None)
+    fragment = attr.ib(validator=_optional_str, default=None)
+    hostname = attr.ib(validator=_optional_str, default=None)
+    port = attr.ib(validator=_optional_str, default=None)
 
     # other filters
-    source_anchor = attr.ib(validator=attr.validators.instance_of(str))
-    query = attr.ib(validator=attr.validators.optional(_dict_of_str_str))
-    max_depth = attr.ib(convert=int,
-                        validator=attr.validators.optional(_positive))
+    source_anchor = attr.ib(validator=_optional_str, default=None)
+    query = attr.ib(validator=attr.validators.optional(_dict_of_str_str), default=attr.Factory(dict))
+    max_depth = attr.ib(validator=attr.validators.optional(_positive_int), default=None)
 
     # XXX possible additions: max_length, response headers?
 
@@ -124,14 +126,15 @@ class Filter:
         ret = True
 
         for name, regex in self._url_regexes:
-            if not regex.match(getattr(url, name)):
+            if regex is not None and not regex.match(getattr(url, name)):
                 ret = False
                 break
 
         if ret: # still True after above loop
-            if not self._source_anchor_regex.match(request.meta['source_anchor']): # FIXME
+            if (self._source_anchor_regex is not None and
+                not self._source_anchor_regex.match(request.meta['source_anchor'])): # FIXME
                 ret = False
-            elif request.depth > self.max_depth:
+            elif self.max_depth is not None and request.depth > self.max_depth:
                 ret = False
             else:
                 # test all regexes in query_regexes, ignoring unknown query args from URL
