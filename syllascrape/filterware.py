@@ -70,7 +70,6 @@ class Filter:
                  'hostname',
                  'port', # text pattern
                  'source_anchor', # from parent page
-                 'extension', # sniffed from mimetype
                  'max_depth', # None for infinite depth (w/ resets), positive integer for a depth limit
                  ]
 
@@ -89,7 +88,6 @@ class Filter:
 
     # other filters
     source_anchor = attr.ib(validator=attr.validators.instance_of(str))
-    extension = attr.ib(validator=attr.validators.instance_of(str))
     query = attr.ib(validator=attr.validators.optional(_dict_of_str_str))
     max_depth = attr.ib(convert=int,
                         validator=attr.validators.optional(_positive_int))
@@ -105,10 +103,7 @@ class Filter:
                                  for x in {'scheme', 'path', 'parameters', 'fragment', 'hostname', 'port'}}
 
         self._source_anchor_regex = self._compile_filter(self.source_anchor)
-        self._extension_regex = self._compile_filter(self.extension)
         self._query_regexes = {k: self._compile_filter(v) for k, v in self.query.items()}
-
-
         return self
 
     def _compile_filter(self, s):
@@ -135,8 +130,6 @@ class Filter:
 
         if ret: # still True after above loop
             if not self._source_anchor_regex.match(request.meta['source_anchor']): # FIXME
-                ret = False
-            elif not self._extension_regex.match(request.meta['extension']): # FIXME
                 ret = False
             elif request.depth > self.max_depth:
                 ret = False

@@ -71,7 +71,6 @@ ITEM_PIPELINES = {
 
 # Configure WebFilesPipeline & WebStorePipeline
 FILES_STORE = '/home/vagrant/tmp/wearpants'
-FILES_EXTENSIONS = {'pdf', 'doc', 'docx'}
 
 # Downloader middleware to enforce allowed_domains & allowed_paths for files - this should come first
 DOWNLOADER_MIDDLEWARES = {

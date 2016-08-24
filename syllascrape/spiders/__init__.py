@@ -38,6 +38,7 @@ class Spider(scrapy.spiders.Spider):
         return {
             'filters': getattr(self, 'filters', []),
             'start_urls': getattr(self, 'start_urls', []),
+            'allowed_file_types': getattr(self, 'allowed_file_types', set())
         }
 
     def start_requests(self):
@@ -60,7 +61,7 @@ class Spider(scrapy.spiders.Spider):
         if not ext:
             ext = guess_extension(mimetype).lower()
 
-        if ext in self.settings['FILES_EXTENSIONS']:
+        if ext in self.allowed_file_extensions:
             yield PageItem(
                 url=response.url,
                 content=response.body,
@@ -75,7 +76,8 @@ class Spider(scrapy.spiders.Spider):
 
         for url, anchor in self.extract_links(response):
             # if path ends with a known binary file extension download it, otherwise crawl it
-            if os.path.splitext(url)[-1][1:].lower() in self.settings['FILES_EXTENSIONS']:
+
+            if os.path.splitext(url)[-1][1:].lower() in self.allowed_file_extensions:
                 meta = self.process_file_url(response, url, anchor)
                 if meta:
                     file_urls.append((url, meta))
@@ -133,7 +135,7 @@ def url_to_prefix_filters(url):
 
     return {
         'start_urls': [url],
-
+        'allowed_file_types': {'pdf', 'doc', 'docx'},
         'filters': [
             # allow paths starting with prefix, with matching hostname & port
             Filter('allow', pattern='regex',

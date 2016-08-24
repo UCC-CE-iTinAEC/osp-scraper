@@ -6,8 +6,10 @@ import csv
 import logging
 import itertools
 import urllib.parse
+import re
 
 import syllascrape.tasks
+from syllascrape.filterware import Filter
 
 log = logging.getLogger('edu_repo_crawler')
 
@@ -19,21 +21,23 @@ def make_prefix_params(seed_urls):
     # parameters for a spider
     d = {
         'start_urls': [],
-        'allowed_domains': set(),
-        'allowed_paths': set(),
+        'allowed_file_types': {'pdf', 'doc', 'docx'},
+        'filters': [],
         }
 
     # merge parameters from several seed urls, with unique domains & paths
     for url in seed_urls:
         u = urllib.parse.urlparse(url)
         d['start_urls'].append(url)
-        d['allowed_domains'].add(u.netloc)
-        d['allowed_paths'].add(u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/')
 
-    d['allowed_domains'] = list(d['allowed_domains'])
-    d['allowed_paths'] = list(d['allowed_paths'])
-    d['external_path_max_depth'] = 0
-    d['external_domain_max_depth'] = 0
+        path = u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/'
+
+        d['filters'].append(Filter.compile(
+            pattern='regex',
+            hostname=re.escape(u.hostname),
+            port=re.escape(u.port),
+            path=re.escape(path) + ".*"
+        ))
     return d
 
 def extract_urls(s):
