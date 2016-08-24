@@ -1,6 +1,7 @@
 import re
 import logging
 
+from scrapy import Request
 from scrapy.exceptions import IgnoreRequest
 
 from .filterware import check_filters

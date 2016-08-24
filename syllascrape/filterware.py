@@ -11,7 +11,7 @@ from scrapy.utils.httpobj import urlparse_cached
 
 logger = logging.getLogger(__name__)
 
-def check_filters(filters, request, reponse=None):
+def check_filters(filters, request, response=None):
     """Check a list of filters
 
     The first filter to match is applied. If no filters match at all, return (False, None).
@@ -20,7 +20,7 @@ def check_filters(filters, request, reponse=None):
     :returns: True if allowed or False if denied, and the matching filter
     """
     for f in filters:
-        if f(spider, request, response):
+        if f(request, response):
             if f.action == "allow":
                 return (True, f)
             elif f.action == "deny":
@@ -96,6 +96,10 @@ class Filter:
 
     # XXX possible additions: max_length, response headers?
 
+    def asdict(self):
+        """return a dict representation of the filter"""
+        return attr.asdict(self)
+
     @classmethod
     def compile(cls, *args, **kwargs):
         self = cls(*args, **kwargs)
@@ -125,7 +129,7 @@ class Filter:
 
         ret = True
 
-        for name, regex in self._url_regexes:
+        for name, regex in self._url_regexes.items():
             if regex is not None and not regex.match(getattr(url, name)):
                 ret = False
                 break
@@ -156,4 +160,4 @@ class Filter:
                                 break # inner loop
 
         # return, inverting if necessary
-        return ret if not invert else not ret
+        return ret if not self.invert else not ret

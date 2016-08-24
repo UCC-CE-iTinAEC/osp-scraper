@@ -17,7 +17,7 @@ class CrawlerSubprocess(Process):
 
     def __init__(self, *args, **kwargs):
         super().__init__()
-        self.runner= CrawlerRunner(get_project_settings())
+        self.runner = CrawlerRunner(get_project_settings())
         self.args = args
         self.kwargs = kwargs
 

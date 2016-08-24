@@ -74,8 +74,7 @@ FILES_STORE = '/home/vagrant/tmp/wearpants'
 
 # Downloader middleware to enforce allowed_domains & allowed_paths for files - this should come first
 DOWNLOADER_MIDDLEWARES = {
-    'syllascrape.downloadermiddlewares.OffsiteMiddleware': 50,
-    'syllascrape.downloadermiddlewares.PrefixMiddleware': 51,
+    'syllascrape.downloadermiddlewares.FilterMiddleware': 50,
 }
 
 SPIDER_MIDDLEWARES = {
@@ -84,8 +83,7 @@ SPIDER_MIDDLEWARES = {
     'scrapy.spidermiddlewares.depth.DepthMiddleware': None,
 
     # use our middlewares instead
-    'syllascrape.spidermiddlewares.OffsiteMiddleware': 500,
-    'syllascrape.spidermiddlewares.PrefixMiddleware': 550,
+    'syllascrape.spidermiddlewares.FilterMiddleware': 500,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
