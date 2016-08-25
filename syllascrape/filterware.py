@@ -11,7 +11,7 @@ from scrapy.utils.httpobj import urlparse_cached
 
 logger = logging.getLogger(__name__)
 
-def check_filters(filters, request, response=None):
+def check_filters(filters, request):
     """Check a list of filters
 
     The first filter to match is applied. If no filters match at all, return (False, None).
@@ -20,7 +20,7 @@ def check_filters(filters, request, response=None):
     :returns: True if allowed or False if denied, and the matching filter
     """
     for f in filters:
-        if f(request, response):
+        if f(request):
             if f.action == "allow":
                 return (True, f)
             elif f.action == "deny":
@@ -124,7 +124,7 @@ class Filter:
 
         return re.compile(regex)
 
-    def __call__(self, request, response):
+    def __call__(self, request):
         url = urlparse_cached(request)
 
         ret = True
