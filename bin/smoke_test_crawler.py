@@ -33,48 +33,32 @@ LOGGING = {
 
 dictConfig(LOGGING)
 
-def make_params(url):
-    u = urlparse(url)
-
-    hostname = re.escape(u.hostname) if u.hostname is not None else None
-    port = re.escape(u.port) if u.port is not None else None
+def make_params():
+    hostname = re.escape('wearpants.org')
 
     return {
-        'start_urls': [url],
+        'start_urls': ['https://wearpants.org/'],
         'allowed_file_types': {'pdf', 'doc', 'docx'},
         'filters': [
-            # allow paths starting with prefix, with matching hostname & port
+            Filter.compile('deny', pattern='regex',
+                           source_anchor='contact',
+                           ),
+
             Filter.compile('allow', pattern='regex',
                            hostname=hostname,
-                           port=port,
-                           path=re.escape(u.path if u.path.endswith('/') else
-                                          os.path.dirname(u.path) + '/') + '.*',
+                           path=re.escape('/') + '.*',
                            ),
-            # allow other paths to a depth of 2
-            Filter.compile('allow', pattern='regex',
-                           max_depth=2, hostname=hostname, port=port),
-            # allow other hosts to a depth of 1
-            Filter.compile('allow', pattern='regex', max_depth=1)
         ],
     }
 
 
-def main(csv_file):
-    with open(csv_file) as f:
-        row = next(csv.reader(f))
+def main():
 
-    kwargs = make_params(row[0])
+    kwargs = make_params()
 
     process = CrawlerProcess(get_project_settings())
     process.crawl(Spider, **kwargs)
     process.start()
 
-
-def usage():
-    print("%s <csv_file>" % os.path.basename(sys.argv[0]))
-
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        usage()
-    else:
-        main(sys.argv[1])
+    main()

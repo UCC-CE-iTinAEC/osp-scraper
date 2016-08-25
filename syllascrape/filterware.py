@@ -58,23 +58,37 @@ _optional_str = attr.validators.optional(attr.validators.instance_of(str))
 
 @attr.s(cmp=False)
 class Filter:
+    """A filter for Requests.
+
+    Construct instances of this class using :method:`compile` classmethod,
+    *not* the usual `__init__`. Calling the filter object will return True if
+    it matches.
+
+    Filters are composed of multiple string-based patterns; all patterns must
+    match for the filter to be accepted. The `query` field is a dict of
+    `query paramter name => pattern`; extra parameters are ignored.
+
+    Patterns may be None (the default), meaning that field is ignored; for
+    the `max_depth` field, this means infinite depth.
+
+    :ivar action: 'allow' or 'deny'
+    :ivar pattern: how to interpret patterns: 'glob', 'regex', or 'literal'
+    :ivar invert: invert the match conditions
+    :ivar scheme: http, https, etc.
+    :ivar path: path component, unquoted
+    :ivar query:  dict of query parameter patterns
+    :ivar parameters: parameter component; rarely used
+    :ivar fragment: client-side fragment
+    :ivar hostname: server domain
+    :ivar port: server port, as text
+    :ivar source_anchor: anchor text from parent page, lower cased
+    :ivar max_depth:  None for infinite depth, positive integer for a depth limit
+    """
+
     # XXX it be nice to use slots here for performance, but we need
     # non-attr.ib attributes to hold compiled regexes. This could probably be
     # done through a base class holding the attr.ib's and a public subclass
     # doing instropection on it and adding new slots. Or something.
-
-    WHATEVER = ['action', # 'allow' or 'deny'
-                 'pattern', # 'glob', 'regex', or 'literal'
-                 'scheme', # http, https, etc.
-                 'path', # urlunquoted
-                 'query', # a list of (key, value) patterns
-                 'parameters', # probably useless
-                 'fragment',
-                 'hostname',
-                 'port', # text pattern
-                 'source_anchor', # from parent page
-                 'max_depth', # None for infinite depth (w/ resets), positive integer for a depth limit
-                 ]
 
     # configuration
     action = attr.ib(validator=_one_of({'allow', 'deny'}))
@@ -100,6 +114,7 @@ class Filter:
 
     @classmethod
     def compile(cls, *args, **kwargs):
+        """primary constructor"""
         self = cls(*args, **kwargs)
 
         # regexes to apply to URLs

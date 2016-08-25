@@ -11,10 +11,6 @@ install & use Scrapy; this README only highlights customizations for Syllascrape
 filesystem, or an S3 URL like `s3://<bucket>/<prefix>/`. If using S3, the
 bucket must already exist. You must include the trailing slash when using S3.
 
-`FILES_EXTENSTIONS` is a set of binary filename extensions that should be
-downloaded (*without* leading `.`). All text files (HTML, XML, etc.) will be
-automatically saved.
-
 ## Output
 
 Output files will be stored in the location specified by the `FILES_STORE`
@@ -48,24 +44,19 @@ present, with missing values represented by the empty string.
 * checksum: MD5 of content
 * length: length of content
 * mimetype: Content-Type header from response
-
+* depth: the crawl depth at that
 
 ## Spiders
 All spiders should inherit from `syllascrape.spiders.Spider`.
 
-The `allowed_domains` attribute is a list of domains the spider may crawl;
-note that this includes subdomains as well. If omitted, any domain may be
-crawled.
+`start_urls` is a list of initial URLs to begin the crawl.
 
-The `allowed_paths` attribute is a list of path prefixes the spider may
-crawl. If omitted, any path may be crawled.
+`allowed_file_types` is a set of binary filename extensions that should be
+downloaded (*without* leading `.`). All text files (HTML, XML, etc.) will be
+automatically saved. Defaults to `pdf, doc, docx`.
 
-`start_urls` are a list of URLs to begin crawling at.
-
-All spiders must have a string `name` (must be a valid Python identifier).
-
-Spiders provide several methods that can be overridden to customize which
-links are crawled; see the source for details.
+`filters` a list of syllascrape.filterware.Filter`s that control the scope of
+`the crawl. See its documentation for details.
 
 ## Legacy Format
 

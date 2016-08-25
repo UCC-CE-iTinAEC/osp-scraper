@@ -14,7 +14,11 @@ from ..filterware import Filter
 class Spider(scrapy.spiders.Spider):
     """Base class for syllascrape spiders.
 
-    Subclassers must override the `parse_text` method to implement a crawling strategy
+    Parameters
+    ==========
+    * `start_urls`: a list of initial URLs
+    * `allowed_file_types`: a set of binary file extensions to download
+    * `filters`: a list of `Filter` objects
 
     Internals
     =========
@@ -23,11 +27,10 @@ class Spider(scrapy.spiders.Spider):
     between pages so it can be added to the final PageItem (`source_url` &
     `source_anchor` are implemented this way).
 
-    The `meta` dictionary is also used for depth tracking - `depth`
-    and `path_depth` items keep track of the depth of the crawl outside the
-    `allowed_paths` and `allowed_domains`. Depths are incremented in
+    The `meta` dictionary is also used for depth tracking - the `depth` item
+    keeps track of the depth of the crawl. Depths are incremented in
     `process_text_url` and checked / reset by the spider & downloader
-    middlewares.
+    middlewares for Filters with infinite depth.
     """
 
     name = "syllascrape_spider"
