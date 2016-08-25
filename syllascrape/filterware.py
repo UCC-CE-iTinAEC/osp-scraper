@@ -130,7 +130,7 @@ class Filter:
         ret = True
 
         for name, regex in self._url_regexes.items():
-            if regex is not None and not regex.match(getattr(url, name)):
+            if regex is not None and not regex.match(getattr(url, name) or ''):
                 ret = False
                 break
 
@@ -138,7 +138,7 @@ class Filter:
             if (self._source_anchor_regex is not None and
                 not self._source_anchor_regex.match(request.meta['source_anchor'])): # FIXME
                 ret = False
-            elif self.max_depth is not None and request.depth > self.max_depth:
+            elif self.max_depth is not None and request.meta['depth'] > self.max_depth:
                 ret = False
             else:
                 # test all regexes in query_regexes, ignoring unknown query args from URL
