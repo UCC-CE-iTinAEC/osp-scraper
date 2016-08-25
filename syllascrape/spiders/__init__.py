@@ -68,6 +68,7 @@ class Spider(scrapy.spiders.Spider):
                 source_url=response.meta.get('source_url'),
                 source_anchor=response.meta.get('source_anchor'),
                 mimetype = mimetype,
+                depth = response.meta.get('depth'),
             )
 
     def parse_text(self, response):
@@ -92,6 +93,7 @@ class Spider(scrapy.spiders.Spider):
             source_url=response.meta.get('source_url'),
             source_anchor=response.meta.get('source_anchor'),
             mimetype = response.headers.get('content-type').decode('ascii'),
+            depth = response.meta.get('depth'),
             file_urls = file_urls
         )
 

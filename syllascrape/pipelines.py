@@ -137,6 +137,7 @@ class WebFilesPipeline(FilesPipeline):
         d["retrieved"] = response.retrieved
         d["length"] = len(response.body)
         d["source_anchor"] = response.meta["source_anchor"]
+        d["depth"] = response.meta["depth"]
         return d
 
     def file_path(self, request, response=None, info=None):
