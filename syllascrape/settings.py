@@ -21,6 +21,9 @@ NEWSPIDER_MODULE = 'syllascrape.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
+# Maximum file size to download
+DOWNLOAD_MAXSIZE = 128 * (1024 * 1024) # 128 MB
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
