@@ -94,8 +94,6 @@ class Filter:
     query = attr.ib(validator=attr.validators.optional(_dict_of_str_str), default=attr.Factory(dict))
     max_depth = attr.ib(validator=attr.validators.optional(_positive_int), default=None)
 
-    # XXX possible additions: max_length, response headers?
-
     def asdict(self):
         """return a dict representation of the filter"""
         return attr.asdict(self)
@@ -136,7 +134,7 @@ class Filter:
 
         if ret: # still True after above loop
             if (self._source_anchor_regex is not None and
-                not self._source_anchor_regex.match(request.meta['source_anchor'])): # FIXME
+                not self._source_anchor_regex.match(request.meta['source_anchor'].lower())):
                 ret = False
             elif self.max_depth is not None and request.meta['depth'] > self.max_depth:
                 ret = False

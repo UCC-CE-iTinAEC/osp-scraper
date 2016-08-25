@@ -64,7 +64,6 @@ def main(csv_file):
         row = next(csv.reader(f))
 
     kwargs = make_params(row[0])
-    print(kwargs)
 
     process = CrawlerProcess(get_project_settings())
     process.crawl(Spider, **kwargs)
