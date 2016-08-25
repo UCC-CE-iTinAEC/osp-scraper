@@ -90,3 +90,7 @@ ENV/
 
 # git revision
 /syllascrape/git_revision
+
+# Scrapy overrides
+/syllascrape/settings/local.py
+/celeryconfig.py

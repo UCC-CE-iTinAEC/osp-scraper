@@ -109,3 +109,10 @@ SPIDER_MIDDLEWARES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
+# Merge local settings.
+try:
+    from .local import *
+except ImportError:
+    pass
