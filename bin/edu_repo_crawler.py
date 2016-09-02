@@ -46,7 +46,7 @@ def make_params(seed_urls):
         u = urllib.parse.urlparse(url)
         prefix = re.escape(u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/')
         hostname=re.escape(u.hostname) if u.hostname is not None else None
-        port=re.escape(u.port) if u.port is not None else None
+        port=re.escape(str(u.port)) if u.port is not None else None
 
         # allow prefix to infinite depth
         d['filters'].append(Filter.compile('allow',
