@@ -13,10 +13,18 @@ from syllascrape.filterware import Filter
 
 log = logging.getLogger('edu_repo_crawler')
 
-def make_prefix_params(seed_urls):
-    """Generate parameters for a prefix spider from a list of URLs
+# a list of base domains to blacklist; subdomains blocked too
+blacklist_domains = ['facebook.com', 'reddit.com', 'twitter.com', 'linkedin.com', 'wikipedia.org']
+blacklist_re = "^" + "|".join("((.*\.)?%s$)" % re.escape(x) for x in blacklist_domains)
 
-    based on from syllascrape.spiders.url_to_prefix_params
+def make_params(seed_urls):
+    """Generate parameters for a spider from a list of URLs
+
+    * Allow paths with matching prefix to infinite depth
+    * Allow same hostname to max depth of 2
+    * Allow other domains to max depth of 1
+
+    based on syllascrape.spiders.url_to_prefix_params
     """
     # parameters for a spider
     d = {
@@ -25,19 +33,40 @@ def make_prefix_params(seed_urls):
         'filters': [],
         }
 
+    # blacklist domains
+    d['filters'].append(Filter.compile('deny',
+                                       pattern='regex',
+                                       hostname=blacklist_re
+                                       ))
+
     # merge parameters from several seed urls, with unique domains & paths
     for url in seed_urls:
-        u = urllib.parse.urlparse(url)
         d['start_urls'].append(url)
 
-        path = u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/'
+        u = urllib.parse.urlparse(url)
+        prefix = re.escape(u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/')
+        hostname=re.escape(u.hostname) if u.hostname is not None else None
+        port=re.escape(u.port) if u.port is not None else None
 
+        # allow prefix to infinite depth
         d['filters'].append(Filter.compile('allow',
             pattern='regex',
-            hostname=re.escape(u.hostname) if u.hostname is not None else None,
-            port=re.escape(u.port) if u.port is not None else None,
-            path=re.escape(path) + ".*"
+            hostname=hostname,
+            port=port,
+            path=prefix + ".*"
         ))
+
+        # allow same hostname to max depth 2
+        d['filters'].append(Filter.compile('allow',
+                                           pattern='regex',
+                                           hostname=hostname,
+                                           port=port,
+                                           max_depth=2
+                                           ))
+
+    # allow other domains w/ max depth 1
+    d['filters'].append(Filter.compile('allow', max_depth=1))
+
     return d
 
 def extract_urls(s):
@@ -56,7 +85,7 @@ def main(csv_file):
 
             if urls:
                 log.info("Found %d URLs for %s", len(urls), row['biz_name'])
-                params = make_prefix_params(urls)
+                params = make_params(urls)
                 log.debug("Parameters: %r", params)
                 syllascrape.tasks.crawl.delay(**params)
             else:
