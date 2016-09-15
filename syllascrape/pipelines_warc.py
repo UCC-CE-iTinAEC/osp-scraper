@@ -8,6 +8,7 @@
 import scrapy
 from scrapy.pipelines.files import FilesPipeline
 from scrapy.utils.python import to_bytes
+from scrapy.utils.misc import md5sum
 
 import warc
 
@@ -22,13 +23,10 @@ from . import items
 from .utils import extract_domain, file_path, guess_extension
 from .version import git_revision
 
-
-def build_record():
-    # make a WARC Header
-    header = warc.WARCHeader(headers={"WARC-Type": "resource"},
-                             defaults=True)
-
-    return header
+def path_from_warc(record, prefix=None):
+    """return a path from the Record ID of a WARC"""
+    path = "%s.warc" % record.header.record_id[10:-1]
+    return os.path.join(prefix, path) if prefix is None else path
 
 
 class WebStorePipeline(object):
@@ -49,7 +47,6 @@ class WebStorePipeline(object):
             raise NotConfigured
 
         self.store = self._get_store(store_uri)
-        self.encoder = ScrapyJSONEncoder()
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -80,11 +77,9 @@ class WebStorePipeline(object):
 
         # make a WARC Record
         record = warc.WARCRecord(payload=item["content"],
-                                 headers={"WARC-Type": "resource"},
                                  defaults=True)
 
-
-        path = 'warc/%s.warc' % record.header.record_id
+        path = path_from_warc(record, 'warc')
         buf = BytesIO()
         record.write_to(buf)
         self.store.persist_file(path, buf, None)
@@ -105,10 +100,6 @@ class WebFilesPipeline(FilesPipeline):
     """
 
     logger = logging.getLogger(__name__)
-
-    def __init__(self, *args, **kwargs):
-        self.encoder = ScrapyJSONEncoder()
-        super().__init__(*args, **kwargs)
 
     def get_media_requests(self, item, info):
         # hook to generate requests. We expect files_urls_field to be a list of 2 tuples of (url, meta)
@@ -137,16 +128,12 @@ class WebFilesPipeline(FilesPipeline):
     def media_downloaded(self, response, request, info):
         # hook called after each file is downloaded
 
-        # stuff timestamp on the response so we can use it in `file_path` below
-        response.retrieved = int(time.time())
-
         # the dictionary here ends up in `item[file_results_field]` above
         d = super().media_downloaded(response, request, info)
         d["retrieved"] = response.retrieved
         d["length"] = len(response.body)
         d["source_anchor"] = response.meta["source_anchor"]
         d["depth"] = response.meta["depth"]
-        d["warc_header"] = response.meta["warc_header"]
         d["warc_record"] = response.meta["warc_record"]
         return d
 
@@ -155,9 +142,9 @@ class WebFilesPipeline(FilesPipeline):
         path = self.file_path(request, response=response, info=info)
 
         # make a WARC record
-        record = response.meta["warc_record"] = warc.WARCRecord(header=response.meta["warc_header"],
-                                                                payload=response.bytes,
-                                                                defaults=True)
+        record = response.meta["warc_record"]
+        record.update_payload(response.body)
+
         buf = BytesIO()
         record.write_to(buf)
         checksum = md5sum(buf)
@@ -171,22 +158,21 @@ class WebFilesPipeline(FilesPipeline):
         # downloaded anew each time because the call to
         # `FilesStore.stat_file(..)` will 404.
 
-        # XXX Make a WARC Header *here*, use `file_data/<header.record_id>.dat` for the file_path
-        # Stuff header on the response object, pull it off in media downloaded & stuff it in return dict
-        # Read header off dict in item_completed, write a WARC Record using the `record_id` above
-        # Side job to concat WARCs will inline .dat file & write a new WARC Header
+        # XXX Make a WARC Record *here*, and use it's `header.record_id` for the file_path
+        # Stuff record on the response object, pull it off in media downloaded & stuff it in return dict
+        # Read record off dict in item_completed, write to file path using the `record_id` above
 
         if response is None:
             # this happens in FilesPipeline.media_to_download to check if
             # file already exists in storage. We just generate a throwaway
             # path, forcing it to always be downloaded
-            header = build_header()
-        elif 'warc_header' not in response.meta:
+            record = warc.WARCRecord()
+        elif 'warc_record' not in response.meta:
             # first time file_path has been called for this response
-            header = build_header()
-            response.meta['warc_header'] = header
+            record = warc.WARCRecord()
+            response.meta['warc_record'] = record
         else:
-            # we've been called before for this response, returing existing header
-            header = response.meta['warc_header']
+            # we've been called before for this response, returing existing record
+            record = response.meta['warc_record']
 
-        return 'data/%s.dat' % header.record_id
+        return path_from_warc(record, 'warc')

@@ -68,12 +68,12 @@ DOWNLOAD_MAXSIZE = 128 * (1024 * 1024) # 128 MB
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'syllascrape.pipelines.WebFilesPipeline': 300,
-    'syllascrape.pipelines.WebStorePipeline': 301,
+    'syllascrape.pipelines_warc.WebFilesPipeline': 300,
+    'syllascrape.pipelines_warc.WebStorePipeline': 301,
 }
 
 # Configure WebFilesPipeline & WebStorePipeline
-FILES_STORE = '/home/vagrant/tmp/wearpants'
+FILES_STORE = None
 
 # Downloader middleware to enforce allowed_domains & allowed_paths for files - this should come first
 DOWNLOADER_MIDDLEWARES = {
