@@ -68,6 +68,8 @@ class Spider(scrapy.spiders.Spider):
             yield PageItem(
                 url=response.url,
                 content=response.body,
+                headers=response.headers,
+                status=response.status,
                 source_url=response.meta.get('source_url'),
                 source_anchor=response.meta.get('source_anchor'),
                 mimetype = mimetype,
@@ -93,6 +95,8 @@ class Spider(scrapy.spiders.Spider):
         yield PageItem(
             url=response.url,
             content=response.body,
+            headers=response.headers,
+            status=response.status,
             source_url=response.meta.get('source_url'),
             source_anchor=response.meta.get('source_anchor'),
             mimetype = response.headers.get('content-type').decode('ascii'),
@@ -115,7 +119,8 @@ class Spider(scrapy.spiders.Spider):
 
     def process_file_url(self, response, url, anchor):
         """return `Request.meta` for a file url, or None to skip"""
-        return {'source_anchor': anchor,
+        return {'source_url': response.url,
+                'source_anchor': anchor,
                 'depth': response.meta['depth'] + 1,
                 }
 

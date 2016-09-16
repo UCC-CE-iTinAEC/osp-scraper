@@ -12,10 +12,13 @@ from scrapy.utils.misc import md5sum
 
 import warc
 
+import uuid
 import logging
 import hashlib
 import os.path
 import time
+import json
+import itertools
 from io import BytesIO
 from urllib.parse import urlparse
 
@@ -28,6 +31,46 @@ def path_from_warc(record, prefix=None):
     path = "%s.warc" % record.header.record_id[10:-1]
     return os.path.join(prefix, path) if prefix is None else path
 
+def new_warc():
+    """return a new WARCRecord"""
+
+    # ripped from WARCHeader.init_defaults()
+    headers = {
+
+        'WARC-Record-ID': "<urn:uuid:%s>" % uuid.uuid1(),
+        'Content-Type': 'application/http; msgtype=response',
+    }
+
+    return warc.WARCRecord(header=warc.WARCHeader(headers, defaults=False),
+                           defaults=False)
+
+def update_warc_from_item(record, item):
+    """update a WARC record from a scrapy Item"""
+    h = record.header
+    h['WARC-Target-URI'] = item['url']
+    h['WARC-Date'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(item['retrieved']))
+    # XXX Scrapy doesn't provide remote IP for WARC-IP-Address
+
+    # XXX these should go in a WARC metadata record
+    h['X-Spider-Name'] = item['spider_name']
+    h['X-Spider-Revision'] = item['spider_revision']
+    h['X-Crawl-Depth'] = item['depth'] # WARC standard spells this 'hopsFromSeed'
+
+    # XXX this should go in a single WARC warcinfo record, not each response
+    h['X-Spider-Parameters'] = json.dumps(item['spider_parameters'])
+
+
+    # below based on WARCRecord.from_response()
+
+    # XXX scrapy doesn't provide human-readable status string
+    status = "HTTP/1.1 {} UNKNOWN".format(item['status']).encode()
+    headers = [b': '.join((k, v)) for k, l in item['headers'].iteritems() for v in l]
+
+    record.update_payload(b"\r\n".join(itertools.chain((status, ),
+                                                       headers,
+                                                       (b'', ),
+                                                       (item['content'], )
+                                                       )))
 
 class WebStorePipeline(object):
     """Stores web pages, similar to `FilesPipeline`.
@@ -74,11 +117,11 @@ class WebStorePipeline(object):
         item["spider_parameters"] = spider.get_parameters()
         item["retrieved"] = int(time.time())
 
-
         # make a WARC Record
-        record = warc.WARCRecord(payload=item["content"],
-                                 defaults=True)
+        record = new_warc()
+        update_warc_from_item(record, item)
 
+        # write it out
         path = path_from_warc(record, 'warc')
         buf = BytesIO()
         record.write_to(buf)
@@ -119,7 +162,6 @@ class WebFilesPipeline(FilesPipeline):
             i["spider_name"] = info.spider.name
             i["spider_revision"] = git_revision
             i["spider_parameters"] = info.spider.get_parameters()
-            i["source_url"] = item["url"]
 
             # XXX much of this needs to be made available in file_downloaded!
 
@@ -132,6 +174,7 @@ class WebFilesPipeline(FilesPipeline):
         d = super().media_downloaded(response, request, info)
         d["retrieved"] = response.retrieved
         d["length"] = len(response.body)
+        d["source_url"] = response.meta["source_url"]
         d["source_anchor"] = response.meta["source_anchor"]
         d["depth"] = response.meta["depth"]
         d["warc_record"] = response.meta["warc_record"]
@@ -166,10 +209,10 @@ class WebFilesPipeline(FilesPipeline):
             # this happens in FilesPipeline.media_to_download to check if
             # file already exists in storage. We just generate a throwaway
             # path, forcing it to always be downloaded
-            record = warc.WARCRecord()
+            record = new_warc()
         elif 'warc_record' not in response.meta:
             # first time file_path has been called for this response
-            record = warc.WARCRecord()
+            record = new_warc()
             response.meta['warc_record'] = record
         else:
             # we've been called before for this response, returing existing record

@@ -29,6 +29,8 @@ class BaseItem(scrapy.Item):
 
 class PageItem(BaseItem):
     content = scrapy.Field() # raw bytes
+    headers = scrapy.Field() # scrapy Headers object
+    status = scrapy.Field() # HTTP status code
     file_urls = scrapy.Field() # for use with WebFilesPipeline - list of 2-tuples of (url, meta dict)
     files = scrapy.Field() # gets results of WebFilesPipeleine
 
