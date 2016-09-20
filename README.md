@@ -34,7 +34,6 @@ The following metadata is saved for each downloaded file; all fields will be
 present, with missing values represented by the empty string.
 
 * url: url of the file
-* domain: hostname & port
 * source_url: url that linked to the file
 * source_anchor: anchor text on source page
 * retrieved: integer seconds since epoch
@@ -42,9 +41,7 @@ present, with missing values represented by the empty string.
 * spider_revision: git revision number for syllascrape code
 * spider_parameters: dict of spider parameters (starting urls, allowed domains, etc.)
 * spider_run_id: unique identifier for spider run
-* checksum: MD5 of content
 * length: length of content
-* mimetype: Content-Type header from response
 * depth: the crawl depth of the page. Reset by filters
 * hops_from_seed: how many hops from a starting url
 

@@ -14,7 +14,6 @@ import warc
 
 import uuid
 import logging
-import hashlib
 import os.path
 import time
 import json
@@ -23,7 +22,6 @@ from io import BytesIO
 from urllib.parse import urlparse
 
 from . import items
-from .utils import extract_domain, file_path, guess_extension
 from .version import git_revision
 
 def path_from_warc(record, prefix=""):
@@ -110,8 +108,6 @@ class WarcStorePipeline(object):
 
     def process_item(self, item, spider):
         # calculate metadata
-        item["domain"] = extract_domain(item["url"])
-        item["checksum"] = hashlib.md5(to_bytes(item["content"])).hexdigest()
         item["length"] = len(item["content"])
         item["spider_name"] = spider.name
         item["spider_revision"] = git_revision
@@ -157,7 +153,6 @@ class WarcFilesPipeline(FilesPipeline):
         # build a a scrapy Item for this file
         i = items.PageItem()
         i["url"] = request.url
-        i["domain"] = extract_domain(i["url"])
         i["retrieved"] = int(time.time())
         i["content"] = response.body
         i["length"] = len(response.body)

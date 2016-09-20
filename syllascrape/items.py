@@ -10,7 +10,6 @@ from pprint import pformat
 
 class PageItem(scrapy.Item):
     url = scrapy.Field()
-    domain = scrapy.Field()
     source_url = scrapy.Field()
     source_anchor = scrapy.Field() # anchor text on source page
     retrieved = scrapy.Field() # integer seconds since epoch
@@ -18,9 +17,7 @@ class PageItem(scrapy.Item):
     spider_revision = scrapy.Field() # git revision number of source code
     spider_parameters = scrapy.Field() # dict of spider parameters
     spider_run_id = scrapy.Field() # string UUID to identify this run
-    checksum = scrapy.Field() # MD5 sum of content
     length = scrapy.Field() # length of content
-    mimetype = scrapy.Field() # Content-Type header from response
     depth = scrapy.Field() # crawl depth - reset by filters
     hops_from_seed = scrapy.Field() # how many hops from start URL
 

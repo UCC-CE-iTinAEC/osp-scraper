@@ -80,7 +80,6 @@ class Spider(scrapy.spiders.Spider):
                 status=response.status,
                 source_url=response.meta.get('source_url'),
                 source_anchor=response.meta.get('source_anchor'),
-                mimetype = mimetype,
                 depth = response.meta.get('depth'),
                 hops_from_seed = response.meta.get('hops_from_seed'),
             )
@@ -91,7 +90,6 @@ class Spider(scrapy.spiders.Spider):
 
         for url, anchor in self.extract_links(response):
             # if path ends with a known binary file extension download it, otherwise crawl it
-
             if os.path.splitext(url)[-1][1:].lower() in self.allowed_file_types:
                 meta = self.process_file_url(response, url, anchor)
                 if meta:
@@ -108,7 +106,6 @@ class Spider(scrapy.spiders.Spider):
             status=response.status,
             source_url=response.meta.get('source_url'),
             source_anchor=response.meta.get('source_anchor'),
-            mimetype = response.headers.get('content-type').decode('ascii'),
             depth = response.meta.get('depth'),
             hops_from_seed = response.meta.get('hops_from_seed'),
             file_urls = file_urls,
