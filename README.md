@@ -41,6 +41,7 @@ present, with missing values represented by the empty string.
 * spider_name: spider name
 * spider_revision: git revision number for syllascrape code
 * spider_parameters: dict of spider parameters (starting urls, allowed domains, etc.)
+* spider_run_id: unique identifier for spider run
 * checksum: MD5 of content
 * length: length of content
 * mimetype: Content-Type header from response

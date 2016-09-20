@@ -54,11 +54,11 @@ def update_warc_from_item(record, item):
     # XXX these should go in a WARC metadata record
     h['X-Spider-Name'] = item['spider_name']
     h['X-Spider-Revision'] = item['spider_revision']
-    h['X-Crawl-Depth'] = item['depth'] # WARC standard spells this 'hopsFromSeed'
+    h['X-Crawl-Depth'] = item['depth']
 
     # XXX this should go in a single WARC warcinfo record, not each response
     h['X-Spider-Parameters'] = json.dumps(item['spider_parameters'])
-
+    h['X-Spider-Run-ID'] = item['spider_run_id']
 
     # below based on WARCRecord.from_response()
 
@@ -72,7 +72,7 @@ def update_warc_from_item(record, item):
                                                        (item['content'], )
                                                        )))
 
-class WebStorePipeline(object):
+class WarcStorePipeline(object):
     """Stores web pages, similar to `FilesPipeline`.
 
     Saves to a filesystem or S3 path specified in the `FILES_STORE` setting.
@@ -115,6 +115,7 @@ class WebStorePipeline(object):
         item["spider_name"] = spider.name
         item["spider_revision"] = git_revision
         item["spider_parameters"] = spider.get_parameters()
+        item["spider_run_id"] = spider.run_id
         item["retrieved"] = int(time.time())
 
         # make a WARC Record
@@ -128,7 +129,7 @@ class WebStorePipeline(object):
         self.store.persist_file(path, buf, None)
         return item
 
-class WebFilesPipeline(FilesPipeline):
+class WarcFilesPipeline(FilesPipeline):
     """A customized `FilesPipeline`
 
     Saves to a filesystem or S3 path specified in the `FILES_STORE` setting.
@@ -167,6 +168,7 @@ class WebFilesPipeline(FilesPipeline):
         i["spider_name"] = info.spider.name
         i["spider_revision"] = git_revision
         i["spider_parameters"] = info.spider.get_parameters()
+        i["spider_run_id"] = info.spider.run_id
 
         # update WARC record
         record = response.meta["warc_record"]
@@ -181,13 +183,15 @@ class WebFilesPipeline(FilesPipeline):
 
     def file_path(self, request, response=None, info=None):
         # hook to generate file name. This does something slightly evil - by
-        # including the timestamp in the filename, we force the file to be
-        # downloaded anew each time because the call to
-        # `FilesStore.stat_file(..)` will 404.
+        # generating a unique filename, we force the file to be downloaded
+        # anew each time because the call to `FilesStore.stat_file(..)` will
+        # 404.
 
-        # XXX Make a WARC Record *here*, and use it's `header.record_id` for the file_path
+        # Make a WARC Record *here*, and use it's `header.record_id` for the file_path
         # Stuff record on the response object, pull it off in media downloaded & stuff it in return dict
         # Read record off dict in item_completed, write to file path using the `record_id` above
+
+        assert info is not None
 
         if response is None:
             # this happens in FilesPipeline.media_to_download to check if

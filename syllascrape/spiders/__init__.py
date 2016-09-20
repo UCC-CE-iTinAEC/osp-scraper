@@ -5,6 +5,7 @@ from scrapy.utils.httpobj import urlparse_cached
 from urllib.parse import urlparse
 import os.path
 import re
+import uuid
 
 from ..items import PageItem
 from ..utils import guess_extension
@@ -34,6 +35,12 @@ class Spider(scrapy.spiders.Spider):
     """
 
     name = "syllascrape_spider"
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super().from_crawler(crawler, *args, **kwargs)
+        spider.run_id = str(uuid.uuid1())
+        return spider
 
     def get_parameters(self):
         """return dict of parameters for current spider run"""
