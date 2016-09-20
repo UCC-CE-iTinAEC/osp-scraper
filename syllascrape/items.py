@@ -8,7 +8,7 @@
 import scrapy
 from pprint import pformat
 
-class BaseItem(scrapy.Item):
+class PageItem(scrapy.Item):
     url = scrapy.Field()
     domain = scrapy.Field()
     source_url = scrapy.Field()
@@ -24,12 +24,6 @@ class BaseItem(scrapy.Item):
     depth = scrapy.Field() # crawl depth - reset by filters
     hops_from_seed = scrapy.Field() # how many hops from start URL
 
-# we have slightly different items for `pages` (which contain raw content in memory)
-# and `files` (where bytes have be saved to storage already by scrapy). These items
-# are internal to scrapy only; the final format written will look like FileItem
-# see http://doc.scrapy.org/en/latest/topics/media-pipeline.html
-
-class PageItem(BaseItem):
     content = scrapy.Field() # raw bytes
     headers = scrapy.Field() # scrapy Headers object
     status = scrapy.Field() # HTTP status code
@@ -43,6 +37,3 @@ class PageItem(BaseItem):
     # custom repr so we don't show the entire page when logging
     def __repr__(self):
         return pformat(self.get_metadata())
-
-class FileItem(BaseItem):
-    pass
