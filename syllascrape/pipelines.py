@@ -7,13 +7,18 @@
 
 import scrapy
 from scrapy.pipelines.files import FilesPipeline
-from scrapy.utils.serialize import ScrapyJSONEncoder
 from scrapy.utils.python import to_bytes
+from scrapy.utils.misc import md5sum
 
+import warc
+
+import uuid
 import logging
 import hashlib
 import os.path
 import time
+import json
+import itertools
 from io import BytesIO
 from urllib.parse import urlparse
 
@@ -21,8 +26,53 @@ from . import items
 from .utils import extract_domain, file_path, guess_extension
 from .version import git_revision
 
+def path_from_warc(record, prefix=""):
+    """return a path from the Record ID of a WARC"""
+    path = "%s.warc" % record.header.record_id[10:-1]
+    return os.path.join(prefix, path)
 
-class WebStorePipeline(object):
+def new_warc():
+    """return a new WARCRecord"""
+
+    # ripped from WARCHeader.init_defaults()
+    headers = {
+
+        'WARC-Record-ID': "<urn:uuid:%s>" % uuid.uuid1(),
+        'Content-Type': 'application/http; msgtype=response',
+    }
+
+    return warc.WARCRecord(header=warc.WARCHeader(headers, defaults=False),
+                           defaults=False)
+
+def update_warc_from_item(record, item):
+    """update a WARC record from a scrapy Item"""
+    h = record.header
+    h['WARC-Target-URI'] = item['url']
+    h['WARC-Date'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(item['retrieved']))
+    # XXX Scrapy doesn't provide remote IP for WARC-IP-Address
+
+    # XXX these should go in a WARC metadata record
+    h['X-Spider-Name'] = item['spider_name']
+    h['X-Spider-Revision'] = item['spider_revision']
+    h['X-Crawl-Depth'] = item['depth']
+
+    # XXX this should go in a single WARC warcinfo record, not each response
+    h['X-Spider-Parameters'] = json.dumps(item['spider_parameters'])
+    h['X-Spider-Run-ID'] = item['spider_run_id']
+
+    # below based on WARCRecord.from_response()
+
+    # XXX scrapy doesn't provide human-readable status string
+    status = "HTTP/1.1 {} UNKNOWN".format(item['status']).encode()
+    headers = [b': '.join((k, v)) for k, l in item['headers'].iteritems() for v in l]
+
+    record.update_payload(b"\r\n".join(itertools.chain((status, ),
+                                                       headers,
+                                                       (b'', ),
+                                                       (item['content'], )
+                                                       )))
+
+class WarcStorePipeline(object):
     """Stores web pages, similar to `FilesPipeline`.
 
     Saves to a filesystem or S3 path specified in the `FILES_STORE` setting.
@@ -40,7 +90,6 @@ class WebStorePipeline(object):
             raise NotConfigured
 
         self.store = self._get_store(store_uri)
-        self.encoder = ScrapyJSONEncoder()
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -66,21 +115,21 @@ class WebStorePipeline(object):
         item["spider_name"] = spider.name
         item["spider_revision"] = git_revision
         item["spider_parameters"] = spider.get_parameters()
+        item["spider_run_id"] = spider.run_id
         item["retrieved"] = int(time.time())
 
-        # save the raw bytes
-        path = file_path(item['url'], item['retrieved'],
-                         default_ext=guess_extension(item['mimetype']))
-        self.store.persist_file(path, BytesIO(item["content"]), None)
+        # make a WARC Record
+        record = new_warc()
+        update_warc_from_item(record, item)
 
-        # jsonify the item's metadata
-        jpath = "%s.json" % os.path.splitext(path)[0]
-        json_buf = BytesIO(self.encoder.encode(item.get_metadata()).encode('utf-8'))
-        self.store.persist_file(jpath, json_buf, None)
-
+        # write it out
+        path = path_from_warc(record, spider.run_id)
+        buf = BytesIO()
+        record.write_to(buf)
+        self.store.persist_file(path, buf, None)
         return item
 
-class WebFilesPipeline(FilesPipeline):
+class WarcFilesPipeline(FilesPipeline):
     """A customized `FilesPipeline`
 
     Saves to a filesystem or S3 path specified in the `FILES_STORE` setting.
@@ -96,55 +145,65 @@ class WebFilesPipeline(FilesPipeline):
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, *args, **kwargs):
-        self.encoder = ScrapyJSONEncoder()
-        super().__init__(*args, **kwargs)
-
     def get_media_requests(self, item, info):
         # hook to generate requests. We expect files_urls_field to be a list of 2 tuples of (url, meta)
         return [scrapy.Request(url, meta=meta) for url, meta in item.get(self.files_urls_field, [])]
 
-    def item_completed(self, results, item, info):
-        # callback executed when all files for an item have been downloaded
-        super().item_completed(results, item, info)
+    def file_downloaded(self, response, request, info):
+        # hook called to write bytes
+        path = self.file_path(request, response=response, info=info)
 
-        for d in item.get(self.files_result_field, ()):
-            i = items.FileItem()
-            i["url"] = d["url"]
-            i["domain"] = extract_domain(d["url"])
-            i["checksum"] = d["checksum"]
-            i["retrieved"] = d["retrieved"]
-            i["source_anchor"] = d["source_anchor"]
-            i["spider_name"] = info.spider.name
-            i["spider_revision"] = git_revision
-            i["spider_parameters"] = info.spider.get_parameters()
-            i["source_url"] = item["url"]
+        # build a a scrapy Item for this file
+        i = items.PageItem()
+        i["url"] = request.url
+        i["domain"] = extract_domain(i["url"])
+        i["retrieved"] = int(time.time())
+        i["content"] = response.body
+        i["length"] = len(response.body)
+        i["headers"] = response.headers
+        i["status"] = response.status
+        i["source_anchor"] = response.meta["source_anchor"]
+        i["source_url"] = response.meta["source_url"]
+        i["depth"] = response.meta["depth"]
+        i["spider_name"] = info.spider.name
+        i["spider_revision"] = git_revision
+        i["spider_parameters"] = info.spider.get_parameters()
+        i["spider_run_id"] = info.spider.run_id
 
-            path = os.path.splitext(d['path'])[0]
-            json_buf = BytesIO(self.encoder.encode(i).encode('utf-8'))
-            self.store.persist_file("%s.json" % path, json_buf, None)
+        # update WARC record
+        record = response.meta["warc_record"]
+        update_warc_from_item(record, i)
 
-        return item
-
-    def media_downloaded(self, response, request, info):
-        # hook called after each file is downloaded
-
-        # stuff timestamp on the response so we can use it in `file_path` below
-        response.retrieved = int(time.time())
-
-        # the dictionary here ends up in `item[file_results_field]` above
-        d = super().media_downloaded(response, request, info)
-        d["retrieved"] = response.retrieved
-        d["length"] = len(response.body)
-        d["source_anchor"] = response.meta["source_anchor"]
-        d["depth"] = response.meta["depth"]
-        return d
+        buf = BytesIO()
+        record.write_to(buf)
+        checksum = md5sum(buf)
+        buf.seek(0)
+        self.store.persist_file(path, buf, info)
+        return checksum
 
     def file_path(self, request, response=None, info=None):
         # hook to generate file name. This does something slightly evil - by
-        # including the timestamp in the filename, we force the file to be
-        # downloaded anew each time because the call to
-        # `FilesStore.stat_file(..)` will 404.
+        # generating a unique filename, we force the file to be downloaded
+        # anew each time because the call to `FilesStore.stat_file(..)` will
+        # 404.
 
-        default_ext = guess_extension(response.headers['content-type'].decode('ascii')) if response else ''
-        return file_path(request.url, getattr(response, 'retrieved', 0), default_ext=default_ext)
+        # Make a WARC Record *here*, and use it's `header.record_id` for the file_path
+        # Stuff record on the response object, pull it off in media downloaded & stuff it in return dict
+        # Read record off dict in item_completed, write to file path using the `record_id` above
+
+        assert info is not None
+
+        if response is None:
+            # this happens in FilesPipeline.media_to_download to check if
+            # file already exists in storage. We just generate a throwaway
+            # path, forcing it to always be downloaded
+            record = new_warc()
+        elif 'warc_record' not in response.meta:
+            # first time file_path has been called for this response
+            record = new_warc()
+            response.meta['warc_record'] = record
+        else:
+            # we've been called before for this response, returing existing record
+            record = response.meta['warc_record']
+
+        return path_from_warc(record, info.spider.run_id)
