@@ -148,45 +148,29 @@ class WebFilesPipeline(FilesPipeline):
         # hook to generate requests. We expect files_urls_field to be a list of 2 tuples of (url, meta)
         return [scrapy.Request(url, meta=meta) for url, meta in item.get(self.files_urls_field, [])]
 
-    def item_completed(self, results, item, info):
-        # callback executed when all files for an item have been downloaded
-        super().item_completed(results, item, info)
-
-        for d in item.get(self.files_result_field, ()):
-            i = items.FileItem()
-            i["url"] = d["url"]
-            i["domain"] = extract_domain(d["url"])
-            i["checksum"] = d["checksum"]
-            i["retrieved"] = d["retrieved"]
-            i["source_anchor"] = d["source_anchor"]
-            i["spider_name"] = info.spider.name
-            i["spider_revision"] = git_revision
-            i["spider_parameters"] = info.spider.get_parameters()
-
-            # XXX much of this needs to be made available in file_downloaded!
-
-        return item
-
-    def media_downloaded(self, response, request, info):
-        # hook called after each file is downloaded
-
-        # the dictionary here ends up in `item[file_results_field]` above
-        d = super().media_downloaded(response, request, info)
-        d["retrieved"] = response.retrieved
-        d["length"] = len(response.body)
-        d["source_url"] = response.meta["source_url"]
-        d["source_anchor"] = response.meta["source_anchor"]
-        d["depth"] = response.meta["depth"]
-        d["warc_record"] = response.meta["warc_record"]
-        return d
-
     def file_downloaded(self, response, request, info):
         # hook called to write bytes
         path = self.file_path(request, response=response, info=info)
 
-        # make a WARC record
+        # build a a scrapy Item for this file
+        i = items.PageItem()
+        i["url"] = request.url
+        i["domain"] = extract_domain(i["url"])
+        i["retrieved"] = int(time.time())
+        i["content"] = response.body
+        i["length"] = len(response.body)
+        i["headers"] = response.headers
+        i["status"] = response.status
+        i["source_anchor"] = response.meta["source_anchor"]
+        i["source_url"] = response.meta["source_url"]
+        i["depth"] = response.meta["depth"]
+        i["spider_name"] = info.spider.name
+        i["spider_revision"] = git_revision
+        i["spider_parameters"] = info.spider.get_parameters()
+
+        # update WARC record
         record = response.meta["warc_record"]
-        record.update_payload(response.body)
+        update_warc_from_item(record, i)
 
         buf = BytesIO()
         record.write_to(buf)

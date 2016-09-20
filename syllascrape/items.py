@@ -36,7 +36,7 @@ class PageItem(BaseItem):
 
     def get_metadata(self):
         """return a dict containing only metadata (dropping `content`, etc.)."""
-        return {k:v for k, v in self.items() if k not in ('content', 'file_urls', 'files')}
+        return {k:v for k, v in self.items() if k not in ('content', 'file_urls', 'files', 'headers', 'status')}
 
     # custom repr so we don't show the entire page when logging
     def __repr__(self):
