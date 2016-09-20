@@ -26,10 +26,14 @@ from . import items
 from .utils import extract_domain, file_path, guess_extension
 from .version import git_revision
 
-def path_from_warc(record, prefix=None):
+def incoming_path():
+    """return a path in which to put incoming files"""
+    return time.strftime("%Y-%m-%d", time.gmtime())
+
+def path_from_warc(record):
     """return a path from the Record ID of a WARC"""
     path = "%s.warc" % record.header.record_id[10:-1]
-    return os.path.join(prefix, path) if prefix is None else path
+    return os.path.join(incoming_path(), path)
 
 def new_warc():
     """return a new WARCRecord"""
@@ -123,7 +127,7 @@ class WarcStorePipeline(object):
         update_warc_from_item(record, item)
 
         # write it out
-        path = path_from_warc(record, 'warc')
+        path = path_from_warc(record)
         buf = BytesIO()
         record.write_to(buf)
         self.store.persist_file(path, buf, None)
@@ -206,4 +210,4 @@ class WarcFilesPipeline(FilesPipeline):
             # we've been called before for this response, returing existing record
             record = response.meta['warc_record']
 
-        return path_from_warc(record, 'warc')
+        return path_from_warc(record)
