@@ -21,7 +21,8 @@ class BaseItem(scrapy.Item):
     checksum = scrapy.Field() # MD5 sum of content
     length = scrapy.Field() # length of content
     mimetype = scrapy.Field() # Content-Type header from response
-    depth = scrapy.Field() # crawl depth page
+    depth = scrapy.Field() # crawl depth - reset by filters
+    hops_from_seed = scrapy.Field() # how many hops from start URL
 
 # we have slightly different items for `pages` (which contain raw content in memory)
 # and `files` (where bytes have be saved to storage already by scrapy). These items

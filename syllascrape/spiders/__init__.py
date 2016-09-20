@@ -54,6 +54,7 @@ class Spider(scrapy.spiders.Spider):
     def start_requests(self):
         for r in super().start_requests():
             r.meta['depth'] = 0
+            r.meta['hops_from_seed'] = 0
             yield r
 
     def parse(self, response):
@@ -81,6 +82,7 @@ class Spider(scrapy.spiders.Spider):
                 source_anchor=response.meta.get('source_anchor'),
                 mimetype = mimetype,
                 depth = response.meta.get('depth'),
+                hops_from_seed = response.meta.get('hops_from_seed'),
             )
 
     def parse_text(self, response):
@@ -108,7 +110,8 @@ class Spider(scrapy.spiders.Spider):
             source_anchor=response.meta.get('source_anchor'),
             mimetype = response.headers.get('content-type').decode('ascii'),
             depth = response.meta.get('depth'),
-            file_urls = file_urls
+            hops_from_seed = response.meta.get('hops_from_seed'),
+            file_urls = file_urls,
         )
 
     def extract_links(self, response):
@@ -129,6 +132,7 @@ class Spider(scrapy.spiders.Spider):
         return {'source_url': response.url,
                 'source_anchor': anchor,
                 'depth': response.meta['depth'] + 1,
+                'hops_from_seed': response.meta['hops_from_seed'] + 1,
                 }
 
     def process_text_url(self, response, url, anchor):
@@ -136,6 +140,7 @@ class Spider(scrapy.spiders.Spider):
         return {'source_url': response.url,
                 'source_anchor': anchor,
                 'depth': response.meta['depth'] + 1,
+                'hops_from_seed': response.meta['hops_from_seed'] + 1,
                 }
 
 def url_to_prefix_params(url):

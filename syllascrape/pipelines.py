@@ -55,6 +55,7 @@ def update_warc_from_item(record, item):
     h['X-Spider-Name'] = item['spider_name']
     h['X-Spider-Revision'] = item['spider_revision']
     h['X-Crawl-Depth'] = item['depth']
+    h['X-Hops-From-Seed'] = item['hops_from_seed']
 
     # XXX this should go in a single WARC warcinfo record, not each response
     h['X-Spider-Parameters'] = json.dumps(item['spider_parameters'])
@@ -165,6 +166,7 @@ class WarcFilesPipeline(FilesPipeline):
         i["source_anchor"] = response.meta["source_anchor"]
         i["source_url"] = response.meta["source_url"]
         i["depth"] = response.meta["depth"]
+        i["hops_from_seed"] = response.meta["hops_from_seed"]
         i["spider_name"] = info.spider.name
         i["spider_revision"] = git_revision
         i["spider_parameters"] = info.spider.get_parameters()

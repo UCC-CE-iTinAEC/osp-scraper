@@ -45,7 +45,8 @@ present, with missing values represented by the empty string.
 * checksum: MD5 of content
 * length: length of content
 * mimetype: Content-Type header from response
-* depth: the crawl depth at that
+* depth: the crawl depth of the page. Reset by filters
+* hops_from_seed: how many hops from a starting url
 
 ## Spiders
 All spiders should inherit from `syllascrape.spiders.Spider`.
