@@ -12,6 +12,7 @@ from scrapy.utils.misc import md5sum
 
 import warc
 
+import socket
 import uuid
 import logging
 import os.path
@@ -29,35 +30,52 @@ def path_from_warc(record, prefix=""):
     path = "%s.warc" % record.header.record_id[10:-1]
     return os.path.join(prefix, path)
 
-def new_warc():
-    """return a new WARCRecord"""
+def new_warc(kind):
+    """return a new WARCRecord
+
+    @arg kind: what flavor of WARC to create; see `warc.WarcHeader.CONTENT_TYPES` for flavors
+    """
 
     # ripped from WARCHeader.init_defaults()
     headers = {
 
         'WARC-Record-ID': "<urn:uuid:%s>" % uuid.uuid1(),
-        'Content-Type': 'application/http; msgtype=response',
+        'Content-Type': warc.WARCHeader.CONTENT_TYPES[kind],
+        'WARC-Date': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
     }
 
     return warc.WARCRecord(header=warc.WARCHeader(headers, defaults=False),
                            defaults=False)
+
+def update_warc_from_spider(record, spider):
+    """update a WARC record from a scrapy Spider"""
+
+    # make empty header object to use for fields
+    # XXX WARCHeader messes up capitalization here
+    fields = warc.WARCHeader({}, defaults=False)
+    fields['software'] = 'syllascrape'
+    fields['hostname'] = socket.getfqdn()
+    fields['x-spider-name'] = spider.name
+    fields['x-spider-run-id'] = spider.run_id
+    fields['x-spider-revision'] = git_revision
+    fields['x-spider-parameters'] = json.dumps(spider.get_parameters())
+
+    buf = BytesIO()
+    fields.write_to(buf, version_line=False, extra_crlf=False)
+    record.update_payload(buf.getvalue())
+
 
 def update_warc_from_item(record, item):
     """update a WARC record from a scrapy Item"""
     h = record.header
     h['WARC-Target-URI'] = item['url']
     h['WARC-Date'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(item['retrieved']))
+    h['X-Spider-Run-ID'] = item['spider_run_id']
     # XXX Scrapy doesn't provide remote IP for WARC-IP-Address
 
     # XXX these should go in a WARC metadata record
-    h['X-Spider-Name'] = item['spider_name']
-    h['X-Spider-Revision'] = item['spider_revision']
     h['X-Crawl-Depth'] = item['depth']
     h['X-Hops-From-Seed'] = item['hops_from_seed']
-
-    # XXX this should go in a single WARC warcinfo record, not each response
-    h['X-Spider-Parameters'] = json.dumps(item['spider_parameters'])
-    h['X-Spider-Run-ID'] = item['spider_run_id']
 
     # below based on WARCRecord.from_response()
 
@@ -90,6 +108,15 @@ class WarcStorePipeline(object):
 
         self.store = self._get_store(store_uri)
 
+    def open_spider(self, spider):
+        # write a warcinfo WARC for this spider run
+        record = new_warc('warcinfo')
+        update_warc_from_spider(record, spider)
+        path = path_from_warc(record, spider.run_id)
+        buf = BytesIO()
+        record.write_to(buf)
+        self.store.persist_file(path, buf, None)
+
     @classmethod
     def from_crawler(cls, crawler):
         pipe = cls(crawler.settings['FILES_STORE'],)
@@ -116,7 +143,7 @@ class WarcStorePipeline(object):
         item["retrieved"] = int(time.time())
 
         # make a WARC Record
-        record = new_warc()
+        record = new_warc('response')
         update_warc_from_item(record, item)
 
         # write it out
@@ -194,10 +221,10 @@ class WarcFilesPipeline(FilesPipeline):
             # this happens in FilesPipeline.media_to_download to check if
             # file already exists in storage. We just generate a throwaway
             # path, forcing it to always be downloaded
-            record = new_warc()
+            record = new_warc('response')
         elif 'warc_record' not in response.meta:
             # first time file_path has been called for this response
-            record = new_warc()
+            record = new_warc('response')
             response.meta['warc_record'] = record
         else:
             # we've been called before for this response, returing existing record
