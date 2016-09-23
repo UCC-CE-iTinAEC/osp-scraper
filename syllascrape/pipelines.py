@@ -39,6 +39,7 @@ def new_warc(kind):
     # ripped from WARCHeader.init_defaults()
     headers = {
 
+        'WARC-Type': kind,
         'WARC-Record-ID': "<urn:uuid:%s>" % uuid.uuid1(),
         'Content-Type': warc.WARCHeader.CONTENT_TYPES[kind],
         'WARC-Date': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
@@ -73,10 +74,6 @@ def update_warc_from_item(record, item):
     h['X-Spider-Run-ID'] = item['spider_run_id']
     # XXX Scrapy doesn't provide remote IP for WARC-IP-Address
 
-    # XXX these should go in a WARC metadata record
-    h['X-Crawl-Depth'] = item['depth']
-    h['X-Hops-From-Seed'] = item['hops_from_seed']
-
     # below based on WARCRecord.from_response()
 
     # XXX scrapy doesn't provide human-readable status string
@@ -88,6 +85,19 @@ def update_warc_from_item(record, item):
                                                        (b'', ),
                                                        (item['content'], )
                                                        )))
+
+def update_warc_metadata_from_item(record, item):
+    """update a WARC record from a scrapy Spider"""
+
+    # make empty header object to use for fields
+    # XXX WARCHeader messes up capitalization here
+    fields = warc.WARCHeader({}, defaults=False)
+    fields['x-crawl-depth'] = item['depth']
+    fields['hopsFromSeed'] = item['hops_from_seed']
+
+    buf = BytesIO()
+    fields.write_to(buf, version_line=False, extra_crlf=False)
+    record.update_payload(buf.getvalue())
 
 class WarcStorePipeline(object):
     """Stores web pages, similar to `FilesPipeline`.
@@ -146,10 +156,16 @@ class WarcStorePipeline(object):
         record = new_warc('response')
         update_warc_from_item(record, item)
 
-        # write it out
+        # make a WARC metadata
+        metadata = new_warc('metadata')
+        update_warc_metadata_from_item(metadata, item)
+        metadata.header['WARC-Concurrent-To'] = record.header.record_id
+
+        # write it all out
         path = path_from_warc(record, spider.run_id)
         buf = BytesIO()
         record.write_to(buf)
+        metadata.write_to(buf)
         self.store.persist_file(path, buf, None)
         return item
 
@@ -198,8 +214,15 @@ class WarcFilesPipeline(FilesPipeline):
         record = response.meta["warc_record"]
         update_warc_from_item(record, i)
 
+        # make a WARC metadata
+        metadata = new_warc('metadata')
+        update_warc_metadata_from_item(metadata, i)
+        metadata.header['WARC-Concurrent-To'] = record.header.record_id
+
+        # write it all out
         buf = BytesIO()
         record.write_to(buf)
+        metadata.write_to(buf)
         checksum = md5sum(buf)
         buf.seek(0)
         self.store.persist_file(path, buf, info)
