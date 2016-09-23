@@ -48,7 +48,7 @@ def new_warc(kind):
     return warc.WARCRecord(header=warc.WARCHeader(headers, defaults=False),
                            defaults=False)
 
-def update_warc_from_spider(record, spider):
+def update_warc_info_from_spider(record, spider):
     """update a WARC record from a scrapy Spider"""
 
     # make empty header object to use for fields
@@ -66,7 +66,7 @@ def update_warc_from_spider(record, spider):
     record.update_payload(buf.getvalue())
 
 
-def update_warc_from_item(record, item):
+def update_warc_response_from_item(record, item):
     """update a WARC record from a scrapy Item"""
     h = record.header
     h['WARC-Target-URI'] = item['url']
@@ -121,7 +121,7 @@ class WarcStorePipeline(object):
     def open_spider(self, spider):
         # write a warcinfo WARC for this spider run
         record = new_warc('warcinfo')
-        update_warc_from_spider(record, spider)
+        update_warc_info_from_spider(record, spider)
         path = path_from_warc(record, spider.run_id)
         buf = BytesIO()
         record.write_to(buf)
@@ -154,7 +154,7 @@ class WarcStorePipeline(object):
 
         # make a WARC Record
         record = new_warc('response')
-        update_warc_from_item(record, item)
+        update_warc_response_from_item(record, item)
 
         # make a WARC metadata
         metadata = new_warc('metadata')
@@ -212,7 +212,7 @@ class WarcFilesPipeline(FilesPipeline):
 
         # update WARC record
         record = response.meta["warc_record"]
-        update_warc_from_item(record, i)
+        update_warc_response_from_item(record, i)
 
         # make a WARC metadata
         metadata = new_warc('metadata')
