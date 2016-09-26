@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
 import scrapy
 from scrapy.pipelines.files import FilesPipeline
 from scrapy.utils.python import to_bytes
@@ -49,7 +44,7 @@ def new_warc(kind):
                            defaults=False)
 
 def update_warc_info_from_spider(record, spider):
-    """update a WARC record from a scrapy Spider"""
+    """update a WARC warcinfo record from a scrapy Spider"""
 
     # make empty header object to use for fields
     # XXX WARCHeader messes up capitalization here
@@ -67,7 +62,7 @@ def update_warc_info_from_spider(record, spider):
 
 
 def update_warc_response_from_item(record, item):
-    """update a WARC record from a scrapy Item"""
+    """update a WARC response record from a scrapy Item"""
     h = record.header
     h['WARC-Target-URI'] = item['url']
     h['WARC-Date'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(item['retrieved']))
@@ -87,7 +82,7 @@ def update_warc_response_from_item(record, item):
                                                        )))
 
 def update_warc_metadata_from_item(record, item):
-    """update a WARC record from a scrapy Spider"""
+    """update a WARC metadata record from a scrapy Item"""
 
     # make empty header object to use for fields
     # XXX WARCHeader messes up capitalization here
@@ -100,11 +95,11 @@ def update_warc_metadata_from_item(record, item):
     record.update_payload(buf.getvalue())
 
 class WarcStorePipeline(object):
-    """Stores web pages, similar to `FilesPipeline`.
+    """Stores web pages in WARC files, similar to `FilesPipeline`.
 
     Saves to a filesystem or S3 path specified in the `FILES_STORE` setting.
-    Pages will be named `<ext>/<url_hash>-<epoch>.<ext>`, with an accompanying
-    `.json` file containing metadata.
+    Pages will be named `<spider>run_id>/<warc-id>.warc`, with a `response`
+    and `metadata` records.
 
     We piggyback on WebFilesPipeline below, which uses singleton classes for S3/FS
     storage.
@@ -173,8 +168,8 @@ class WarcFilesPipeline(FilesPipeline):
     """A customized `FilesPipeline`
 
     Saves to a filesystem or S3 path specified in the `FILES_STORE` setting.
-    Files will be named `<ext>/<url_hash>-<epoch>.<ext>`, with an accompanying
-    `.json` file containing metadata.
+    Pages will be named `<spider>run_id>/<warc-id>.warc`, with a `response`
+    and `metadata` records.
 
     This subclass effectively bypasses the `FILES_EXPIRES` setting; files
     will be downloaded anew each time they are encountered.
@@ -235,8 +230,7 @@ class WarcFilesPipeline(FilesPipeline):
         # 404.
 
         # Make a WARC Record *here*, and use it's `header.record_id` for the file_path
-        # Stuff record on the response object, pull it off in media downloaded & stuff it in return dict
-        # Read record off dict in item_completed, write to file path using the `record_id` above
+        # Stuff record on the response object, pull it off in file_downloaded. I'm sorry.
 
         assert info is not None
 

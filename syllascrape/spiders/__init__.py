@@ -32,6 +32,10 @@ class Spider(scrapy.spiders.Spider):
     keeps track of the depth of the crawl. Depths are incremented in
     `process_text_url` and checked / reset by the spider & downloader
     middlewares for Filters with infinite depth.
+
+    Attributes
+    ==========
+    :ivar str run_id: a unique ID for each spider run
     """
 
     name = "syllascrape_spider"
