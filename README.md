@@ -13,37 +13,38 @@ bucket must already exist. You must include the trailing slash when using S3.
 
 ## Output
 
-Output files will be stored in the location specified by the `FILES_STORE`
-setting. Files will be named as `<ext>/<url_hash>-<epoch>.<ext>`, with a
-corresponding `.json` file containing metadata (described below).
+Output files will be stored as WARC files in the location specified by the
+`FILES_STORE` setting. Files will be named as
+`<spider_run_id>/<warc_id>.warc`. When in doubt, we aim for compatibility
+with Common Crawl.
 
-Due to the use of timestamps, the dataset is immutable, and provides a
-consistent view of the data at past points in time. To obtain the most recent
-items:
+### WARC Records
+We write 3 kinds of WARC records:
 
-1. reverse sort the files by name
-2. group by `url_hash`
-3. take the first item from each group.
+* for each spider run, a `warcinfo` record including the filters as JSON
+* for each page, a `response` record with the bytes of the HTTP response (including reconstructed headers)
+* for each page, a `metadata` record with info about the crawler (number of hops, etc)
 
-See `syllascrape.storage.newest_files` for a helper function that implements
-this algorithm.
+### Variations from WARC standard
+* we don't write `request` records.
+* some header/field names have strange capitalization
+* some fields are missing, including `WARC-IP-Address`
+* the human readable HTTP status field (the `OK` in `200 OK`) is lost and replaced with `UNKNOWN`
 
-### Metadata
+### Helpful links
 
-The following metadata is saved for each downloaded file; all fields will be
-present, with missing values represented by the empty string.
+* [WARC File Format](http://archive-access.sourceforge.net/warc/warc_file_format-0.16.html)
+* [Some best practices](http://www.netpreserve.org/sites/default/files/resources/WARC_Guidelines_v1.pdf)
+* [Common Crawl docs](http://commoncrawl.org/the-data/get-started/)
+* [Common Crawl example](https://gist.github.com/Smerity/e750f0ef0ab9aa366558#file-bbc-warc)
+* [Helpful slides](http://connect.ala.org/files/2015-06-27_ALCTS_PARS_PMIG_web_archives.pdf)
+* [More WARC example files](https://mementoweb.github.io/SiteStory/warcfile_example.html)
+* [Common Crawl Index](http://commoncrawl.org/2015/04/announcing-the-common-crawl-index/)
 
-* url: url of the file
-* source_url: url that linked to the file
-* source_anchor: anchor text on source page
-* retrieved: integer seconds since epoch
-* spider_name: spider name
-* spider_revision: git revision number for syllascrape code
-* spider_parameters: dict of spider parameters (starting urls, allowed domains, etc.)
-* spider_run_id: unique identifier for spider run
-* length: length of content
-* depth: the crawl depth of the page. Reset by filters
-* hops_from_seed: how many hops from a starting url
+### A note on libraries
+
+All of the Python WARC libraries are pretty terrible, `internetarchive/warc`
+(and its various forks) seemed the least bad.
 
 ## Spiders
 All spiders should inherit from `syllascrape.spiders.Spider`.
@@ -56,12 +57,6 @@ automatically saved. Defaults to `pdf, doc, docx`.
 
 `filters` a list of syllascrape.filterware.Filter`s that control the scope of
 `the crawl. See its documentation for details.
-
-## Legacy Format
-
-A script to convert to the legacy data format is in
-`bin/write_legacy_logs.py`. Note that data files will be hard linked to save
-space.
 
 ## Celery
 
@@ -94,3 +89,5 @@ The `bin/csv_prefix_crawler.py` takes a CSV file with a
 seed URL on each line, and fires of Celery crawl tasks. If the path component
 ends with a `/` it will be used-as is; otherwise the final path component is
 assumed to be a filename and will be dropped.
+
+The `edu_repo_crawler.py` works with the Google spreadsheet: "USA EDU Repo"
