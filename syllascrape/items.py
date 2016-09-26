@@ -24,8 +24,8 @@ class PageItem(scrapy.Item):
     content = scrapy.Field() # raw bytes
     headers = scrapy.Field() # scrapy Headers object
     status = scrapy.Field() # HTTP status code
-    file_urls = scrapy.Field() # for use with WebFilesPipeline - list of 2-tuples of (url, meta dict)
-    files = scrapy.Field() # gets results of WebFilesPipeleine
+    file_urls = scrapy.Field() # for use with WarcFilesPipeline - list of 2-tuples of (url, meta dict)
+    files = scrapy.Field() # gets results of WarcFilesPipeleine
 
     def get_metadata(self):
         """return a dict containing only metadata (dropping `content`, etc.)."""

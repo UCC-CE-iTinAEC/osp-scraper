@@ -101,7 +101,7 @@ class WarcStorePipeline(object):
     Pages will be named `<spider>run_id>/<warc-id>.warc`, with a `response`
     and `metadata` records.
 
-    We piggyback on WebFilesPipeline below, which uses singleton classes for S3/FS
+    We piggyback on WarcFilesPipeline below, which uses singleton classes for S3/FS
     storage.
     """
 

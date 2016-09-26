@@ -72,7 +72,7 @@ ITEM_PIPELINES = {
     'syllascrape.pipelines.WarcStorePipeline': 301,
 }
 
-# Configure WebFilesPipeline & WebStorePipeline
+# Configure WarcFilesPipeline & WarcStorePipeline
 FILES_STORE = None
 
 # Downloader middleware to enforce allowed_domains & allowed_paths for files - this should come first
