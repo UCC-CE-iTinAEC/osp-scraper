@@ -29,7 +29,6 @@ We write 3 kinds of WARC records:
 * we don't write `request` records.
 * some header/field names have strange capitalization
 * some fields are missing, including `WARC-IP-Address`
-* the human readable HTTP status field (the `OK` in `200 OK`) is lost and replaced with `UNKNOWN`
 
 ### Helpful links
 

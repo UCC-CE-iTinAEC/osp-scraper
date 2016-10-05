@@ -6,6 +6,7 @@ from scrapy.utils.python import to_bytes
 from scrapy.utils.misc import md5sum
 
 import warc
+import httpstatus
 
 import socket
 import uuid
@@ -72,7 +73,8 @@ def update_warc_response_from_item(record, item):
     # below based on WARCRecord.from_response()
 
     # XXX scrapy doesn't provide human-readable status string
-    status = "HTTP/1.1 {} UNKNOWN".format(item['status']).encode()
+    status = "HTTP/1.1 {} {}".format(item['status'],
+                                     httpstatus.HTTPStatus(item['status']).name).encode()
     headers = [b': '.join((k, v)) for k, l in item['headers'].iteritems() for v in l]
 
     record.update_payload(b"\r\n".join(itertools.chain((status, ),
