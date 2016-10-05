@@ -91,6 +91,8 @@ def update_warc_metadata_from_item(record, item):
     fields = warc.WARCHeader({}, defaults=False)
     fields['x-crawl-depth'] = item['depth']
     fields['hopsFromSeed'] = item['hops_from_seed']
+    fields['x-source-anchor'] = item['source_anchor']
+    fields['x-source-url'] = item['source_url']
 
     buf = BytesIO()
     fields.write_to(buf, version_line=False, extra_crlf=False)
