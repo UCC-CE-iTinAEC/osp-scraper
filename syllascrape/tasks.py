@@ -98,4 +98,4 @@ def crawl(spider, *args, **kwargs):
     """
     proc = CrawlerProcess(get_project_settings())
     proc.crawl(spider, *args, **kwargs)
-    proc.join()
+    proc.start()
