@@ -22,7 +22,11 @@ blacklist_domains = [
     'wikipedia.org',
 ]
 
-blacklist_re = "^" + "|".join("((.*\.)?%s$)" % re.escape(x) for x in blacklist_domains)
+blacklist_re = "^" + "|".join(
+    "((.*\.)?%s$)" % re.escape(x)
+    for x in blacklist_domains
+)
+
 
 def make_params(seed_urls):
     """Generate parameters for a spider from a list of URLs.
