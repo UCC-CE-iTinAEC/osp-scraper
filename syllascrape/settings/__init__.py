@@ -113,7 +113,10 @@ SPIDER_MIDDLEWARES = {
 
 # Syllascrape:
 
+LOG_LEVEL = 'WARNING'
+
 FILES_STORE = 's3://syllascrape/test/'
+
 BROKER_HOST = 'localhost'
 
 
