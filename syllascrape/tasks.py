@@ -38,13 +38,16 @@ def make_params(seed_urls):
         'start_urls': [],
         'allowed_file_types': {'pdf', 'doc', 'docx'},
         'filters': [],
-        }
+    }
 
     # blacklist domains
-    d['filters'].append(Filter.compile('deny',
-                                       pattern='regex',
-                                       hostname=blacklist_re
-                                       ))
+    d['filters'].append(
+        Filter.compile(
+            'deny',
+            pattern='regex',
+            hostname=blacklist_re
+        )
+    )
 
     # merge parameters from several seed urls, with unique domains & paths
     for url in seed_urls:
@@ -64,12 +67,15 @@ def make_params(seed_urls):
         ))
 
         # allow same hostname to max depth 2
-        d['filters'].append(Filter.compile('allow',
-                                           pattern='regex',
-                                           hostname=hostname,
-                                           port=port,
-                                           max_depth=2
-                                           ))
+        d['filters'].append(
+            Filter.compile(
+                'allow',
+                pattern='regex',
+                hostname=hostname,
+                port=port,
+                max_depth=2
+            )
+        )
 
     # allow other domains w/ max depth 1
     d['filters'].append(Filter.compile('allow', max_depth=1))
