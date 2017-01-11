@@ -8,9 +8,11 @@ import os
 
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
+from rq.decorators import job
 
 from .spiders import Spider
 from .filterware import Filter
+from .services import redis_conn
 
 
 # a list of base domains to blacklist; subdomains blocked too
@@ -90,6 +92,7 @@ def make_params(seed_urls):
     return d
 
 
+@job('default', connection=redis_conn, timeout=86400)
 def crawl(spider, *args, **kwargs):
     """Run a spider.
 
