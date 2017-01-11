@@ -25,13 +25,16 @@ blacklist_domains = [
 blacklist_re = "^" + "|".join("((.*\.)?%s$)" % re.escape(x) for x in blacklist_domains)
 
 def make_params(seed_urls):
-    """Generate parameters for a spider from a list of URLs
+    """Generate parameters for a spider from a list of URLs.
 
     * Allow paths with matching prefix to infinite depth
     * Allow same hostname to max depth of 2
     * Allow other domains to max depth of 1
 
-    based on syllascrape.spiders.url_to_prefix_params
+    Based on syllascrape.spiders.url_to_prefix_params.
+
+    Args:
+        seed_urls (list)
     """
     # parameters for a spider
     d = {
@@ -90,5 +93,5 @@ def crawl(spider, *args, **kwargs):
         spider (str): The Scrapy `name` of the spider.
     """
     proc = CrawlerProcess(get_project_settings())
-    proc.crawl(spider)
+    proc.crawl(spider, *args, **kwargs)
     proc.join()
