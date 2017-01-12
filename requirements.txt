@@ -1,3 +1,4 @@
+ipython==5.1.0
 PyDispatcher==2.0.5
 Scrapy==1.1.0
 Twisted==16.2.0
@@ -35,4 +36,4 @@ python-dotenv==0.6.1
 git+https://github.com/wearpants/warc3
 httpstatus35==0.0.1
 rq==0.7.1
-ipython==5.1.0
+rq-dashboard==0.3.7
