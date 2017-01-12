@@ -2,7 +2,7 @@
 
 from redis import Redis
 
-from . import settings
+from .settings.rq import REDIS_URL
 
 
-redis_conn = Redis.from_url(settings.REDIS_URL)
+redis_conn = Redis.from_url(REDIS_URL)
