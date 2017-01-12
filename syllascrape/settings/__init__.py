@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 # Scrapy settings for syllascrape project
@@ -9,11 +10,17 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
+
+import os
+
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
+
+
 BOT_NAME = 'syllascrape'
 
 SPIDER_MODULES = ['syllascrape.spiders']
 NEWSPIDER_MODULE = 'syllascrape.spiders'
-
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'syllascrape (+http://www.yourdomain.com)'
@@ -30,7 +37,7 @@ DOWNLOAD_MAXSIZE = 128 * (1024 * 1024) # 128 MB
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+# DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -111,17 +118,20 @@ SPIDER_MIDDLEWARES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 
-# Syllascrape:
+# ENV
 
-LOG_LEVEL = 'WARNING'
+DOWNLOAD_DELAY = int(os.environ.get(
+    'DOWNLOAD_DELAY', 3
+))
 
-FILES_STORE = 's3://syllascrape/test/'
+LOG_LEVEL = os.environ.get(
+    'LOG_LEVEL', 'WARNING'
+)
 
-REDIS_URL = 'redis://localhost/0'
+FILES_STORE = os.environ.get(
+    'FILES_STORE', 's3://syllascrape/test/'
+)
 
-
-# Merge local settings.
-try:
-    from .local import *
-except ImportError:
-    pass
+REDIS_URL = os.environ.get(
+    'REDIS_URL', 'redis://localhost/0'
+)
