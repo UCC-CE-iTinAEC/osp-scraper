@@ -5,4 +5,4 @@ from redis import Redis
 from . import settings
 
 
-redis_conn = Redis(settings.BROKER_HOST)
+redis_conn = Redis.from_url(settings.REDIS_URL)

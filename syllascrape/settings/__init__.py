@@ -117,7 +117,7 @@ LOG_LEVEL = 'WARNING'
 
 FILES_STORE = 's3://syllascrape/test/'
 
-BROKER_HOST = 'localhost'
+REDIS_URL = 'redis://localhost/0'
 
 
 # Merge local settings.
