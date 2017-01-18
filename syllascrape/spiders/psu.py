@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import scrapy
-from syllascrape.items import PageItem 
+from ..items import PageItem 
 
 class PSUSpider(scrapy.spiders.Spider):
     name = "psu"
