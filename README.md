@@ -5,6 +5,24 @@ Syllascrape is a [Scrapy](http://scrapy.org) spider for the [Open Syllabus Proje
 Please see [Scrapy's docs](http://doc.scrapy.org) for instructions on how to
 install & use Scrapy; this README only highlights customizations for Syllascrape
 
+## Installation
+Create a Python 3 environment
+```
+python3 -m venv env
+```
+Activate the environment (This needs to be done every time you open a new terminal)
+```
+. env/bin/activate
+```
+Install dependencies
+```
+pip install -r requirements.txt
+```
+Install Syllascrape as a package for development
+```
+python setup.py develop 
+```
+
 ## Settings
 
 `FILES_STORE` is the root path to save files. This may be a path on the local
