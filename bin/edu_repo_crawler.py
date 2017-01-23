@@ -34,6 +34,11 @@ def main(csv_file):
                 log.info("Found %d URLs for %s", len(urls), row['name'])
                 params = make_params(urls)
                 log.debug("Parameters: %r", params)
+
+                if row['robots.txt'].lower() == "ignore":
+                    params['ignore_robots_txt'] = True
+                    log.info("Ignoring robots.txt")
+                    
                 crawl.delay('syllascrape_spider', **params)
             else:
                 log.debug("No URLs found for %s", row['name'])
