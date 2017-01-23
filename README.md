@@ -29,6 +29,11 @@ python setup.py develop
 filesystem, or an S3 URL like `s3://<bucket>/<prefix>/`. If using S3, the
 bucket must already exist. You must include the trailing slash when using S3.
 
+To set `FILES_STORE` to save files locally on your system, create a `.env` file in the root of the project with contents such as:
+```
+FILES_STORE="file://downloads/"
+```
+
 ## Output
 
 Output files will be stored as WARC files in the location specified by the
