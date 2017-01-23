@@ -2,8 +2,9 @@
 
 import scrapy
 from ..items import PageItem 
+from ..spiders.CustomSpider import CustomSpider
 
-class PSUSpider(scrapy.spiders.Spider):
+class PSUSpider(CustomSpider):
     name = "psu"
     allowed_domains = ["psu.edu"]
 
