@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import scrapy
-
 from ..items import PageItem 
 from ..spiders.CustomSpider import CustomSpider
 
@@ -21,7 +20,7 @@ class ASUSpider(CustomSpider):
                 name = option.css("option::text").extract_first()
                 terms.append((code, name))
 
-            return scrapy.Request("https://webapp4.asu.edu/catalog/Subjects.html", callback=get_subject_codes)
+            yield scrapy.Request("https://webapp4.asu.edu/catalog/Subjects.html", callback=get_subject_codes)
 
         def get_subject_codes(response):
             for subject in response.css("#subjectDivs .row"):
@@ -48,37 +47,14 @@ class ASUSpider(CustomSpider):
                             "source_url": start_url,
                             "source_anchor": subject_name + " " + term_name,
                         },
-                        callback=self.parse,
-                        dont_filter=True
+                        callback=self.parse_for_files
                     )
 
         yield scrapy.Request(start_url, callback=get_terms_codes, dont_filter=True)
 
-    def parse(self, response):
-        file_urls = []
-
+    def get_file_links(self, response):
         for tag in response.css('a[title="Syllabus"]'):
             url = tag.css('a::attr(href)').extract_first()
             if url:
                 anchor = tag.css('a::text').extract_first()
-
-                meta = {
-                    'source_url': response.url,
-                    'source_anchor': anchor,
-                    'depth': response.meta['depth'] + 1,
-                    'hops_from_seed': response.meta['hops_from_seed'] + 1,
-                }
-
-                file_urls.append((url, meta))
-
-        yield PageItem(
-            url=response.url,
-            content=response.body,
-            headers=response.headers,
-            status=response.status,
-            source_url=response.meta.get('source_url'),
-            source_anchor=response.meta.get('source_anchor'),
-            depth=response.meta.get('depth'),
-            hops_from_seed=response.meta.get('hops_from_seed'),
-            file_urls=file_urls,
-        )
+                yield (url, anchor)

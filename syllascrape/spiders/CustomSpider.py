@@ -6,6 +6,7 @@ import uuid
 from scrapy.spiders import Spider
 
 from ..filterware import Filter
+from ..items import PageItem 
 
 class CustomSpider(Spider):
     @classmethod
@@ -25,5 +26,28 @@ class CustomSpider(Spider):
             'allowed_file_types': list(getattr(self, 'allowed_file_types', set()))
         }
 
-    def clean_whitespace(self, s):
-        return re.sub(r"\s+", " ", s).strip()
+    def parse_for_files(self, response):
+        file_urls = []
+
+        for url, anchor in self.get_file_links(response):
+            meta = {
+                'source_url': response.url,
+                'source_anchor': anchor,
+                'depth': response.meta['depth'] + 1,
+                'hops_from_seed': response.meta['hops_from_seed'] + 1,
+            }
+
+            file_urls.append((url, meta))
+
+        yield PageItem(
+            url=response.url,
+            content=response.body,
+            headers=response.headers,
+            status=response.status,
+            source_url=response.meta.get('source_url'),
+            source_anchor=response.meta.get('source_anchor'),
+            depth=response.meta.get('depth'),
+            hops_from_seed=response.meta.get('hops_from_seed'),
+            file_urls=file_urls
+        )
+        return
