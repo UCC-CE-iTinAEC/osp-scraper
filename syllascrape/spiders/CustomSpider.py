@@ -24,6 +24,3 @@ class CustomSpider(Spider):
             'start_urls': getattr(self, 'start_urls', []),
             'allowed_file_types': list(getattr(self, 'allowed_file_types', set()))
         }
-
-    def clean_whitespace(self, s):
-        return re.sub(r"\s+", " ", s).strip()
