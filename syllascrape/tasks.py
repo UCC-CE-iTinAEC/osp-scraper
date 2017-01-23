@@ -100,6 +100,10 @@ def crawl(spider, *args, **kwargs):
     Args:
         spider (str): The Scrapy `name` of the spider.
     """
-    proc = CrawlerProcess(get_project_settings())
+    settings = get_project_settings()
+    if kwargs.get('ignore_robots_txt') is True:
+        settings.attributes.get('ROBOTSTXT_OBEY').value = False
+
+    proc = CrawlerProcess(settings)
     proc.crawl(spider, *args, **kwargs)
     proc.start()
