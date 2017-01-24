@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import scrapy
-from ..items import PageItem 
+
 from ..spiders.CustomSpider import CustomSpider
 
 class PSUSpider(CustomSpider):
