@@ -26,11 +26,15 @@ class CustomSpider(Spider):
             'allowed_file_types': list(getattr(self, 'allowed_file_types', set()))
         }
 
+    def get_file_links(self, response):
+        return
+        yield
+
     def parse_for_files(self, response):
         file_urls = []
 
         for url, anchor in self.get_file_links(response):
-            meta = {
+            meta={
                 'source_url': response.url,
                 'source_anchor': anchor,
                 'depth': response.meta['depth'] + 1,
@@ -50,4 +54,7 @@ class CustomSpider(Spider):
             hops_from_seed=response.meta.get('hops_from_seed'),
             file_urls=file_urls
         )
-        return
+
+    def clean_whitespace(self, s):
+        return re.sub(r"\s+", " ", s).strip()
+

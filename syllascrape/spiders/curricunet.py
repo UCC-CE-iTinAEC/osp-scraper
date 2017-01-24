@@ -75,9 +75,6 @@
 #             hops_from_seed=response.meta.get('hops_from_seed')
 #         )
 
-#     def clean_whitespace(self, s):
-#         return re.sub(r"\s+", " ", s).strip()
-
 # http://www.curricunet.com/sac/search/course/
 # http://www.curricunet.com/SantaMonica/search/course/
 # http://www.curricunet.com/elcamino/search/course/
