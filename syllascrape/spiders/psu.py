@@ -68,12 +68,12 @@ class PSUSpider(CustomSpider):
 # https://ed.psu.edu/eps/edldr/downloads-forms/schafft-syllabi Handled by syllascrape
 # http://lser.la.psu.edu/gwr/resources-1/course-syllabi Handled by syllascrape
 # http://nursing.psu.edu/undergraduate/syllabus Requires permissions
-# https://www.courses.psu.edu/art/ Handled by syllascrape, but syllabi are HTML
+# https://www.courses.psu.edu/art/ Handled by syllascrape
 # http://bulletins.psu.edu/undergrad/campuses/details/28/BB%20H No syllabi found
-# http://bio.psu.edu/undergraduate-portal/our-curriculum/syllabi Handled by syllascrape, but syllabi are HTML
+# http://bio.psu.edu/undergraduate-portal/our-curriculum/syllabi Handled by syllascrape
 # http://www.met.psu.edu/academics/undergraduate-studies/undergraduate-courses/course-syllabi Handled by syllascrape, but no syllabi found
-# http://www.phys.psu.edu/undergraduate/courses/syllabi Handled by syllascrape, but syllabi are HTML
-# http://bmb.psu.edu/undergraduate/courses/sp16-syllabi Handled by syllascrape, but syllabi are HTML
+# http://www.phys.psu.edu/undergraduate/courses/syllabi Handled by syllascrape
+# http://bmb.psu.edu/undergraduate/courses/sp16-syllabi Handled by syllascrape
 # http://phys23p.sl.psu.edu/syll/ Handled by syllascrape
-# http://www.personal.psu.edu/~j5j/courses.html Handled by syllascrape
+# http://www.personal.ps Handled by syllascrape
 # http://nursing.psu.edu/undergraduate/syllabus Requires permissions
