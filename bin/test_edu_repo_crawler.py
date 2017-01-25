@@ -30,6 +30,9 @@ def main(csv_file, id):
                 urls.extend(extract_urls(row['Mixed URLs']))
                 urls.extend(extract_urls(row['Database URLs']))
 
+                if row.get('Custom Scraper Name'):
+                    crawl(row['Custom Scraper Name'])
+
                 if urls:
                     log.info("Found %d URLs for %s", len(urls), row['name'])
                     params = make_params(urls)
