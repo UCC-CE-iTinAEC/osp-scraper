@@ -24,14 +24,14 @@ def extract_urls(s):
 def main(csv_file):
     with open(csv_file) as f:
         for row in csv.DictReader(f):
+            # run custom scrapers & skip extraction
+            if row.get('Custom Scraper Name'):
+                crawl.delay(row['Custom Scraper Name'])
 
             # find comma-separated URLs in these columns
             urls = extract_urls(row['Doc URLs'])
             urls.extend(extract_urls(row['Mixed URLs']))
             urls.extend(extract_urls(row['Database URLs']))
-
-            if row.get('Custom Scraper Name'):
-                crawl.delay(row['Custom Scraper Name'])
 
             if urls:
                 log.info("Found %d URLs for %s", len(urls), row['name'])
