@@ -8,6 +8,8 @@ import itertools
 import urllib.parse
 import re
 
+import click
+
 from syllascrape.tasks import make_params, crawl
 
 
@@ -21,7 +23,13 @@ def extract_urls(s):
     return list(urls)
 
 
-def main(csv_file):
+@click.command()
+@click.argument('csv_file', type=click.Path(exists=True))
+@click.option('--local', default=False, is_flag=True, help='Run spiders locally instead of queueing them')
+@click.option('--institution', default=None, help='Only run spiders for the institution with this ID')
+def main(csv_file, local, institution):
+    crawl_func = crawl if local else crawl.delay
+
     with open(csv_file) as f:
         for row in csv.DictReader(f):
 
@@ -30,30 +38,26 @@ def main(csv_file):
             urls.extend(extract_urls(row['Mixed URLs']))
             urls.extend(extract_urls(row['Database URLs']))
 
-            if row.get('Custom Scraper Name'):
-                crawl.delay(row['Custom Scraper Name'])
+            if not institution or institution == row['id']:
+                if row.get('Custom Scraper Name'):
+                    crawl_func(row['Custom Scraper Name'])
 
-            if urls:
-                log.info("Found %d URLs for %s", len(urls), row['name'])
-                params = make_params(urls)
-                log.debug("Parameters: %r", params)
+                if urls:
+                    log.info("Found %d URLs for %s", len(urls), row['name'])
+                    params = make_params(urls)
+                    log.debug("Parameters: %r", params)
 
-                if row['robots.txt'].lower() == "ignore":
-                    params['ignore_robots_txt'] = True
-                    log.info("Ignoring robots.txt")
-                    
-                crawl.delay('syllascrape_spider', **params)
-            else:
-                log.debug("No URLs found for %s", row['name'])
+                    if row['robots.txt'].lower() == "ignore":
+                        params['ignore_robots_txt'] = True
+                        log.info("Ignoring robots.txt")
+                        
+                    crawl_func('syllascrape_spider', **params)
+                else:
+                    log.debug("No URLs found for %s", row['name'])
 
-
-def usage():
-    print("%s <csv_file>" % os.path.basename(sys.argv[0]))
-
+                if institution:
+                    break
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        usage()
-    else:
-        logging.basicConfig(level=logging.INFO)
-        main(sys.argv[1])
+    logging.basicConfig(level=logging.INFO)
+    main()
