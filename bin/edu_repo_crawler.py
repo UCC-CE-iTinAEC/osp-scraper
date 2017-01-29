@@ -32,15 +32,15 @@ def main(csv_file, local, institution):
 
     with open(csv_file) as f:
         for row in csv.DictReader(f):
-
-            # find comma-separated URLs in these columns
-            urls = extract_urls(row['Doc URLs'])
-            urls.extend(extract_urls(row['Mixed URLs']))
-            urls.extend(extract_urls(row['Database URLs']))
-
             if not institution or institution == row['id']:
+                # run custom scraper
                 if row.get('Custom Scraper Name'):
                     crawl_func(row['Custom Scraper Name'])
+
+                # find comma-separated URLs in these columns
+                urls = extract_urls(row['Doc URLs'])
+                urls.extend(extract_urls(row['Mixed URLs']))
+                urls.extend(extract_urls(row['Database URLs']))
 
                 if urls:
                     log.info("Found %d URLs for %s", len(urls), row['name'])
