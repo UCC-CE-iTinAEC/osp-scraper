@@ -52,7 +52,7 @@ class ASUSpider(CustomSpider):
 
         yield scrapy.Request(start_url, callback=get_terms_codes, dont_filter=True)
 
-    def get_file_links(self, response):
+    def extract_links(self, response):
         for tag in response.css('a[title="Syllabus"]'):
             url = tag.css('a::attr(href)').extract_first()
             if url:

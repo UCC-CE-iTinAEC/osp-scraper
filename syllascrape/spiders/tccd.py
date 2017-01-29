@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 import scrapy
@@ -32,7 +31,7 @@ class TCCDSpider(CustomSpider):
                 callback=self.parse_for_files
             )
 
-    def get_file_links(self, response):
+    def extract_links(self, response):
         syllabus_link_tag = response.css('tr:last-child td.info a')
         syllabus_relative_url = syllabus_link_tag.css('a::attr(href)').re_first("displayLink[^']*")
         url = response.urljoin(syllabus_relative_url)
