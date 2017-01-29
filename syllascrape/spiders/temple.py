@@ -8,10 +8,6 @@ class TempleSpider(CustomSpider):
     name = "temple"
     allowed_domains = ["temple.edu"]
 
-    custom_settings = {
-        'ROBOTSTXT_OBEY': False,
-    }
-
     def start_requests(self):
         terms = []
         subjects = []

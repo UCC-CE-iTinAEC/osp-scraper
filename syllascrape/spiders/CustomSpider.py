@@ -9,6 +9,10 @@ from ..filterware import Filter
 from ..items import PageItem 
 
 class CustomSpider(Spider):
+    custom_settings = {
+        'ROBOTSTXT_OBEY': False,
+    }
+    
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super().from_crawler(crawler, *args, **kwargs)

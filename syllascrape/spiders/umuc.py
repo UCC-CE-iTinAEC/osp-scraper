@@ -14,10 +14,6 @@ class UMUCSpider(CustomSpider):
         "http://webapps.umuc.edu/soc/asia.cfm?fAcad=UBSU",
     ]
 
-    custom_settings = {
-        'ROBOTSTXT_OBEY': False,
-    }
-
     def parse(self, response):
         sessions = []
         for option in response.css("#soc-session option"):
