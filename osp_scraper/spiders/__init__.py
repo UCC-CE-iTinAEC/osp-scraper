@@ -12,8 +12,30 @@ from ..utils import guess_extension
 from .. import version
 from ..filterware import Filter
 
-class Spider(scrapy.spiders.Spider):
-    """Base class for osp_scraper spiders.
+# file types we download
+ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx'})
+
+class BaseSpider(scrapy.spiders.Spider):
+    """Common base class for all syllascrape spiders"""
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super().from_crawler(crawler, *args, **kwargs)
+        spider.run_id = str(uuid.uuid1())
+        return spider
+
+
+    def get_parameters(self):
+        """return dict of parameters for current spider run"""
+        # default values should match various middlewares
+        return {
+            'filters': [f.asdict() for f in getattr(self, 'filters', [])],
+            'start_urls': getattr(self, 'start_urls', []),
+            'allowed_file_types': list(getattr(self, 'allowed_file_types', set()))
+        }
+
+class Spider(BaseSpider):
+    """Filtering spider.
 
     Parameters
     ==========
@@ -39,21 +61,6 @@ class Spider(scrapy.spiders.Spider):
     """
 
     name = "osp_scraper_spider"
-
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super().from_crawler(crawler, *args, **kwargs)
-        spider.run_id = str(uuid.uuid1())
-        return spider
-
-    def get_parameters(self):
-        """return dict of parameters for current spider run"""
-        # default values should match various middlewares
-        return {
-            'filters': [f.asdict() for f in getattr(self, 'filters', [])],
-            'start_urls': getattr(self, 'start_urls', []),
-            'allowed_file_types': list(getattr(self, 'allowed_file_types', set()))
-        }
 
     def start_requests(self):
         for r in super().start_requests():
@@ -158,7 +165,7 @@ def url_to_prefix_params(url):
 
     return {
         'start_urls': [url],
-        'allowed_file_types': {'pdf', 'doc', 'docx'},
+        'allowed_file_types': ALLOWED_FILE_TYPES,
         'filters': [
             # allow paths starting with prefix, with matching hostname & port
             Filter.compile('allow', pattern='regex',
