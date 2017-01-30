@@ -34,7 +34,7 @@ class BaseSpider(scrapy.spiders.Spider):
             'allowed_file_types': list(getattr(self, 'allowed_file_types', set()))
         }
 
-class Spider(BaseSpider):
+class FilterSpider(BaseSpider):
     """Filtering spider.
 
     Parameters
@@ -158,7 +158,7 @@ def url_to_prefix_params(url):
     the final path component is assumed to be a filename and will be dropped.
 
     :arg str url: the seed url
-    :returns: parameters for :cls:`Spider`: `start_urls`, `filters`
+    :returns: parameters for :cls:`FilterSpider`: `start_urls`, `filters`
     :rtype: dict
     """
     u = urlparse(url)
