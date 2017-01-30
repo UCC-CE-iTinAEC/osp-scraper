@@ -20,7 +20,7 @@ pip install -r requirements.txt
 ```
 Install Syllascrape as a package for development
 ```
-python setup.py develop 
+python setup.py develop
 ```
 
 ## Settings
@@ -69,7 +69,7 @@ All of the Python WARC libraries are pretty terrible, `internetarchive/warc`
 (and its various forks) seemed the least bad.
 
 ## Spiders
-All spiders should inherit from `syllascrape.spiders.Spider`.
+All spiders should inherit from `syllascrape.spiders.BaseSpider`.
 
 `start_urls` is a list of initial URLs to begin the crawl.
 

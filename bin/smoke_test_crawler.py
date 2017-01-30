@@ -8,7 +8,7 @@ from logging.config import dictConfig
 import re
 from urllib.parse import urlparse
 
-from syllascrape.spiders import Spider
+from syllascrape.spiders import FilterSpider
 from syllascrape.spiders import url_to_prefix_params
 from syllascrape.filterware import Filter
 
@@ -57,7 +57,7 @@ def main():
     kwargs = make_params()
 
     process = CrawlerProcess(get_project_settings())
-    process.crawl(Spider, **kwargs)
+    process.crawl(FilterSpider, **kwargs)
     process.start()
 
 if __name__ == '__main__':
