@@ -14,17 +14,17 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 setup(
-    name='syllascrape',
+    name='osp_scraper',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.3.2',
+    version='0.4.0',
 
     description='Scrapers for the Open Syllabus Project',
 
     # The project's main homepage.
-    url='https://github.com/wearpants/syllascrape',
+    url='https://github.com/wearpants/osp_scraper',
 
     # Author details
     author='Pete Fein',

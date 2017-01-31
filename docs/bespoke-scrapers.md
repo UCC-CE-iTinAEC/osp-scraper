@@ -8,9 +8,9 @@ Make sure to set `HTTPCACHE_ENABLED = True` and `DOWNLOAD_DELAY = 5.0` in your l
 
 ## Writing spiders
 
-You should generate `PageItems` like those in the the [existing crawler](https://github.com/wearpants/syllascrape/blob/master/syllascrape/items.py)
+You should generate `PageItems` like those in the the [existing crawler](https://github.com/wearpants/osp_scraper/blob/master/osp_scraper/items.py)
 
-You can import the syllascrape package into your spider & use that class directly if you like, but don't try to write your code inside Syllascrape though, it's a bit customized.
+You can import the osp_scraper package into your spider & use that class directly if you like, but don't try to write your code inside OSP Scraper though, it's a bit customized.
 
 You can use Scrapy's `FormRequest` to [submit forms](https://doc.scrapy.org/en/latest/topics/request-response.html#formrequest-objects). The goal is want to extract a list of items from 2-3 fields, and the crawl all possible combinations by submitting the form. There are `product()` and `permutation()` functions in the Python `itertools` library if you want to use them.
 

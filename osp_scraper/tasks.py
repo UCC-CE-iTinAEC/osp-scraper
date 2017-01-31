@@ -37,7 +37,7 @@ def make_params(seed_urls):
     * Allow same hostname to max depth of 2
     * Allow other domains to max depth of 1
 
-    Based on syllascrape.spiders.url_to_prefix_params.
+    Based on osp_scraper.spiders.url_to_prefix_params.
 
     Args:
         seed_urls (list)
