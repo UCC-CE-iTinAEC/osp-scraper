@@ -8,7 +8,7 @@ Make sure to set `HTTPCACHE_ENABLED = True` and `DOWNLOAD_DELAY = 5.0` in your l
 
 ## Writing spiders
 
-You should generate `PageItems` like those in the the [existing crawler](https://github.com/syllabusproject/osp_scraper/blob/master/osp_scraper/items.py)
+You should generate `PageItems` like those in the the [existing crawler](https://github.com/syllabusproject/osp-scraper/blob/master/osp_scraper/items.py)
 
 You can import the osp_scraper package into your spider & use that class directly if you like, but don't try to write your code inside OSP Scraper though, it's a bit customized.
 

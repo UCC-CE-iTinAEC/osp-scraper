@@ -24,7 +24,7 @@ setup(
     description='Scrapers for the Open Syllabus Project',
 
     # The project's main homepage.
-    url='https://github.com/syllabusproject/osp_scraper',
+    url='https://github.com/syllabusproject/osp-scraper',
 
     # Author details
     author='Pete Fein',
