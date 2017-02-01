@@ -4,13 +4,13 @@ import sys
 import os.path
 import csv
 
-import syllascrape.tasks
-from syllascrape.spiders import url_to_prefix_params
+import osp_scraper.tasks
+from osp_scraper.spiders import url_to_prefix_params
 
 def main(csv_file):
     with open(csv_file) as f:
         for row in csv.reader(f):
-            syllascrape.tasks.crawl.delay(**url_to_prefix_params(row[0]))
+            osp_scraper.tasks.crawl.delay(**url_to_prefix_params(row[0]))
 
 def usage():
     print("%s <csv_file>" % os.path.basename(sys.argv[0]))

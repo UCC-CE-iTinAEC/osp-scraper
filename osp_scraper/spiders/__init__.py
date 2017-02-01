@@ -13,7 +13,7 @@ from .. import version
 from ..filterware import Filter
 
 class Spider(scrapy.spiders.Spider):
-    """Base class for syllascrape spiders.
+    """Base class for osp_scraper spiders.
 
     Parameters
     ==========
@@ -38,7 +38,7 @@ class Spider(scrapy.spiders.Spider):
     :ivar str run_id: a unique ID for each spider run
     """
 
-    name = "syllascrape_spider"
+    name = "osp_scraper_spider"
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):

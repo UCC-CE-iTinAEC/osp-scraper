@@ -10,7 +10,7 @@ import re
 
 import click
 
-from syllascrape.tasks import make_params, crawl
+from osp_scraper.tasks import make_params, crawl
 
 
 log = logging.getLogger('edu_repo_crawler')
@@ -50,8 +50,8 @@ def main(csv_file, local, institution):
                     if row['robots.txt'].lower() == "ignore":
                         params['ignore_robots_txt'] = True
                         log.info("Ignoring robots.txt")
-                        
-                    crawl_func('syllascrape_spider', **params)
+
+                    crawl_func('osp_scraper_spider', **params)
                 else:
                     log.debug("No URLs found for %s", row['name'])
 

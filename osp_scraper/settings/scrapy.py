@@ -1,7 +1,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for syllascrape project
+# Scrapy settings for osp_scraper project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -14,13 +14,13 @@
 import os
 
 
-BOT_NAME = 'syllascrape'
+BOT_NAME = 'osp_scraper'
 
-SPIDER_MODULES = ['syllascrape.spiders']
-NEWSPIDER_MODULE = 'syllascrape.spiders'
+SPIDER_MODULES = ['osp_scraper.spiders']
+NEWSPIDER_MODULE = 'osp_scraper.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'syllascrape (+http://www.yourdomain.com)'
+#USER_AGENT = 'osp_scraper (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -54,13 +54,13 @@ DOWNLOAD_MAXSIZE = 128 * (1024 * 1024) # 128 MB
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'syllascrape.middlewares.MyCustomSpiderMiddleware': 543,
+#    'osp_scraper.middlewares.MyCustomSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'syllascrape.middlewares.MyCustomDownloaderMiddleware': 543,
+#    'osp_scraper.middlewares.MyCustomDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -72,8 +72,8 @@ DOWNLOAD_MAXSIZE = 128 * (1024 * 1024) # 128 MB
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'syllascrape.pipelines.WarcFilesPipeline': 300,
-    'syllascrape.pipelines.WarcStorePipeline': 301,
+    'osp_scraper.pipelines.WarcFilesPipeline': 300,
+    'osp_scraper.pipelines.WarcStorePipeline': 301,
 }
 
 # Configure WarcFilesPipeline & WarcStorePipeline
@@ -81,7 +81,7 @@ FILES_STORE = None
 
 # Downloader middleware to enforce allowed_domains & allowed_paths for files - this should come first
 DOWNLOADER_MIDDLEWARES = {
-    'syllascrape.downloadermiddlewares.FilterMiddleware': 50,
+    'osp_scraper.downloadermiddlewares.FilterMiddleware': 50,
 }
 
 SPIDER_MIDDLEWARES = {
@@ -90,7 +90,7 @@ SPIDER_MIDDLEWARES = {
     'scrapy.spidermiddlewares.depth.DepthMiddleware': None,
 
     # use our middlewares instead
-    'syllascrape.spidermiddlewares.FilterMiddleware': 500,
+    'osp_scraper.spidermiddlewares.FilterMiddleware': 500,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

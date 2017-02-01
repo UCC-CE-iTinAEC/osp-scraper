@@ -8,9 +8,9 @@ from logging.config import dictConfig
 import re
 from urllib.parse import urlparse
 
-from syllascrape.spiders import Spider
-from syllascrape.spiders import url_to_prefix_params
-from syllascrape.filterware import Filter
+from osp_scraper.spiders import Spider
+from osp_scraper.spiders import url_to_prefix_params
+from osp_scraper.filterware import Filter
 
 from scrapy.utils.log import configure_logging
 from scrapy.crawler import CrawlerRunner, CrawlerProcess

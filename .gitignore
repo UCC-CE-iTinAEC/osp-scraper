@@ -89,8 +89,8 @@ ENV/
 .ropeproject
 
 # git revision
-/syllascrape/git_revision
+/osp_scraper/git_revision
 
 # Scrapy overrides
-/syllascrape/settings/local.py
+/osp_scraper/settings/local.py
 /celeryconfig.py

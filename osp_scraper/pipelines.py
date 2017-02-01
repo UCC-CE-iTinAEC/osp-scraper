@@ -50,7 +50,7 @@ def update_warc_info_from_spider(record, spider):
     # make empty header object to use for fields
     # XXX WARCHeader messes up capitalization here
     fields = warc.WARCHeader({}, defaults=False)
-    fields['software'] = 'syllascrape'
+    fields['software'] = 'osp_scraper'
     fields['hostname'] = socket.getfqdn()
     fields['x-spider-name'] = spider.name
     fields['x-spider-run-id'] = spider.run_id

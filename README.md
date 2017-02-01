@@ -1,9 +1,9 @@
-# Syllascrape
+# OSP Scraper
 
-Syllascrape is a [Scrapy](http://scrapy.org) spider for the [Open Syllabus Project](http://opensyllabusproject.org/).
+OSP Scraper is a [Scrapy](http://scrapy.org) spider for the [Open Syllabus Project](http://opensyllabusproject.org/).
 
 Please see [Scrapy's docs](http://doc.scrapy.org) for instructions on how to
-install & use Scrapy; this README only highlights customizations for Syllascrape
+install & use Scrapy; this README only highlights customizations for OSP Scraper
 
 ## Installation
 Create a Python 3 environment
@@ -18,9 +18,9 @@ Install dependencies
 ```
 pip install -r requirements.txt
 ```
-Install Syllascrape as a package for development
+Install OSP Scraper as a package for development
 ```
-python setup.py develop 
+python setup.py develop
 ```
 
 ## Settings
@@ -69,7 +69,7 @@ All of the Python WARC libraries are pretty terrible, `internetarchive/warc`
 (and its various forks) seemed the least bad.
 
 ## Spiders
-All spiders should inherit from `syllascrape.spiders.Spider`.
+All spiders should inherit from `osp_scraper.spiders.Spider`.
 
 `start_urls` is a list of initial URLs to begin the crawl.
 
@@ -77,22 +77,22 @@ All spiders should inherit from `syllascrape.spiders.Spider`.
 downloaded (*without* leading `.`). All text files (HTML, XML, etc.) will be
 automatically saved. Defaults to `pdf, doc, docx`.
 
-`filters` a list of syllascrape.filterware.Filter`s that control the scope of
+`filters` a list of osp_scraper.filterware.Filter`s that control the scope of
 `the crawl. See its documentation for details.
 
 ## Celery
 
-Syllascrape supports running spiders under
+OSP Scraper supports running spiders under
 [Celery](http://www.celeryproject.org/). Celery looks for a module
 `celeryconfig.py` somewhere on the PYTHONPATH. To start the celery worker,
 from the project directory run:
 
-    $ celery -A syllascrape worker -l info
+    $ celery -A osp_scraper worker -l info
 
 Also installed is [Flower](https://flower.readthedocs.io/en/latest/) a nice
 web UI for [monitoring celery](http://localhost:5555/). Run it as:
 
-    $ flower -A syllascrape
+    $ flower -A osp_scraper
 
 ### Celery/Scrapy Integration
 Celery workers run as a daemon process & read tasks off a Redis queue.
