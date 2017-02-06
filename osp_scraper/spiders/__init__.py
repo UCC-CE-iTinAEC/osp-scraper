@@ -24,7 +24,6 @@ class BaseSpider(scrapy.spiders.Spider):
         spider.run_id = str(uuid.uuid1())
         return spider
 
-
     def get_parameters(self):
         """return dict of parameters for current spider run"""
         # default values should match various middlewares
@@ -33,6 +32,7 @@ class BaseSpider(scrapy.spiders.Spider):
             'start_urls': getattr(self, 'start_urls', []),
             'allowed_file_types': list(getattr(self, 'allowed_file_types', set()))
         }
+
 
 class FilterSpider(BaseSpider):
     """Filtering spider.
@@ -123,7 +123,7 @@ class FilterSpider(BaseSpider):
         )
 
     def extract_links(self, response):
-        """return a list of (url, source_anchor) tuples extracted from the page"""
+        """Generate (url, source_anchor) tuples extracted from the page"""
 
         for link in response.css('a'):
             # extract the href & urljoin it to the current response

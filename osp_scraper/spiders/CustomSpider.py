@@ -20,11 +20,12 @@ class CustomSpider(BaseSpider):
         return spider
 
     def extract_links(self, response):
-        """return a list of (url, source_anchor) tuples extracted from the page
+        """Generate (url, source_anchor) tuples extracted from the page
 
         Implement in subclass for each site.
         """
-        return ()
+        return
+        yield
 
     def parse_for_files(self, response):
         """
