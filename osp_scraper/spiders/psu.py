@@ -54,4 +54,4 @@ class PSUSpider(CustomSpider):
             url = response.urljoin(relative_url)
             anchor = tag.css("a::text").extract_first()
 
-            yield url, anchor
+            yield (url, anchor)

@@ -12,8 +12,30 @@ from ..utils import guess_extension
 from .. import version
 from ..filterware import Filter
 
-class Spider(scrapy.spiders.Spider):
-    """Base class for osp_scraper spiders.
+# file types we download
+ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx'})
+
+class BaseSpider(scrapy.spiders.Spider):
+    """Common base class for all syllascrape spiders"""
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super().from_crawler(crawler, *args, **kwargs)
+        spider.run_id = str(uuid.uuid1())
+        return spider
+
+    def get_parameters(self):
+        """return dict of parameters for current spider run"""
+        # default values should match various middlewares
+        return {
+            'filters': [f.asdict() for f in getattr(self, 'filters', [])],
+            'start_urls': getattr(self, 'start_urls', []),
+            'allowed_file_types': list(getattr(self, 'allowed_file_types', set()))
+        }
+
+
+class FilterSpider(BaseSpider):
+    """Filtering spider.
 
     Parameters
     ==========
@@ -39,21 +61,6 @@ class Spider(scrapy.spiders.Spider):
     """
 
     name = "osp_scraper_spider"
-
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super().from_crawler(crawler, *args, **kwargs)
-        spider.run_id = str(uuid.uuid1())
-        return spider
-
-    def get_parameters(self):
-        """return dict of parameters for current spider run"""
-        # default values should match various middlewares
-        return {
-            'filters': [f.asdict() for f in getattr(self, 'filters', [])],
-            'start_urls': getattr(self, 'start_urls', []),
-            'allowed_file_types': list(getattr(self, 'allowed_file_types', set()))
-        }
 
     def start_requests(self):
         for r in super().start_requests():
@@ -116,7 +123,7 @@ class Spider(scrapy.spiders.Spider):
         )
 
     def extract_links(self, response):
-        """return a list of (url, source_anchor) tuples extracted from the page"""
+        """Generate (url, source_anchor) tuples extracted from the page"""
 
         for link in response.css('a'):
             # extract the href & urljoin it to the current response
@@ -151,14 +158,14 @@ def url_to_prefix_params(url):
     the final path component is assumed to be a filename and will be dropped.
 
     :arg str url: the seed url
-    :returns: parameters for :cls:`Spider`: `start_urls`, `filters`
+    :returns: parameters for :cls:`FilterSpider`: `start_urls`, `filters`
     :rtype: dict
     """
     u = urlparse(url)
 
     return {
         'start_urls': [url],
-        'allowed_file_types': {'pdf', 'doc', 'docx'},
+        'allowed_file_types': ALLOWED_FILE_TYPES,
         'filters': [
             # allow paths starting with prefix, with matching hostname & port
             Filter.compile('allow', pattern='regex',

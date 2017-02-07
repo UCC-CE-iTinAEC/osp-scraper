@@ -10,7 +10,7 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from rq.decorators import job
 
-from .spiders import Spider
+from .spiders import FilterSpider
 from .filterware import Filter
 from .services import redis_conn
 
