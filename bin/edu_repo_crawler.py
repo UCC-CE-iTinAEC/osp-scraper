@@ -25,7 +25,7 @@ def extract_urls(s):
 
 @click.command()
 @click.argument('csv_file', type=click.Path(exists=True))
-@click.option('--local', default=False, is_flag=True, help='Run spiders locally instead of queueing them')
+@click.option('--local', default=False, is_flag=True, help='Run one spider locally instead of queueing it')
 @click.option('--institution', default=None, help='Only run spiders for the institution with this ID')
 def main(csv_file, local, institution):
     crawl_func = crawl if local else crawl.delay
@@ -33,8 +33,8 @@ def main(csv_file, local, institution):
     with open(csv_file) as f:
         for row in csv.DictReader(f):
             if not institution or institution == row['id']:
-                # run custom scraper
-                if row.get('Custom Scraper Name'):
+                # run custom scraper, but only if not running locally
+                if (not local) and row.get('Custom Scraper Name'):
                     crawl_func(row['Custom Scraper Name'])
 
                 # find comma-separated URLs in these columns
