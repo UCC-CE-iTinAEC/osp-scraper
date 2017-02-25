@@ -35,7 +35,10 @@ def main(csv_file, local, institution):
             if not institution or institution == row['id']:
                 # run custom scraper, but only if not running locally
                 if (not local) and row.get('Custom Scraper Name'):
-                    crawl_func(row['Custom Scraper Name'])
+                    params = {
+                        "start_urls": extract_urls(row['Database URLs'])
+                    }
+                    crawl_func(row['Custom Scraper Name'], **params)
 
                 # find comma-separated URLs in these columns
                 urls = extract_urls(row['Doc URLs'])
