@@ -13,6 +13,8 @@ class ASUSpider(CustomSpider):
         subjects = []
 
         start_url = "https://webapp4.asu.edu/catalog/"
+        subject_url = "https://webapp4.asu.edu/catalog/Subjects.html"
+        search_url = "https://webapp4.asu.edu/catalog/classlist"
 
         def get_terms_codes(response):
             for option in response.css("#term option"):
@@ -20,7 +22,7 @@ class ASUSpider(CustomSpider):
                 name = option.css("option::text").extract_first()
                 terms.append((code, name))
 
-            yield scrapy.Request("https://webapp4.asu.edu/catalog/Subjects.html", callback=get_subject_codes)
+            yield scrapy.Request(subjects_url, callback=get_subject_codes)
 
         def get_subject_codes(response):
             for subject in response.css("#subjectDivs .row"):
@@ -28,10 +30,10 @@ class ASUSpider(CustomSpider):
                 name = subject.css(".subjectTitle::text").extract_first()
                 subjects.append((code, name))
 
-            for term_code, term_name in terms[:3]:
-                for subject_code, subject_name in subjects[:3]:
+            for term_code, term_name in terms:
+                for subject_code, subject_name in subjects:
                     yield scrapy.FormRequest(
-                        "https://webapp4.asu.edu/catalog/classlist",
+                        search_url,
                         formdata={
                             "s": subject_code,
                             "t": term_code,
