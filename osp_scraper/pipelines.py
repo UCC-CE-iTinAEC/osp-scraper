@@ -252,3 +252,8 @@ class WarcFilesPipeline(FilesPipeline):
             record = response.meta['warc_record']
 
         return path_from_warc(record, info.spider.run_id)
+
+    def _check_media_to_download(self, result, request, info):
+        x = super()._check_media_to_download(result, request, info)
+        request.meta['handle_httpstatus_all'] = False
+        return x
