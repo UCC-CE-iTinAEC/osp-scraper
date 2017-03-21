@@ -34,7 +34,7 @@ def main(csv_file, local, institution):
         for row in csv.DictReader(f):
             if not institution or institution == row['id']:
                 # run custom scraper, but only if not running locally
-                if (not local) and row.get('Custom Scraper Name'):
+                if not local and 'Custom Scraper Name' in row:
                     params = {
                         "start_urls": extract_urls(row['Database URLs'])
                     }
