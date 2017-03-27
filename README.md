@@ -80,35 +80,35 @@ automatically saved. Defaults to `pdf, doc, docx`.
 `filters` a list of osp_scraper.filterware.Filter`s that control the scope of
 `the crawl. See its documentation for details.
 
-## Celery
+## RQ
 
 OSP Scraper supports running spiders under
-[Celery](http://www.celeryproject.org/). Celery looks for a module
-`celeryconfig.py` somewhere on the PYTHONPATH. To start the celery worker,
-from the project directory run:
+[Rq](http://python-rq.org/). 
+To see jobs in the queue, run
 
-    $ celery -A osp_scraper worker -l info
+    $ rq info
 
-Also installed is [Flower](https://flower.readthedocs.io/en/latest/) a nice
-web UI for [monitoring celery](http://localhost:5555/). Run it as:
+from the project directory. To start the rq worker, run:
 
-    $ flower -A osp_scraper
+    $ rqworker
 
-### Celery/Scrapy Integration
-Celery workers run as a daemon process & read tasks off a Redis queue.
+To add jobs to the queue, see Crawling from CSV below. 
+
+### RQ/Scrapy Integration
+RQ workers run as a daemon process & read tasks off a Redis queue.
 
 Each task fires off a subprocess running scrapy/twisted.
 
 When the subprocess exits, the task is finished.
 
-Celery then starts a new daemon process for the next incoming task. This is
+RQ then starts a new daemon process for the next incoming task. This is
 unusual - typically a daemon process handles 1000s of short tasks before
 respawning), but seems to be needed to run twisted.
 
 ## Crawling from CSV
 
 The `bin/csv_prefix_crawler.py` takes a CSV file with a
-seed URL on each line, and fires of Celery crawl tasks. If the path component
+seed URL on each line, and fires of RQ crawl tasks. If the path component
 ends with a `/` it will be used-as is; otherwise the final path component is
 assumed to be a filename and will be dropped.
 
