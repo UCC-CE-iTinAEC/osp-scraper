@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import re
-import uuid
-
 from . import BaseSpider, ALLOWED_FILE_TYPES
 from ..filterware import Filter
 from ..items import PageItem
 
 class CustomSpider(BaseSpider):
     custom_settings = {
-        'ROBOTSTXT_OBEY': False,
+        'ROBOTSTXT_OBEY': False
     }
 
     @classmethod
@@ -19,8 +16,22 @@ class CustomSpider(BaseSpider):
         spider.filters = [Filter.compile('allow')]
         return spider
 
+    def start_requests(self):
+        for request in super().start_requests():
+            request.meta['depth'] = 0
+            request.meta['hops_from_seed'] = 0
+            yield request
+
+    def parse(self, response):
+        """
+        Implement in subclass for each site when necessary.  Implementing parse
+        is not necessary when implementing start_requests.
+        """
+        raise NotImplementedError
+
     def extract_links(self, response):
-        """Generate (url, source_anchor) tuples extracted from the page
+        """
+        Generate (url, source_anchor) tuples extracted from the page
 
         Implement in subclass for each site.
         """
@@ -35,24 +46,24 @@ class CustomSpider(BaseSpider):
         file_urls = []
 
         for url, anchor in self.extract_links(response):
-            meta={
+            meta = {
                 'source_url': response.url,
-                'source_anchor': anchor,
+                'source_anchor': self.clean_whitespace(anchor),
                 'depth': response.meta['depth'] + 1,
                 'hops_from_seed': response.meta['hops_from_seed'] + 1,
             }
 
-            file_urls.append((url, meta))
+            file_urls.append((response.urljoin(url), meta))
 
         yield PageItem(
             url=response.url,
             content=response.body,
             headers=response.headers,
             status=response.status,
-            source_url=response.meta.get('source_url'),
-            source_anchor=response.meta.get('source_anchor'),
-            depth=response.meta.get('depth'),
-            hops_from_seed=response.meta.get('hops_from_seed'),
+            source_url=response.meta['source_url'],
+            source_anchor=self.clean_whitespace(response.meta['source_anchor']),
+            depth=response.meta['depth'],
+            hops_from_seed=response.meta['hops_from_seed'],
             file_urls=file_urls
         )
 
@@ -61,4 +72,4 @@ class CustomSpider(BaseSpider):
         Condenses all consecutive whitespace in a string to a single
         space and removes leading and trailing whitespace.
         """
-        return re.sub(r"\s+", " ", s).strip()
+        return " ".join(s.split())
