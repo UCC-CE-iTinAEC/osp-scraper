@@ -113,3 +113,10 @@ ends with a `/` it will be used-as is; otherwise the final path component is
 assumed to be a filename and will be dropped.
 
 The `edu_repo_crawler.py` works with the Google spreadsheet: "USA EDU Repo"
+
+## Downloading files listed in CSV
+
+If you use a tool such as (OutWit)[https://www.outwit.com/] to get file URLs,
+you can use the `bin/download_files.py` script to save these files as WARCs.  
+The spreadsheet must have `Source Url` and `Document Url` columns.
+
