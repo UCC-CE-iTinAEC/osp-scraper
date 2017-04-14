@@ -17,7 +17,7 @@ class BCITSpider(CustomSpider):
 
         for term in terms:
             meta = {
-                "term": term
+                'term': term
             }
             url = get_subjects_url.format(**meta)
             yield scrapy.Request(url, meta=meta, callback=self.parse_for_subjects)
@@ -28,7 +28,7 @@ class BCITSpider(CustomSpider):
 
         for subject in subjects:
             meta = dict(response.meta)
-            meta["subject"] = subject
+            meta['subject'] = subject
             url = get_courses_url.format(**meta)
             yield scrapy.Request(url, meta=meta, callback=self.parse_for_courses)
 
@@ -38,32 +38,32 @@ class BCITSpider(CustomSpider):
 
         for course in courses:
             meta = dict(response.meta)
-            meta["course"] = course
+            meta['course'] = course
             url = get_sections_url.format(**meta)
             yield scrapy.Request(url, meta=meta, callback=self.parse_for_sections)
 
     def parse_for_sections(self, response):
         get_outline_url = "http://www.bcit.ca/study/outlines/{course_id}"
-        rows = response.css('tr')
+        rows = response.css("tr")
         for row in rows:
-            course_id = row.css('a::attr(href)').extract_first()
+            course_id = row.css("a::attr(href)").extract_first()
             if course_id:
                 url = get_outline_url.format(course_id=course_id)
-                course_number = row.css('a::text').extract_first()
+                course_number = row.css("a::text").extract_first()
                 anchor = " ".join([
-                    response.meta["term"],
-                    response.meta["subject"],
-                    response.meta["course"],
+                    response.meta['term'],
+                    response.meta['subject'],
+                    response.meta['course'],
                     course_number
                 ]).strip()
 
                 yield scrapy.Request(
                     url,
                     meta={
-                        "depth": 0,
-                        "hops_from_seed": 1,
-                        "source_url": url,
-                        "source_anchor": anchor
+                        'depth': 4,
+                        'hops_from_seed': 4,
+                        'source_url': url,
+                        'source_anchor': anchor
                     },
                     callback=self.parse_for_files
                 )

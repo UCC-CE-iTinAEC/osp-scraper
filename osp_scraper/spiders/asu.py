@@ -13,7 +13,7 @@ class ASUSpider(CustomSpider):
         subjects = []
 
         start_url = "https://webapp4.asu.edu/catalog/"
-        subject_url = "https://webapp4.asu.edu/catalog/Subjects.html"
+        subjects_url = "https://webapp4.asu.edu/catalog/Subjects.html"
         search_url = "https://webapp4.asu.edu/catalog/classlist"
 
         def get_terms_codes(response):
@@ -34,20 +34,22 @@ class ASUSpider(CustomSpider):
                 for subject_code, subject_name in subjects:
                     yield scrapy.FormRequest(
                         search_url,
+                        method="GET",
                         formdata={
-                            "s": subject_code,
-                            "t": term_code,
-                            "e": "all",
-                            "hon": "F",
-                            "promod": "F",
+                            's': subject_code,
+                            't': term_code,
+                            'e': "all",
+                            'hon': "F",
+                            'promod': "F"
                         },
-                        method='GET',
-                        cookies={"onlineCampusSelection":"C"},
+                        cookies={
+                            'onlineCampusSelection': "C"
+                        },
                         meta={
-                            "depth": 1,
-                            "hops_from_seed": 1,
-                            "source_url": start_url,
-                            "source_anchor": subject_name + " " + term_name,
+                            'depth': 1,
+                            'hops_from_seed': 1,
+                            'source_url': start_url,
+                            'source_anchor': subject_name + " " + term_name
                         },
                         callback=self.parse_for_files
                     )
@@ -55,8 +57,8 @@ class ASUSpider(CustomSpider):
         yield scrapy.Request(start_url, callback=get_terms_codes, dont_filter=True)
 
     def extract_links(self, response):
-        for tag in response.css('a[title="Syllabus"]'):
-            url = tag.css('a::attr(href)').extract_first()
+        for tag in response.css("a[title='Syllabus']"):
+            url = tag.css("a::attr(href)").extract_first()
             if url:
-                anchor = tag.css('a::text').extract_first()
+                anchor = tag.css("a::text").extract_first()
                 yield (url, anchor)

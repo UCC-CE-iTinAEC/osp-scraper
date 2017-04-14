@@ -16,10 +16,10 @@ class ORUSpider(CustomSpider):
                 name = option.css("option::text").extract_first()
                 yield scrapy.FormRequest(
                     response.url,
+                    method="GET",
                     formdata={
                         'term': code
                     },
-                    method="GET",
                     meta={
                         'source_anchor': name
                     },

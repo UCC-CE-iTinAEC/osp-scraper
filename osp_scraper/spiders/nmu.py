@@ -20,7 +20,7 @@ class NMUSpider(CustomSpider):
                     'depth': 0,
                     'hops_from_seed': 0,
                     'source_url': url,
-                    'source_anchor': ''
+                    'source_anchor': ""
                 },
                 callback=self.parse_for_files
             )

@@ -21,20 +21,21 @@ class TCCDSpider(CustomSpider):
             anchor = tag.css("a::text").extract_first()
 
             yield scrapy.Request(
-                url, 
+                url,
                 meta={
                     "depth": 1,
                     "hops_from_seed": 1,
                     "source_url": response.url,
-                    "source_anchor": anchor,
+                    "source_anchor": anchor
                 },
                 callback=self.parse_for_files
             )
 
     def extract_links(self, response):
-        syllabus_link_tag = response.css('tr:last-child td.info a')
-        syllabus_relative_url = syllabus_link_tag.css('a::attr(href)').re_first("displayLink[^']*")
+        syllabus_link_tag = response.css("tr:last-child td.info a")
+        syllabus_relative_url = syllabus_link_tag.css("a::attr(href)")\
+            .re_first("displayLink[^']*")
         url = response.urljoin(syllabus_relative_url)
-        anchor = syllabus_link_tag.css('a::text').extract_first()
+        anchor = syllabus_link_tag.css("a::text").extract_first()
 
         yield (url, anchor)
