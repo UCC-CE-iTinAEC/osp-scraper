@@ -17,6 +17,14 @@ class CustomSpider(BaseSpider):
         return spider
 
     def start_requests(self):
+        """
+        Override in subclass for each site when necessary.  Overriding
+        start_requests is not necessary when implementing parse.
+
+        By default, sets both the 'depth' and 'hops_from_seed' meta content to
+        0.  This can be useful when making calls to parse_for_files directly out
+        of parse.
+        """
         for request in super().start_requests():
             request.meta['depth'] = 0
             request.meta['hops_from_seed'] = 0
