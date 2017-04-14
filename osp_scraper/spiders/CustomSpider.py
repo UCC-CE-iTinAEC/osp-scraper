@@ -41,7 +41,7 @@ class CustomSpider(BaseSpider):
         """
         Generate (url, source_anchor) tuples extracted from the page
 
-        Implement in subclass for each site.
+        Implement in subclass for each site as necessary.
         """
         return
         yield
