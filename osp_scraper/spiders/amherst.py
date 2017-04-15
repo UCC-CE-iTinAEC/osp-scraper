@@ -15,13 +15,13 @@ class AmherstSpider(CustomSpider):
         for term in terms:
             yield scrapy.FormRequest.from_response(
                 response,
-                formid='academics-schedule-search',
+                formid="academics-schedule-search",
                 formdata={
-                    'termid': term,
+                    'termid': term
                 },
                 meta={
                     'depth': 1,
-                    'hops_from_seed': 1,
+                    'hops_from_seed': 1
                 },
                 callback=self.parse_for_courses
             )

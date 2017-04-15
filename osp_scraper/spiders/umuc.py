@@ -11,7 +11,7 @@ class UMUCSpider(CustomSpider):
     start_urls = [
         "http://webapps.umuc.edu/soc/asia.cfm?fAcad=UGRD",
         "http://webapps.umuc.edu/soc/asia.cfm?fAcad=GR4T",
-        "http://webapps.umuc.edu/soc/asia.cfm?fAcad=UBSU",
+        "http://webapps.umuc.edu/soc/asia.cfm?fAcad=UBSU"
     ]
 
     def parse(self, response):
@@ -28,16 +28,16 @@ class UMUCSpider(CustomSpider):
                     yield scrapy.FormRequest(
                         response.url,
                         formdata={
-                            "fSess": session_value,
-                            "fLoc": location,
-                            "fFetchRows": "99999",
+                            'fSess': session_value,
+                            'fLoc': location,
+                            'fFetchRows': "99999",
                         },
-                        method='GET',
+                        method="GET",
                         meta={
-                            "depth": 1,
-                            "hops_from_seed": 1,
-                            "source_url": response.url,
-                            "source_anchor": session_text,
+                            'depth': 1,
+                            'hops_from_seed': 1,
+                            'source_url': response.url,
+                            'source_anchor': session_text
                         },
                         callback=self.parse_for_syllabi
                     )
@@ -59,12 +59,12 @@ class UMUCSpider(CustomSpider):
                 )
 
     def submit_form(self, response):
-        url = response.css('form::attr(action)').extract_first()
-        method = response.css('form::attr(method)').extract_first() or "GET"
+        url = response.css("form::attr(action)").extract_first()
+        method = response.css("form::attr(method)").extract_first() or "GET"
         formdata = {}
-        for field in response.css('form input[type=hidden]'):
-            name = field.css('input::attr(name)').extract_first()
-            value = field.css('input::attr(value)').extract_first()
+        for field in response.css("form input[type=hidden]"):
+            name = field.css("input::attr(name)").extract_first()
+            value = field.css("input::attr(value)").extract_first()
             if name and value:
                 formdata[name] = value
 

@@ -12,7 +12,7 @@ class GATechSpider(CustomSpider):
         "http://www.econ.gatech.edu/courses",
         "http://www.lmc.gatech.edu/courses",
         "http://www.spp.gatech.edu/courses",
-        "http://www.modlangs.gatech.edu/courses",
+        "http://www.modlangs.gatech.edu/courses"
     ]
 
     def parse(self, response):
@@ -24,7 +24,7 @@ class GATechSpider(CustomSpider):
                 response.url,
                 method="POST",
                 formdata={
-                    "iacTermcode": code
+                    'iacTermcode': code
                 },
                 meta={
                     'source_url': response.url,
@@ -36,9 +36,9 @@ class GATechSpider(CustomSpider):
             )
 
     def extract_links(self, response):
-        for row in response.css('table tr'):
-            relative_url = row.css('td:last-child a::attr(href)').extract_first()
+        for row in response.css("table tr"):
+            relative_url = row.css("td:last-child a::attr(href)").extract_first()
             if relative_url:
                 url = response.urljoin(relative_url)
-                anchor = row.css('td:first-child::text').extract_first()
+                anchor = row.css("td:first-child::text").extract_first()
                 yield (url, anchor)

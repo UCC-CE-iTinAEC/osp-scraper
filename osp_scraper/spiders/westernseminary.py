@@ -18,13 +18,14 @@ class WesternSeminarySpider(CustomSpider):
                 semesters = campuses[cid]["semesters"]
                 for semester in semesters:
                     url = search_url.format(cid, semester.replace(" ", "+"))
+                    anchor = campuses[cid]["name"] + " " + semester
                     yield scrapy.Request(
                         url,
                         meta={
                             "depth": 1,
                             "hops_from_seed": 1,
                             "source_url": response.url,
-                            "source_anchor": campuses[cid]["name"] + " " + semester
+                            "source_anchor": anchor
                         },
                         callback=self.parse_for_files
                     )
@@ -34,6 +35,6 @@ class WesternSeminarySpider(CustomSpider):
     def extract_links(self, response):
         results = json.loads(response.body)
         for result in results:
-            url = result["url"]
-            name = result["crsname"]
+            url = result['url']
+            name = result['crsname']
             yield (url, name)

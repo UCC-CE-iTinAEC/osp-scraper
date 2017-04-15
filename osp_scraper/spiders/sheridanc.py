@@ -12,7 +12,7 @@ class SheridanSpider(CustomSpider):
     start_urls = ["https://ulysses.sheridanc.on.ca/coutline/results.jsp"]
 
     def parse(self, response):
-        current_year = int(response.headers["Date"].split()[3])
+        current_year = int(response.headers['Date'].split()[3])
         years = range(2000, current_year + 2)
         seasons = response.css("#season option::attr(value)").extract()
         programs = response.css("#program_ps option::attr(value)").extract()

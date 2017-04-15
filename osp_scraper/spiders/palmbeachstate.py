@@ -5,14 +5,14 @@ import scrapy
 from ..spiders.CustomSpider import CustomSpider
 
 class PalmBeachStateSpider(CustomSpider):
-    name = 'palmbeachstate'
+    name = "palmbeachstate"
 
     start_urls = ["http://www.palmbeachstate.edu/pf/"]
 
     def parse(self, response):
         yield scrapy.FormRequest.from_response(
             response,
-            formid='form1',
+            formid="form1",
             formdata={
                 'ctl00$ContentPlaceHolder1$btnPeopleSearch': "Search"
             },

@@ -26,13 +26,13 @@ class PDFSpider(CustomSpider):
         for page_num in range(pgs):
             page = pdf.getPage(page_num)
 
-            annotations = page.get("/Annots", [])
+            annotations = page.get('/Annots', [])
             for annotation in annotations:
                 annot_object = annotation.getObject()
 
-                a_tag = annot_object.get("/A")
-                if a_tag and "/URI" in a_tag:
-                    uri = a_tag["/URI"]
+                a_tag = annot_object.get('/A')
+                if a_tag and '/URI' in a_tag:
+                    uri = a_tag['/URI']
                     if isinstance(uri, pyPdf.generic.ByteStringObject):
                         uri = uri.decode("utf-8").replace("\x00", "")
                     yield (uri, uri)

@@ -14,11 +14,11 @@ class TJCSpider(CustomSpider):
             term_value = option.css("option::attr(value)").extract_first()
             yield scrapy.FormRequest(
                 response.url,
+                method="POST",
                 formdata={
                     'pi_term_code': term_value,
                     'pi_subj': ""
                 },
-                method='POST',
                 callback=self.parse_for_courses
             )
 

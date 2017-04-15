@@ -39,10 +39,10 @@ class UTRGVSpider(CustomSpider):
             yield scrapy.Request(
                 url,
                 meta={
-                    'source_url': response.url,
-                    'source_anchor': response.meta['source_anchor'],
                     'depth': response.meta['depth'] + 1,
-                    'hops_from_seed': response.meta['hops_from_seed'] + 1
+                    'hops_from_seed': response.meta['hops_from_seed'] + 1,
+                    'source_url': response.url,
+                    'source_anchor': response.meta['source_anchor']
                 },
                 callback=self.parse_results_page
             )

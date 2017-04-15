@@ -15,7 +15,7 @@ class TRUSpider(CustomSpider):
         tabs = response.css("ul.tabs li a")
         for tab in tabs:
             url = tab.css("::attr(href)").extract_first()
-            anchor = ' '.join(tab.css("::text").extract_first().split())
+            anchor = " ".join(tab.css("::text").extract_first().split())
             yield scrapy.Request(
                 response.urljoin(url),
                 meta={
@@ -34,5 +34,5 @@ class TRUSpider(CustomSpider):
             url = onclick.split("'")[1]
             course_num = row.css("td:first-child strong::text").extract_first()
             course_name = row.css("td:nth-child(2)::text").extract_first()
-            anchor = course_num + ' ' + course_name
+            anchor = course_num + " " + course_name
             yield (url, anchor)

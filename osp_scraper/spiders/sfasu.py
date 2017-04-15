@@ -31,10 +31,10 @@ class SFASUSpider(CustomSpider):
                         'ctl00$ContentPlaceHolder1$termreport1$DropDownListTerm': code
                     },
                     meta={
-                        'source_url': response.url,
-                        'source_anchor': name,
                         'depth': 1,
-                        'hops_from_seed': 1
+                        'hops_from_seed': 1,
+                        'source_url': response.url,
+                        'source_anchor': name
                     },
                     callback=self.parse_for_files
                 )

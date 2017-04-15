@@ -43,7 +43,7 @@ class SFUSpider(CustomSpider):
 
     def parse_for_sections(self, response):
         # Get the url parameter values from the request url
-        url_params = re.sub(r"[^&]*=", "", response.url).split('&')
+        url_params = re.sub(r"[^&]*=", "", response.url).split("&")
         base_url_format = "http://www.sfu.ca/outlines.html?{0}/{1}/{2}/{3}"
         base_url = base_url_format.format(*url_params)
 
@@ -52,10 +52,10 @@ class SFUSpider(CustomSpider):
             yield scrapy.Request(
                 url,
                 meta={
-                    "depth": 1,
-                    "hops_from_seed": 1,
-                    "source_url": self.start_urls[0],
-                    "source_anchor": response.meta["anchor"]
+                    'depth': 1,
+                    'hops_from_seed': 1,
+                    'source_url': self.start_urls[0],
+                    'source_anchor': response.meta['anchor']
                 },
                 callback=self.parse_for_files
             )
