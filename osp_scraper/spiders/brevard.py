@@ -6,84 +6,60 @@ from ..spiders.CustomSpider import CustomSpider
 
 class BrevardSpider(CustomSpider):
     name = "brevard"
-    allowed_domains = ["easternflorida.edu"]
 
-    def start_requests(self):
-        start_url = 'http://web12.easternflorida.edu/ecpr/choice.cfm'
+    start_urls = ["http://web12.easternflorida.edu/ecpr/choice.cfm?CC=1"]
 
-        def select_search(response):
-            # for repository in response.css('a.copyBold15::attr(href)'):
-            # repository_link = response.css('a.copyBold15::attr(href)').extract()
-            # repository_anchor = response.css('a.copyBold15::text').extract()
-            # for link, anchor in zip(repository_link, repository_anchor):
-                # print('Running {0},{1}'.format(anchor, link))
-                # yield scrapy.Request(
-                        # response.urljoin(link),
-                        # method="GET",
-                        # meta={
-                            # "depth": 1,
-                            # "hops_from_seed": 1,
-                            # "source_url": response.url,
-                            # "source_anchor": anchor,
-                        # },
-                        # callback=enter_search
-                # )
+    search_type = "College Credit"
+    page = 1
+
+    def parse(self, response):
+        yield scrapy.FormRequest.from_response(
+            response,
+            meta={
+                'depth': 1,
+                'hops_from_seed': 1,
+                'source_url': response.url,
+                'source_anchor': self.search_type + " " + str(self.page),
+                'require_files': True
+            },
+            callback=self.parse_for_courses
+        )
+
+    def parse_for_courses(self, response):
+        for item in self.parse_for_files(response):
+            yield item
+
+        results = response.css("table table")[0].css("tr")[1:]
+        next_url = response\
+            .css("form > table:last-child a:last-child::attr(href)")\
+            .extract_first()
+        if results and next_url:
+            self.page += 1
+            anchor = self.search_type + " Search " + str(self.page)
             yield scrapy.Request(
-                'http://web12.easternflorida.edu/ecpr/choice.cfm?CC=1',
+                response.urljoin(next_url),
                 meta={
-                    "depth": 1,
-                    "hops_from_seed": 1,
-                    "source_url": response.url,
-                    "source_anchor": "",
+                    'depth': response.meta['depth'] + 1,
+                    'hops_from_seed': response.meta['hops_from_seed'] + 1,
+                    'source_url': response.url,
+                    'source_anchor': anchor,
+                    'require_files': True
                 },
-                callback=enter_search
+                callback=self.parse_for_courses
             )
-
-        def enter_search(response):
-            # Scrape all subsequent pages
-            print('Entering search')
-            yield scrapy.FormRequest.from_response(
-                    response,
-                    formdata={
-                        'Search': 'Search',
-                    },
-                    meta={
-                        "depth": response.meta['depth'] + 1,
-                        "hops_from_seed": response.meta["hops_from_seed"] + 1,
-                        "source_url": response.url,
-                        "source_anchor": "",
-                    },
-                    method='POST',
-                    callback=select_page
-            )
-
-        def select_page(response):
-            if response.css('table tr td table a::attr(href)'):
-                self.parse_for_files(response)
-                print('Ran parse_for_files on ' + response.url)
-            else:
-                return
-
-            print(response.css('table tr td[align="left"] a::attr(href)').extract())
-            next_btn = response.css('table tr td[align="left"] a::attr(href)').extract()[-1]
+        elif self.search_type == "College Credit":
+            self.search_type = "Continuing Education"
+            self.page = 1
+            # Reset the fingerprints set, so that the scraper can revisit pages
+            # with the same url now that the cookies have been changed.
+            self.crawler.engine.slot.scheduler.df.fingerprints = set()
             yield scrapy.Request(
-                    response.urljoin(next_btn),
-                    method='GET',
-                    meta={
-                        "depth": response.meta['depth'],
-                        "hops_from_seed": response.meta["hops_from_seed"] + 1,
-                        "source_url": response.url,
-                        "source_anchor": "",
-                    },
-                    callback=select_page
+                "http://web12.easternflorida.edu/ecpr/choice.cfm?CE=1"
             )
-
-        yield scrapy.Request(start_url, callback=select_search, dont_filter=True)
 
     def extract_links(self, response):
-        print("Running extract links on " + response.url)
-        for tag in response.css('a.text10'):
-            url = response.urljoin(tag.css('a::attr(href)').extract_first())
-            anchor = tag.css('a::text')
-            print("Downloading {0},{1}".format(anchor, url))
-            yield (url, anchor)
+        for row in response.css("table table")[0].css("tr")[1:]:
+            url = row.css(".text10::attr(href)").extract_first()
+            if url:
+                anchor = row.css(".text10::text").extract_first()
+                yield (url, anchor)
