@@ -8,7 +8,7 @@ class CampusConcourseSpider(CustomSpider):
     name = 'campusconcourse'
 
     def start_requests(self):
-        for start_url in self.start_urls:
+        for start_url in self.database_urls:
             yield scrapy.FormRequest(
                 start_url,
                 method="GET",
