@@ -47,7 +47,7 @@ def main(csv_file, local, institution):
                     params = make_params(urls)
                     log.debug("Parameters: %r", params)
 
-                    if row['robots.txt'].lower() == "ignore":
+                    if row['robots.txt'].strip().lower() == "ignore":
                         params['ignore_robots_txt'] = True
                         log.info("Ignoring robots.txt")
 
