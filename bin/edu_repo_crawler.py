@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
-import os.path
 import csv
 import logging
-import itertools
-import urllib.parse
-import re
 
 import click
 
@@ -15,13 +10,11 @@ from osp_scraper.tasks import make_params, crawl
 
 log = logging.getLogger('edu_repo_crawler')
 
-
 def extract_urls(s):
-    """return a list of clean URLs from a comma-separated string"""
+    """Return a list of clean URLs from a comma-separated string."""
     urls = (u.strip() for u in s.split(','))
     urls = (u for u in urls if u.startswith('http'))
     return list(urls)
-
 
 @click.command()
 @click.argument('csv_file', type=click.Path(exists=True))
@@ -33,13 +26,14 @@ def main(csv_file, local, institution):
     with open(csv_file) as f:
         for row in csv.DictReader(f):
             if not institution or institution == row['id']:
-                # run custom scraper, but only if not running locally
+                # Run custom scraper, but only if not running locally.
                 if not local and 'Custom Scraper Name' in row:
                     crawl_func(row['Custom Scraper Name'])
 
-                # find comma-separated URLs in these columns
+                # Find comma-separated URLs in these columns.
                 urls = extract_urls(row['Doc URLs'])
                 urls.extend(extract_urls(row['Mixed URLs']))
+                # NOTE: Should database URLs be included?
                 urls.extend(extract_urls(row['Database URLs']))
 
                 if urls:
