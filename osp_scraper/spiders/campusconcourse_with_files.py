@@ -8,7 +8,7 @@ class CampusConcourseWithFilesSpider(CustomSpider):
     name = "campusconcourse_with_files"
 
     def start_requests(self):
-        for start_url in self.start_urls:
+        for start_url in self.database_urls:
             yield scrapy.FormRequest(
                 start_url,
                 formdata={
