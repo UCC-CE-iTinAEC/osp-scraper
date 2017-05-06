@@ -25,12 +25,8 @@ class PDFSpider(CustomSpider):
                     'source_url': start_url,
                     'source_anchor': start_url
                 },
-                callback=self.parse
+                callback=self.parse_for_files
             )
-
-    def parse(self, response):
-        for item in self.parse_for_files(response):
-            yield item
 
     def extract_links(self, response):
         pdf = pyPdf.PdfFileReader(BytesIO(response.body))
