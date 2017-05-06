@@ -27,7 +27,7 @@ def main(csv_file, local, institution):
         for row in csv.DictReader(f):
             if not institution or institution == row['id']:
                 # Run custom scraper, but only if not running locally.
-                if not local and 'Custom Scraper Name' in row:
+                if not local and row['Custom Scraper Name']:
                     # Create a parameter of database URLs that can be used by
                     # custom scrapers as needed.
                     params = {
