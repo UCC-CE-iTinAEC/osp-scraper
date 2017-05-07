@@ -3,6 +3,7 @@
 from io import BytesIO
 
 import PyPDF2 as pyPdf
+import scrapy
 
 from ..spiders.CustomSpider import CustomSpider
 
@@ -12,12 +13,20 @@ class PDFSpider(CustomSpider):
     every single link from the PDF and yield a PageItem for each PDF, with the
     links as file_urls.
     """
-
     name = "pdf"
 
-    def parse(self, response):
-        for item in self.parse_for_files(response):
-            yield item
+    def start_requests(self):
+        for start_url in self.database_urls:
+            yield scrapy.Request(
+                start_url,
+                meta={
+                    'depth': 0,
+                    'hops_from_seed': 0,
+                    'source_url': start_url,
+                    'source_anchor': start_url
+                },
+                callback=self.parse_for_files
+            )
 
     def extract_links(self, response):
         pdf = pyPdf.PdfFileReader(BytesIO(response.body))
