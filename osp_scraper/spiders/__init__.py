@@ -129,10 +129,12 @@ class FilterSpider(BaseSpider):
             # extract the href & urljoin it to the current response
             url = response.urljoin(link.xpath('@href').extract_first())
 
-            # merge text content of all child nodes of the link
-            anchor = " ".join(s.strip() for s in link.css('*::text').extract() if s.strip())
+            # Only follow http(s) URLs (i.e., no `javascript:` or `mailto:`).
+            if url.startswith('http'):
+                # merge text content of all child nodes of the link
+                anchor = " ".join(s.strip() for s in link.css('*::text').extract() if s.strip())
 
-            yield (url, anchor)
+                yield (url, anchor)
 
 
     def process_file_url(self, response, url, anchor):
