@@ -5,7 +5,8 @@ import logging
 
 import click
 
-from osp_scraper.tasks import make_params, crawl
+from osp_scraper.tasks import crawl
+from osp_scraper.filterware import make_filters
 
 
 log = logging.getLogger('edu_repo_crawler')
@@ -42,8 +43,11 @@ def main(csv_file, local, institution):
 
                 if urls:
                     log.info("Found %d URLs for %s", len(urls), row['name'])
-                    params = make_params(urls)
-                    log.debug("Parameters: %r", params)
+                    params = {
+                        'start_urls': urls,
+                        'filters': make_filters(urls)
+                    }
+                    log.debug("Params: %r", params)
 
                     if row['robots.txt'].strip().lower() == "ignore":
                         params['ignore_robots_txt'] = True

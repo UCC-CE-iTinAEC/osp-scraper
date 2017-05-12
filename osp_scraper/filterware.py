@@ -1,15 +1,81 @@
 import logging
 import fnmatch
 import re
-from urllib.parse import parse_qs
+import urllib.parse
 import attr
-
+import os
 
 from scrapy import signals
 from scrapy.http import Request
 from scrapy.utils.httpobj import urlparse_cached
 
 logger = logging.getLogger(__name__)
+
+# a list of base domains to blacklist; subdomains blocked too
+blacklist_domains = [
+    'facebook.com',
+    'reddit.com',
+    'twitter.com',
+    'linkedin.com',
+    'wikipedia.org',
+]
+
+blacklist_re = "^" + "|".join(
+    "((.*\.)?%s$)" % re.escape(x)
+    for x in blacklist_domains
+)
+
+def make_filters(seed_urls):
+    """Generate filters for a spider from a list of URLs.
+
+    * Allow paths with matching prefix to infinite depth
+    * Allow same hostname to max depth of 2
+    * Allow other domains to max depth of 1
+
+    Args:
+        seed_urls (list)
+    """
+    filters = []
+
+    # blacklist domains
+    filters.append(
+        Filter.compile(
+            'deny',
+            pattern='regex',
+            hostname=blacklist_re
+        )
+    )
+
+    # merge parameters from several seed urls, with unique domains & paths
+    for url in seed_urls:
+        u = urllib.parse.urlparse(url)
+        prefix = re.escape(u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/')
+        hostname=re.escape(u.hostname) if u.hostname is not None else None
+        port=re.escape(str(u.port)) if u.port is not None else None
+
+        # allow prefix to infinite depth
+        filters.append(Filter.compile('allow',
+            pattern='regex',
+            hostname=hostname,
+            port=port,
+            path=prefix + ".*"
+        ))
+
+        # allow same hostname to max depth 2
+        filters.append(
+            Filter.compile(
+                'allow',
+                pattern='regex',
+                hostname=hostname,
+                port=port,
+                max_depth=2
+            )
+        )
+
+    # allow other domains w/ max depth 1
+    filters.append(Filter.compile('allow', max_depth=1))
+
+    return filters
 
 def check_filters(filters, request):
     """Check a list of filters
@@ -155,7 +221,7 @@ class Filter:
                 ret = False
             else:
                 # test all regexes in query_regexes, ignoring unknown query args from URL
-                query = parse_qs(url.query)
+                query = urllib.parse.parse_qs(url.query)
                 for k, regex in self._query_regexes.items():
                     if not ret:
                         break # also break outer loop if we break out of inner one below
