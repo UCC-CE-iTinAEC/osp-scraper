@@ -14,6 +14,7 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 setup(
+
     name='osp_scraper',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
@@ -22,13 +23,14 @@ setup(
     version='0.4.0',
 
     description='Scrapers for the Open Syllabus Project',
+    license='Apache License 2.0',
 
     # The project's main homepage.
-    url='https://github.com/syllabusproject/osp-scraper',
+    url='https://github.com/opensyllabus/osp-scraper',
 
     # Author details
-    author='Pete Fein',
-    author_email='pete@wearpants.org',
+    author='OSP authors',
+    author_email='syllabusopen@gmail.com',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
