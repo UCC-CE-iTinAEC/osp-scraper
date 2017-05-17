@@ -136,6 +136,15 @@ class FilterSpider(BaseSpider):
 
                 yield (url, anchor)
 
+        for frame in (response.css("frame") + response.css("iframe")):
+            relative_url = frame.css("::attr(src)").extract_first()
+            url = response.urljoin(relative_url)
+
+            if url.startswith("http"):
+                anchor = frame.css("::attr(name)").extract_first()
+
+                yield (url, anchor)
+
 
     def process_file_url(self, response, url, anchor):
         """return `Request.meta` for a file url, or None to skip"""
