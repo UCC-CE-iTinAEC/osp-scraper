@@ -13,46 +13,20 @@ class UTSASpider(CustomSpider):
         subjs = response\
             .css("#ctl00_MainContentSearchQuery_searchCriteriaEntry_CourseSubjectCombo_OptionList ")\
             .css("li::text")\
-            .extract()
+            .getall()
 
-        viewstate = response.css("#__VIEWSTATE::attr(value)").extract_first()
-        viewstategenerator = response.css("#__VIEWSTATEGENERATOR::attr(value)")\
-                                     .extract_first()
-        eventvalidation = response.css("#__EVENTVALIDATION::attr(value)")\
-                                  .extract_first()
         for hidden_value, subj in enumerate(subjs, 1):
-            yield scrapy.FormRequest(
-                response.url,
+            yield scrapy.FormRequest.from_response(
+                response,
                 method="POST",
-                # As far as I'm aware, using from_response always fails, and all
-                # the formdata below is necessary.
                 formdata={
-                    '__VIEWSTATE':
-                        viewstate,
-                    '__VIEWSTATEGENERATOR':
-                        viewstategenerator,
-                    '__EVENTVALIDATION':
-                        eventvalidation,
+                    '__EVENTTARGET':
+                        "ctl00$MainContentSearchQuery$searchCriteriaEntry$SearchBtn",
                     'ctl00$MainContentSearchQuery$searchCriteriaEntry$CourseSubjectCombo$TextBox':
                         subj,
                     'ctl00$MainContentSearchQuery$searchCriteriaEntry$CourseSubjectCombo$HiddenField':
                         str(hidden_value),
-                    '__EVENTTARGET':
-                        "ctl00$MainContentSearchQuery$searchCriteriaEntry$SearchBtn",
-                    'ctl00$MainContentSearchQuery$searchCriteriaEntry$SearchTypeRBL':
-                        "SUBJECT",
-                    'ctl00$MainContentSearchQuery$searchCriteriaEntry$AcademicDeptTitleCombo$HiddenField':
-                        "0",
-                    'ctl00$MainContent$mainContent1$TotalPages':
-                        "1",
-                    'ctl00$MainContent$mainContent1$TotalRows':
-                        "0",
-                    'ctl00$MainContent$mainContent1$CurrentPage':
-                        "1",
-                    'ctl00$FooterBtnCntrl$feedbackRating_RatingExtender_ClientState':
-                        "0",
-                    'hiddenInputToUpdateATBuffer_CommonToolkitScripts':
-                        "1"
+                    'ctl00$HeaderBtnCntrl$HomeBtn': None
                 },
                 meta={
                     'depth': 1,
@@ -80,7 +54,7 @@ class UTSASpider(CustomSpider):
         if main_table and not next_page_button_disabled:
             page_num = response.css("#ctl00_MainContent_mainContent1_topPagerPnl")\
                                .css("div:nth-child(2)::text")\
-                               .extract_first().split()[0]
+                               .get().split()[0]
 
             yield scrapy.FormRequest.from_response(
                 response,
@@ -106,24 +80,18 @@ class UTSASpider(CustomSpider):
     def extract_links(self, response):
         rows = response.css("table.infoTable tr")
         for row in rows:
-            anchor = ' '.join(row.css("td span::text")[:2].extract())
-            anchor = anchor + " ".join(row.css("td:nth-child(3) ::text")\
-                                       .extract())
-            anchor = anchor + " " + row.css("td:nth-child(4) a::text")\
-                                       .extract_first()
+            anchor = " ".join(row.css("td")[:4].css("::text").getall())
 
             # Links to textbooks have onclick attributes that look like this:
             #   window.open('<url>'); return false;
-            book_url = row.css("td:nth-child(7) a::attr(onclick)")\
-                          .extract_first()
+            book_url = row.css("td:nth-child(7) a::attr(onclick)").get()
             if book_url:
                 book_url = book_url.split("'")[1]
                 yield (book_url, anchor + " Books")
 
             # Links to syllabi have onclick attributes that look like this:
             #   javascript:window.open('<relative-url>'); return false;
-            syllabus_url = row.css("td:nth-child(8) a::attr(onclick)")\
-                              .extract_first()
+            syllabus_url = row.css("td:nth-child(8) a::attr(onclick)").get()
             if syllabus_url:
                 syllabus_url = syllabus_url.split("'")[1]
                 yield (syllabus_url, anchor + " Syllabus")
