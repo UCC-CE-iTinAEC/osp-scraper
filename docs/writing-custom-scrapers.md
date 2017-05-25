@@ -89,24 +89,24 @@ documentation](https://doc.scrapy.org/en/1.1/intro/tutorial.html).
 ### Requests and Chaining Callbacks
 There are three types of requests we make use of:
 
-- `Scrapy.Request`: Used to make basic HTTP requests.
-- `Scrapy.FormRequest`: An HTTP request that can complete forms and send data
+- `scrapy.Request`: Used to make basic HTTP requests.
+- `scrapy.FormRequest`: An HTTP request that can complete forms and send data
   via a `formdata` dictionary.
-- `Scrapy.FormRequest.from_response`: Takes as input a `response` object and
+- `scrapy.FormRequest.from_response`: Takes as input a `response` object and
   creates a `FormRequest` populated with elements found in an HTML `<form>`.
   Can lead to unexpected behavior.
 
 For more details, see the [Scrapy
 docs](https://doc.scrapy.org/en/1.1/topics/request-response.html).
 
-For the most part we use `Scrapy.FormRequest.from_response` whenever it is
-appropriate and functional, and `Scrapy.FormRequest` otherwise.  Occasionally,
-`Scrapy.Request` will be used.
+For the most part we use `scrapy.FormRequest.from_response` whenever it is
+appropriate and functional, and `scrapy.FormRequest` otherwise.  Occasionally,
+`scrapy.Request` will be used.
 
 We organize the arguments of a Scrapy requests similar to how an HTTP request is
 organized.  Arguments should go in this order:
 
-- The `response` object, if using `Scrapy.FormRequest.from_response`, and the
+- The `response` object, if using `scrapy.FormRequest.from_response`, and the
   URL string otherwise.
 - The `formname`, `formid`, or `formcss` if using `FormRequest.from_response`
   and the response contains multiple forms.
