@@ -13,7 +13,7 @@ from .. import version
 from ..filterware import Filter
 
 # file types we download
-ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx'})
+ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx', 'rtf'})
 
 class BaseSpider(scrapy.spiders.Spider):
     """Common base class for all syllascrape spiders"""
