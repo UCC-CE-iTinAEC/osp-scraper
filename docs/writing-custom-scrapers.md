@@ -1,6 +1,6 @@
 # Writing Custom Scrapers
 
-We use [Scrapy 1.1.0](https://doc.scrapy.org/en/1.1/) for writing web crawlers
+We use [Scrapy 1.4.0](https://doc.scrapy.org/en/1.4/) for writing web crawlers
 that scrape syllabi.  This document will not be a comprehensive breakdown of
 everything that goes into scraping syllabi; instead, it will focus on
 information relevant to working with the
@@ -84,7 +84,7 @@ list of URLs.  An example of this can be found in
 
 For more details about the relationship between `parse` and `start_requests`,
 see the [Scrapy
-documentation](https://doc.scrapy.org/en/1.1/intro/tutorial.html).
+documentation](https://doc.scrapy.org/en/1.4/intro/tutorial.html).
 
 ### Requests and Chaining Callbacks
 There are three types of requests we make use of:
@@ -97,7 +97,7 @@ There are three types of requests we make use of:
   Can lead to unexpected behavior.
 
 For more details, see the [Scrapy
-docs](https://doc.scrapy.org/en/1.1/topics/request-response.html).
+docs](https://doc.scrapy.org/en/1.4/topics/request-response.html).
 
 For the most part we use `scrapy.FormRequest.from_response` whenever it is
 appropriate and functional, and `scrapy.FormRequest` otherwise.  Occasionally,
@@ -117,7 +117,7 @@ organized.  Arguments should go in this order:
 - A `meta` dictionary, as needed.
 - A `dont_click=True` setting, if doing a form request and a form is submitted
   without a button click (this is uncommon).  See the [Scrapy
-  docs](https://doc.scrapy.org/en/1.1/topics/request-response.html#formrequest-objects)
+  docs](https://doc.scrapy.org/en/1.4/topics/request-response.html#formrequest-objects)
   for more information.
 - A `callback` to another method.
 
