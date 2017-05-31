@@ -34,7 +34,6 @@ def main(csv_file, local, institution):
                         "database_urls": extract_urls(row['Database URLs'])
                     }
                     crawl_func(row['Custom Scraper Name'], **params)
-                    break
 
                 # Find comma-separated URLs in these columns.
                 urls = extract_urls(row['Doc URLs'])
