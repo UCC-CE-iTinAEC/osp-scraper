@@ -89,7 +89,9 @@ documentation](https://doc.scrapy.org/en/1.4/intro/tutorial.html).
 ### Requests and Chaining Callbacks
 There are three types of requests we make use of:
 
-- `scrapy.Request`: Used to make basic HTTP requests.
+- `scrapy.Request`: Used to make basic HTTP requests.  Whenever possible, we
+  make use of
+  [`response.follow`](https://doc.scrapy.org/en/latest/topics/request-response.html#scrapy.http.TextResponse.follow).
 - `scrapy.FormRequest`: An HTTP request that can complete forms and send data
   via a `formdata` dictionary.
 - `scrapy.FormRequest.from_response`: Takes as input a `response` object and
@@ -99,9 +101,12 @@ There are three types of requests we make use of:
 For more details, see the [Scrapy
 docs](https://doc.scrapy.org/en/1.4/topics/request-response.html).
 
-For the most part we use `scrapy.FormRequest.from_response` whenever it is
-appropriate and functional, and `scrapy.FormRequest` otherwise.  Occasionally,
-`scrapy.Request` will be used.
+For the most part, we use `scrapy.FormRequest.from_response` whenever it is
+appropriate and functional, and `scrapy.FormRequest` otherwise.  When non-form
+requests are necessary, we always use `response.follow` as a shortcut if it is
+appropriate.  Otherwise, `scrapy.Request` will be used.  For details on using
+`response.follow` as a shortcut, see
+[here](https://doc.scrapy.org/en/1.4/intro/tutorial.html#response-follow-example).
 
 We organize the arguments of a Scrapy requests similar to how an HTTP request is
 organized.  Arguments should go in this order:
