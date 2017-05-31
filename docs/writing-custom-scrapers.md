@@ -48,14 +48,16 @@ name, if the scraper is targeting a general framework (e.g,
 `myname.py`, saved in [`osp_scraper/spiders`](../osp_scraper/spiders).  The top
 of each custom scraper file should look similar to this:
 
-	# -*- coding: utf-8 -*-
+```python
+# -*- coding: utf-8 -*-
 
-	import scrapy
+import scrapy
 
-	from ..spiders.CustomSpider import CustomSpider
+from ..spiders.CustomSpider import CustomSpider
 
-	class MyNameSpider(CustomSpider):
-		name = "myname"
+class MyNameSpider(CustomSpider):
+	name = "myname"
+```
 
 ### Start URLs
 If a scraper targets a single site, define a list of `start_urls` containing
@@ -140,22 +142,24 @@ request.  Sometimes, when using `scrapy.FormRequest`, it may be necessary to set
 Here's an example of a request from
 [`inverhills.py`](../osp_scraper/spiders/inverhills.py):
 
-	yield scrapy.FormRequest.from_response(
-		response,
-		formid="form1",
-		method="POST",
-		formdata={
-			'cboTerm': term_code,
-			'cboSubject': subject_code
-		},
-		meta={
-			'depth': 1,
-			'hops_from_seed': 1,
-			'source_url': response.url,
-			'source_anchor': term_name + " " + subject_name
-		},
-		callback=self.parse_for_files
-	)
+```python
+yield scrapy.FormRequest.from_response(
+	response,
+	formid="form1",
+	method="POST",
+	formdata={
+		'cboTerm': term_code,
+		'cboSubject': subject_code
+	},
+	meta={
+		'depth': 1,
+		'hops_from_seed': 1,
+		'source_url': response.url,
+		'source_anchor': term_name + " " + subject_name
+	},
+	callback=self.parse_for_files
+)
+```
 
 ### Generating `PageItem` objects
 The ultimate goal of each custom scraper is to execute a sequence of requests up
@@ -171,17 +175,19 @@ which is a method available in the
 [`inverhills.py`](../osp_scraper/spiders/inverhills.py) example above.  The
 `parse_for_files` method will `yield` a `PageItem` like this:
 
-	yield PageItem(
-		url=response.url,
-		content=response.body,
-		headers=response.headers,
-		status=response.status,
-		source_url=response.meta['source_url'],
-		source_anchor=self.clean_whitespace(response.meta['source_anchor']),
-		depth=response.meta['depth'],
-		hops_from_seed=response.meta['hops_from_seed'],
-		file_urls=file_urls
-	)
+```python
+yield PageItem(
+	url=response.url,
+	content=response.body,
+	headers=response.headers,
+	status=response.status,
+	source_url=response.meta['source_url'],
+	source_anchor=self.clean_whitespace(response.meta['source_anchor']),
+	depth=response.meta['depth'],
+	hops_from_seed=response.meta['hops_from_seed'],
+	file_urls=file_urls
+)
+```
 
 Most of the values come from the `response` object handed to `parse_for_files`
 on `callback`.  Note that the following `meta` fields need to be set in the
@@ -213,11 +219,13 @@ of unecessary files.  As an example, see
 Here's an example of `extract_links` implemented in
 [`inverhills.py`](../osp_scraper/spiders/inverhills.py):
 
-	def extract_links(self, response):
-		for a_tag in response.css(".pdf"):
-		href = a_tag.css("::attr(href)").extract_first()
-		title = a_tag.css("::attr(title)").extract_first()
-		yield (href, title)
+```python
+def extract_links(self, response):
+	for a_tag in response.css(".pdf"):
+	href = a_tag.css("::attr(href)").extract_first()
+	title = a_tag.css("::attr(title)").extract_first()
+	yield (href, title)
+```
 
 For more information, see the documentation in the
 [`CustomSpider`](../osp_scraper/spiders/CustomSpider.py) class.
