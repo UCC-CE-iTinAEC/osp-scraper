@@ -34,7 +34,8 @@ flower==0.9.1
 tornado==4.2.0
 babel==2.3.4
 python-dotenv==0.6.1
-git+https://github.com/wearpants/warc3
 httpstatus35==0.0.1
 rq==0.8.0
-rq-dashboard==0.3.8
+
+git+https://github.com/wearpants/warc3
+git+https://github.com/eoranged/rq-dashboard
