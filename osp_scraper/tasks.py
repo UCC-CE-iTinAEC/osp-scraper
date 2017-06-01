@@ -93,7 +93,7 @@ def make_params(seed_urls):
 
 
 # Run crawls for 1 week max.
-@job('default', connection=redis_conn, timeout=60*60*24*7)
+@job('default', connection=redis_conn)
 def crawl(spider, *args, **kwargs):
     """Run a spider.
 
