@@ -36,5 +36,5 @@ babel==2.3.4
 python-dotenv==0.6.1
 git+https://github.com/wearpants/warc3
 httpstatus35==0.0.1
-rq==0.7.1
-rq-dashboard==0.3.7
+rq==0.8.0
+rq-dashboard==0.3.9
