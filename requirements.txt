@@ -38,4 +38,4 @@ httpstatus35==0.0.1
 rq==0.8.0
 
 git+https://github.com/wearpants/warc3
-git+https://github.com/eoranged/rq-dashboard
+git+https://github.com/eoranged/rq-dashboard#0.3.9
