@@ -92,8 +92,9 @@ def make_params(seed_urls):
     return d
 
 
-# Run crawls for 1 week max.
-@job('default', connection=redis_conn)
+# Limit crawls to 1 week.
+# TODO: Why doesn't it work to pass this via --worker-ttl to the worker?
+@job('default', connection=redis_conn, timeout=604800)
 def crawl(spider, *args, **kwargs):
     """Run a spider.
 
