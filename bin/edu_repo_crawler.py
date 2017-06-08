@@ -45,7 +45,6 @@ def main(csv_file, local, institution):
                     log.info("Found %d URLs for %s", len(urls), row['name'])
                     params = {
                         'start_urls': urls,
-                        'filters': make_filters(urls)
                     }
                     log.debug("Params: %r", params)
 
