@@ -49,8 +49,3 @@ class TalisSpider(CustomSpider):
                 },
                 callback=self.parse_for_courses
             )
-
-    def extract_links(self, response):
-        title = response.css("#pageTitle::text").get()
-        url = response.css("#exportsToRIS::attr(href)").get()
-        yield (url, title)
