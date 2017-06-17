@@ -19,9 +19,6 @@ class NUSSpider(CustomSpider):
             page_value = page.css("::attr(value)").get()
             page_text = page.css("::text").get()
 
-            #NOTE: I couldn't get from_response to work.
-            viewstate = response.css("#__VIEWSTATE::attr(value)").get()
-            viewstategenerator = response.css("#__VIEWSTATEGENERATOR::attr(value)").get()
             yield scrapy.FormRequest.from_response(
                 response,
                 method="POST",
