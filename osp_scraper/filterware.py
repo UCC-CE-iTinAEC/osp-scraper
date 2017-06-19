@@ -35,6 +35,9 @@ def make_filters(seed_urls):
     Args:
         seed_urls (list)
     """
+    if not seed_urls:
+        raise ValueError("List of URLs must be non-empty")
+
     filters = []
 
     # blacklist domains
