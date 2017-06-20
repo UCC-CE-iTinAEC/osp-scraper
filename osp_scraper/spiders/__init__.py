@@ -161,29 +161,3 @@ class FilterSpider(BaseSpider):
                 'depth': response.meta['depth'] + 1,
                 'hops_from_seed': response.meta['hops_from_seed'] + 1,
                 }
-
-def url_to_prefix_params(url):
-    """Generate filters for a prefix spider.
-
-    If the path component ends with a `/` it will be used-as is; otherwise
-    the final path component is assumed to be a filename and will be dropped.
-
-    :arg str url: the seed url
-    :returns: parameters for :cls:`FilterSpider`: `start_urls`, `filters`
-    :rtype: dict
-    """
-    u = urlparse(url)
-
-    return {
-        'start_urls': [url],
-        'allowed_file_types': ALLOWED_FILE_TYPES,
-        'filters': [
-            # allow paths starting with prefix, with matching hostname & port
-            Filter.compile('allow', pattern='regex',
-                           hostname=re.escape(u.hostname) if u.hostname is not None else None,
-                           port=re.escape(u.port) if u.port is not None else None,
-                           path=re.escape(u.path if u.path.endswith('/') else
-                                          os.path.dirname(u.path) + '/') + '.*'
-                           )
-        ],
-    }
