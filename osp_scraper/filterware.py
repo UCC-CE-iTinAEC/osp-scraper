@@ -52,17 +52,22 @@ def make_filters(seed_urls):
     # merge parameters from several seed urls, with unique domains & paths
     for url in seed_urls:
         u = urllib.parse.urlparse(url)
-        prefix = re.escape(u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/')
-        hostname=re.escape(u.hostname) if u.hostname is not None else None
-        port=re.escape(str(u.port)) if u.port is not None else None
+        prefix = re.escape(
+            u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/'
+        )
+        hostname = re.escape(u.hostname) if u.hostname is not None else None
+        port = re.escape(str(u.port)) if u.port is not None else None
 
         # allow prefix to infinite depth
-        filters.append(Filter.compile('allow',
-            pattern='regex',
-            hostname=hostname,
-            port=port,
-            path=prefix + ".*"
-        ))
+        filters.append(
+            Filter.compile(
+                'allow',
+                pattern='regex',
+                hostname=hostname,
+                port=port,
+                path=prefix + ".*"
+            )
+        )
 
         # allow same hostname to max depth 2
         filters.append(
