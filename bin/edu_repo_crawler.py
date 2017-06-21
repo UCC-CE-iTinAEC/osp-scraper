@@ -44,7 +44,7 @@ def main(csv_file, local, institution):
                 if urls:
                     log.info("Found %d URLs for %s", len(urls), row['name'])
                     params = {
-                        'start_urls': urls,
+                        'start_urls': urls
                     }
                     log.debug("Params: %r", params)
 
