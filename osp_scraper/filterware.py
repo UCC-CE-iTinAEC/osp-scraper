@@ -20,7 +20,6 @@ blacklist_domains = [
     'wikipedia.org',
 ]
 
-blacklist_re = r"^.*\.({})$".format("|".join(map(re.escape, blacklist_domains)))
 
 def make_filters(seed_urls):
     """Generate filters for a spider from a list of URLs.
@@ -36,6 +35,10 @@ def make_filters(seed_urls):
         raise ValueError("List of URLs must be non-empty")
 
     filters = []
+
+    blacklist_re = r"^.*\.({})$".format(
+        "|".join(map(re.escape, blacklist_domains))
+    )
 
     # blacklist domains
     filters.append(
