@@ -51,6 +51,12 @@ def make_filters(seed_urls):
     # merge parameters from several seed urls, with unique domains & paths
     for url in seed_urls:
         u = urllib.parse.urlparse(url)
+        # XXX: We should probably find a cleaner (and more extensive) approach
+        # for checking against problematic strings in `seed_urls`.  For example,
+        # we might want to check for a top-level domain.
+        if not u.hostname:
+            raise ValueError("URL '%s' does not have a hostname" % url)
+
         prefix = re.escape(
             u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/'
         )
