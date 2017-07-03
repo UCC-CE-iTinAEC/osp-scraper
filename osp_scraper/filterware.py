@@ -49,6 +49,9 @@ def make_filters(seed_urls):
     )
 
     # merge parameters from several seed urls, with unique domains & paths
+    prefixes = set()
+    hostnames = set()
+
     for url in seed_urls:
         u = urllib.parse.urlparse(url)
         # XXX: We should probably find a cleaner (and more extensive) approach
@@ -63,6 +66,10 @@ def make_filters(seed_urls):
         hostname = re.escape(u.hostname)
         port = re.escape(str(u.port)) if u.port else None
 
+        prefixes.add((hostname, port, prefix))
+        hostnames.add((hostname, port))
+
+    for hostname, port, prefix in prefixes:
         # allow prefix to infinite depth
         filters.append(
             Filter.compile(
@@ -74,6 +81,7 @@ def make_filters(seed_urls):
             )
         )
 
+    for hostname, port in hostnames:
         # allow same hostname to max depth 2
         filters.append(
             Filter.compile(
