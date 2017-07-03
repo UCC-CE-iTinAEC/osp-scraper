@@ -58,8 +58,8 @@ def make_filters(seed_urls):
         # for checking against problematic strings in `seed_urls`.  For example,
         # we might want to check for a top-level domain.
         if not u.hostname:
-            msg = "URL '{0}' does not have a hostname.  No filters will be made."
-            logger.info(msg.format(url))
+            msg = "Input '{0}' does not have a hostname.  Remove or fix this URL."
+            logger.warning(msg.format(url))
             continue
 
         prefix = re.escape((os.path.dirname(u.path) + "/").replace("//", "/"))
