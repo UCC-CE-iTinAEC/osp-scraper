@@ -55,7 +55,9 @@ def make_filters(seed_urls):
         # for checking against problematic strings in `seed_urls`.  For example,
         # we might want to check for a top-level domain.
         if not u.hostname:
-            raise ValueError("URL '%s' does not have a hostname" % url)
+            msg = "URL '{0}' does not have a hostname.  No filters will be made."
+            logger.info(msg.format(url))
+            continue
 
         prefix = re.escape(
             u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/'
