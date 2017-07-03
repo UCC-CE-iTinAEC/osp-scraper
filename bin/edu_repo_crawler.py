@@ -6,7 +6,6 @@ import logging
 import click
 
 from osp_scraper.tasks import crawl
-from osp_scraper.filterware import make_filters
 
 
 log = logging.getLogger('edu_repo_crawler')
