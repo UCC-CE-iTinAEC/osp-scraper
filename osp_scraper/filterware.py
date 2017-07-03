@@ -59,9 +59,7 @@ def make_filters(seed_urls):
             logger.info(msg.format(url))
             continue
 
-        prefix = re.escape(
-            u.path if u.path.endswith('/') else os.path.dirname(u.path) + '/'
-        )
+        prefix = re.escape((os.path.dirname(u.path) + "/").replace("//", "/"))
         hostname = re.escape(u.hostname)
         port = re.escape(str(u.port)) if u.port else None
 
