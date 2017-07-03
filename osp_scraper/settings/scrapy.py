@@ -69,12 +69,8 @@ DOWNLOAD_MAXSIZE = 128 * (1024 * 1024) # 128 MB
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 #}
 
-# Configure item pipelines
-# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    'osp_scraper.pipelines.WarcFilesPipeline': 300,
-    'osp_scraper.pipelines.WarcStorePipeline': 301,
-}
+# WARC Pipelines are added at the scraper level
+ITEM_PIPELINES = {}
 
 # Configure WarcFilesPipeline & WarcStorePipeline
 FILES_STORE = None

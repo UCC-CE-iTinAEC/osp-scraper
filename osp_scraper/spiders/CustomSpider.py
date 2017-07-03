@@ -6,6 +6,7 @@ from ..items import PageItem
 
 class CustomSpider(BaseSpider):
     custom_settings = {
+        **BaseSpider.custom_settings,
         'ROBOTSTXT_OBEY': False
     }
 

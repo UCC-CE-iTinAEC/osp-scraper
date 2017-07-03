@@ -18,6 +18,15 @@ ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx', 'rtf'})
 class BaseSpider(scrapy.spiders.Spider):
     """Common base class for all syllascrape spiders"""
 
+    # Configure item pipelines
+    # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            "osp_scraper.pipelines.WarcFilesPipeline": 300,
+            "osp_scraper.pipelines.WarcStorePipeline": 301
+        }
+    }
+
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super().from_crawler(crawler, *args, **kwargs)
