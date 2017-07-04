@@ -54,9 +54,6 @@ def make_filters(seed_urls):
 
     for url in seed_urls:
         u = urllib.parse.urlparse(url)
-        # XXX: We should probably find a cleaner (and more extensive) approach
-        # for checking against problematic strings in `seed_urls`.  For example,
-        # we might want to check for a top-level domain.
         if not u.hostname:
             msg = "Input '{0}' does not have a hostname.  Remove or fix this URL."
             logger.warning(msg.format(url))
