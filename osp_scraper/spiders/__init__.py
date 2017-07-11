@@ -11,6 +11,7 @@ from ..items import PageItem
 from ..utils import guess_extension
 from .. import version
 from ..filterware import Filter
+from ..filters import make_filters
 
 # file types we download
 ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx', 'rtf'})
@@ -70,6 +71,15 @@ class FilterSpider(BaseSpider):
     """
 
     name = "osp_scraper_spider"
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super().from_crawler(crawler, *args, **kwargs)
+        spider.allowed_file_types = ALLOWED_FILE_TYPES
+        spider.filters = make_filters(
+            getattr(cls, 'start_urls', []) + kwargs.get('start_urls', [])
+        )
+        return spider
 
     def start_requests(self):
         for r in super().start_requests():
