@@ -10,7 +10,8 @@ import uuid
 from ..items import PageItem
 from ..utils import guess_extension
 from .. import version
-from ..filterware import make_filters, Filter
+from ..filterware import Filter
+from ..filters import make_filters
 
 # file types we download
 ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx', 'rtf'})
