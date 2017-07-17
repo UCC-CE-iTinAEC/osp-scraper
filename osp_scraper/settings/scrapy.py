@@ -16,7 +16,7 @@ import os
 
 BOT_NAME = 'osp_scraper'
 
-SPIDER_MODULES = ['osp_scraper.spiders']
+SPIDER_MODULES = ['osp_scraper.spiders', 'osp_site_scrapers']
 NEWSPIDER_MODULE = 'osp_scraper.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
