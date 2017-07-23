@@ -16,7 +16,7 @@ from ..filters import make_filters
 # file types we download
 ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx', 'rtf'})
 
-class BaseSpider(scrapy.spiders.Spider):
+class OSPSpider(scrapy.spiders.Spider):
     """Common base class for all syllascrape spiders"""
 
     # Configure item pipelines
@@ -44,7 +44,7 @@ class BaseSpider(scrapy.spiders.Spider):
         }
 
 
-class FilterSpider(BaseSpider):
+class FilterSpider(OSPSpider):
     """Filtering spider.
 
     Parameters

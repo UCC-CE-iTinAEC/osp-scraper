@@ -69,7 +69,7 @@ All of the Python WARC libraries are pretty terrible, `internetarchive/warc`
 (and its various forks) seemed the least bad.
 
 ## Spiders
-All spiders should inherit from `syllascrape.spiders.BaseSpider`.
+All spiders should inherit from `osp_scraper.spiders.OSPSpider`.
 
 `start_urls` is a list of initial URLs to begin the crawl.
 
