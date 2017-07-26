@@ -37,12 +37,10 @@ def main(old_csv_file, new_csv_file, out_csv):
                     + extract_urls(old_row['Mixed URLs'])
                 )
 
-                # NOTE: Currently, the only custom scrapers that use the
-                # database urls are campusconcourse and
-                # campusconcourse_with_files, so we always include database urls
-                # for those rows.  In the future, other custom scrapers might
-                # also need database urls.
-                if "campusconcourse" not in new_row['Custom Scraper Name']:
+                # Always include un-diffed 'Database URLs' for rows that have a
+                # custom scraper in case those 'Database URLs' are used by that
+                # scraper.
+                if not new_row['Custom Scraper Name']:
                     new_database_urls = extract_urls(new_row['Database URLs'])
                     diff_row['Database URLs'] = ",".join(set(new_database_urls) - old_urls)
 
