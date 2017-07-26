@@ -6,15 +6,10 @@ import logging
 import click
 
 from osp_scraper.tasks import crawl
+from osp_scraper.utils import extract_urls
 
 
 log = logging.getLogger('edu_repo_crawler')
-
-def extract_urls(s):
-    """Return a list of clean URLs from a comma-separated string."""
-    urls = (u.strip() for u in s.split(','))
-    urls = (u for u in urls if u.startswith('http'))
-    return list(urls)
 
 @click.command()
 @click.argument('csv_file', type=click.Path(exists=True))

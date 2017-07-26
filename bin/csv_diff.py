@@ -4,11 +4,7 @@ import csv
 
 import click
 
-def extract_urls(s):
-    """return a list of clean URLs from a comma-separated string"""
-    urls = (u.strip() for u in s.split(','))
-    urls = (u for u in urls if u.startswith('http'))
-    return list(urls)
+from osp_scraper.utils import extract_urls
 
 @click.command()
 @click.argument('old_csv_file', type=click.Path(exists=True))
