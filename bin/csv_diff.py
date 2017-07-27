@@ -26,14 +26,14 @@ def main(old_csv_file, new_csv_file, out_csv, diff_custom_scrapers):
     that contains them.
     """
     with open(old_csv_file) as old_csv, open(new_csv_file) as new_csv:
-        old_rows = {row['name']: row for row in csv.DictReader(old_csv)}
+        old_rows = {row['id']: row for row in csv.DictReader(old_csv)}
 
         new_reader = csv.DictReader(new_csv)
         writer = csv.DictWriter(out_csv, fieldnames=new_reader.fieldnames)
         writer.writeheader()
         for new_row in new_reader:
             diff_row = dict(new_row)
-            old_row = old_rows.get(new_row['name'])
+            old_row = old_rows.get(new_row['id'])
 
             if old_row:
                 old_urls = set(
