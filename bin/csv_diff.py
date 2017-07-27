@@ -24,6 +24,10 @@ def main(old_csv_file, new_csv_file, out_csv, diff_custom_scrapers):
     Takes in an old edu csv file and a new edu csv, finds the URLs and custom
     scrapers present in the new file but not the old one, and outputs a csv file
     that contains them.
+
+    Rows are compared based on the value in the 'id' column.  In order for the
+    diff to work properly, ensure that each row has a unique 'id' value
+    associated with it.
     """
     with open(old_csv_file) as old_csv, open(new_csv_file) as new_csv:
         old_rows = {row['id']: row for row in csv.DictReader(old_csv)}
