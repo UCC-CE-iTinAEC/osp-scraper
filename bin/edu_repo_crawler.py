@@ -33,7 +33,8 @@ def main(csv_file, local, institution):
                 # Find comma-separated URLs in these columns.
                 urls = extract_urls(row['Doc URLs'])
                 urls.extend(extract_urls(row['Mixed URLs']))
-                urls.extend(extract_urls(row['Database URLs']))
+                if not row['Custom Scraper Name']:
+                    urls.extend(extract_urls(row['Database URLs']))
 
                 if urls:
                     log.info("Found %d URLs for %s", len(urls), row['name'])
