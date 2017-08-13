@@ -28,6 +28,7 @@ class FilterMiddleware(object):
                 # some requests for files come from scrapy itself (robots.txt, etc.)
                 if 'depth' not in request.meta or request.dont_filter:
                     yield request
+                    continue
 
                 allowed, filter = check_filters(spider.filters, request)
 
