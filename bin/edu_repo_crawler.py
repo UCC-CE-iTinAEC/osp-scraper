@@ -5,16 +5,11 @@ import logging
 
 import click
 
-from osp_scraper.tasks import make_params, crawl
+from osp_scraper.tasks import crawl
+from osp_scraper.utils import extract_urls
 
 
 log = logging.getLogger('edu_repo_crawler')
-
-def extract_urls(s):
-    """Return a list of clean URLs from a comma-separated string."""
-    urls = (u.strip() for u in s.split(','))
-    urls = (u for u in urls if u.startswith('http'))
-    return list(urls)
 
 @click.command()
 @click.argument('csv_file', type=click.Path(exists=True))
@@ -38,12 +33,15 @@ def main(csv_file, local, institution):
                 # Find comma-separated URLs in these columns.
                 urls = extract_urls(row['Doc URLs'])
                 urls.extend(extract_urls(row['Mixed URLs']))
-                urls.extend(extract_urls(row['Database URLs']))
+                if not row['Custom Scraper Name']:
+                    urls.extend(extract_urls(row['Database URLs']))
 
                 if urls:
                     log.info("Found %d URLs for %s", len(urls), row['name'])
-                    params = make_params(urls)
-                    log.debug("Parameters: %r", params)
+                    params = {
+                        'start_urls': urls
+                    }
+                    log.debug("Params: %r", params)
 
                     if row['robots.txt'].strip().lower() == "ignore":
                         params['ignore_robots_txt'] = True

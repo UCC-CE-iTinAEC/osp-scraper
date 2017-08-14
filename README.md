@@ -69,7 +69,7 @@ All of the Python WARC libraries are pretty terrible, `internetarchive/warc`
 (and its various forks) seemed the least bad.
 
 ## Spiders
-All spiders should inherit from `syllascrape.spiders.BaseSpider`.
+All spiders should inherit from `osp_scraper.spiders.OSPSpider`.
 
 `start_urls` is a list of initial URLs to begin the crawl.
 
@@ -107,12 +107,9 @@ respawning), but seems to be needed to run twisted.
 
 ## Crawling from CSV
 
-The `bin/csv_prefix_crawler.py` takes a CSV file with a
-seed URL on each line, and fires of RQ crawl tasks. If the path component
-ends with a `/` it will be used-as is; otherwise the final path component is
-assumed to be a filename and will be dropped.
-
-The `edu_repo_crawler.py` works with the Google spreadsheet: "USA EDU Repo"
+The `edu_repo_crawler.py` script takes a specially formatted CSV file with URLs
+on each line and uses them to fire RQ crawl tasks.  Each crawl operates
+according to a set of filters which restrict the breadth and depth of the crawl.
 
 ## Downloading files listed in CSV
 

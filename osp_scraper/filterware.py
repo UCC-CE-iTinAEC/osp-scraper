@@ -1,9 +1,9 @@
 import logging
 import fnmatch
 import re
-from urllib.parse import parse_qs
+import urllib.parse
 import attr
-
+import os
 
 from scrapy import signals
 from scrapy.http import Request
@@ -155,7 +155,7 @@ class Filter:
                 ret = False
             else:
                 # test all regexes in query_regexes, ignoring unknown query args from URL
-                query = parse_qs(url.query)
+                query = urllib.parse.parse_qs(url.query)
                 for k, regex in self._query_regexes.items():
                     if not ret:
                         break # also break outer loop if we break out of inner one below

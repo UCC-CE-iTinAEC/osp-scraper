@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from . import BaseSpider, ALLOWED_FILE_TYPES
+from . import OSPSpider, ALLOWED_FILE_TYPES
 from ..filterware import Filter
 from ..items import PageItem
 
-class CustomSpider(BaseSpider):
+class CustomSpider(OSPSpider):
     custom_settings = {
+        **OSPSpider.custom_settings,
         'ROBOTSTXT_OBEY': False
     }
 

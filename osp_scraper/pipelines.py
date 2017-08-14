@@ -67,6 +67,7 @@ def update_warc_response_from_item(record, item):
     h = record.header
     h['WARC-Target-URI'] = item['url']
     h['WARC-Date'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(item['retrieved']))
+    h['X-Spider-Name'] = item['spider_name']
     h['X-Spider-Run-ID'] = item['spider_run_id']
     # XXX Scrapy doesn't provide remote IP for WARC-IP-Address
 

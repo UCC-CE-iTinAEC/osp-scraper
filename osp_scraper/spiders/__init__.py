@@ -11,12 +11,22 @@ from ..items import PageItem
 from ..utils import guess_extension
 from .. import version
 from ..filterware import Filter
+from ..filters import make_filters
 
 # file types we download
 ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx', 'rtf'})
 
-class BaseSpider(scrapy.spiders.Spider):
+class OSPSpider(scrapy.spiders.Spider):
     """Common base class for all syllascrape spiders"""
+
+    # Configure item pipelines
+    # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            "osp_scraper.pipelines.WarcFilesPipeline": 300,
+            "osp_scraper.pipelines.WarcStorePipeline": 301
+        }
+    }
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -34,7 +44,7 @@ class BaseSpider(scrapy.spiders.Spider):
         }
 
 
-class FilterSpider(BaseSpider):
+class FilterSpider(OSPSpider):
     """Filtering spider.
 
     Parameters
@@ -61,6 +71,15 @@ class FilterSpider(BaseSpider):
     """
 
     name = "osp_scraper_spider"
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super().from_crawler(crawler, *args, **kwargs)
+        spider.allowed_file_types = ALLOWED_FILE_TYPES
+        spider.filters = make_filters(
+            getattr(cls, 'start_urls', []) + kwargs.get('start_urls', [])
+        )
+        return spider
 
     def start_requests(self):
         for r in super().start_requests():
@@ -161,29 +180,3 @@ class FilterSpider(BaseSpider):
                 'depth': response.meta['depth'] + 1,
                 'hops_from_seed': response.meta['hops_from_seed'] + 1,
                 }
-
-def url_to_prefix_params(url):
-    """Generate filters for a prefix spider.
-
-    If the path component ends with a `/` it will be used-as is; otherwise
-    the final path component is assumed to be a filename and will be dropped.
-
-    :arg str url: the seed url
-    :returns: parameters for :cls:`FilterSpider`: `start_urls`, `filters`
-    :rtype: dict
-    """
-    u = urlparse(url)
-
-    return {
-        'start_urls': [url],
-        'allowed_file_types': ALLOWED_FILE_TYPES,
-        'filters': [
-            # allow paths starting with prefix, with matching hostname & port
-            Filter.compile('allow', pattern='regex',
-                           hostname=re.escape(u.hostname) if u.hostname is not None else None,
-                           port=re.escape(u.port) if u.port is not None else None,
-                           path=re.escape(u.path if u.path.endswith('/') else
-                                          os.path.dirname(u.path) + '/') + '.*'
-                           )
-        ],
-    }
