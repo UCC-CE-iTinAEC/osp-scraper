@@ -2,11 +2,11 @@
 
 import csv
 import logging
-
 import click
 
 from osp_scraper.tasks import crawl
 from osp_scraper.seeds import SeedURLList
+from osp_scraper.services import queue
 
 
 log = logging.getLogger('seed_url_crawler')
@@ -17,17 +17,15 @@ log = logging.getLogger('seed_url_crawler')
 def main(path):
 
     seeds = SeedURLList.from_file(path)
-
     groups = seeds.group_by_domain()
 
     for domain, urls in groups.items():
 
-        crawl.delay(
-            'osp_scraper_spider',
-            start_urls=urls,
-            ignore_robots_txt=True,
-        )
+        # Args for crawl function.
+        kwargs = dict(start_urls=urls, ignore_robots_txt=True)
 
+        # Queue the job with 24h timeout.
+        queue.enqueue(crawl, kwargs=kwargs, timeout=86400)
         log.info(f'{len(urls)} URLs for {domain}')
 
 
