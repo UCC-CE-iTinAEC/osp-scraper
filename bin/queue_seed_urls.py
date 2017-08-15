@@ -6,31 +6,29 @@ import logging
 import click
 
 from osp_scraper.tasks import crawl
-from osp_scraper.utils import extract_urls
+from osp_scraper.seeds import SeedURLList
 
 
 log = logging.getLogger('seed_url_crawler')
 
 
 @click.command()
-@click.argument('csv_file', type=click.Path(exists=True))
-def main(csv_file):
+@click.argument('path', type=click.Path(exists=True))
+def main(path):
 
-    with open(csv_file) as fh:
-        for row in csv.DictReader(fh):
+    seeds = SeedURLList.from_file(path)
 
-            urls = (
-                extract_urls(row['Doc URLs']) +
-                extract_urls(row['Mixed URLs'])
-            )
+    groups = seeds.group_by_domain()
 
-            crawl.delay(
-                'osp_scraper_spider',
-                start_urls=urls,
-                ignore_robots_txt=True,
-            )
+    for domain, urls in groups.items():
 
-            log.debug(urls)
+        crawl.delay(
+            'osp_scraper_spider',
+            start_urls=urls,
+            ignore_robots_txt=True,
+        )
+
+        log.info(f'{len(urls)} URLs for {domain}')
 
 
 if __name__ == '__main__':
