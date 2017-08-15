@@ -63,15 +63,18 @@ def make_filters(seed_urls):
         prefixes.add((hostname, port, prefix))
         hostnames.add((hostname, port))
 
+    # TODO: Read max depths from settings?
+
     for hostname, port, prefix in prefixes:
-        # allow prefix to infinite depth
+        # allow same prefix to max depth 100.
         filters.append(
             Filter.compile(
                 'allow',
                 pattern='regex',
                 hostname=hostname,
                 port=port,
-                path=prefix + ".*"
+                path=prefix + ".*",
+                max_depth=100,
             )
         )
 
