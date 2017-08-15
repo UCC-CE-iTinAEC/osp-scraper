@@ -15,8 +15,7 @@ from .filterware import Filter
 from .services import redis_conn
 
 
-# Limit crawls to 1 week.
-# TODO: Why doesn't it work to pass this via --worker-ttl to the worker?
+# Limit crawls to 1 week, by default.
 @job('default', connection=redis_conn, timeout=604800)
 def crawl(spider, *args, **kwargs):
     """Run a spider.
