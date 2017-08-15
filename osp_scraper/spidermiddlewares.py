@@ -21,21 +21,27 @@ class FilterMiddleware(object):
     def process_spider_output(self, response, result, spider):
         for request in result:
             if not isinstance(request, Request):
+                # Always allow objects that aren't Requests (dict or Item).
+                yield request
+            elif 'depth' not in request.meta:
+                # Always allow requests for files that come from scrapy itself
+                # (robots.txt, etc.).
+                yield request
+            elif request.dont_filter:
+                # Don't filter requests with request.dont_filter.
                 yield request
             else:
-                # we have a request
-
-                # some requests for files come from scrapy itself (robots.txt, etc.)
-                if 'depth' not in request.meta or request.dont_filter:
-                    yield request
-
+                # We have a request that needs to be checked against filters.
                 allowed, filter = check_filters(spider.filters, request)
 
                 if not allowed:
-                    pass # drop request
+                    # Request not allowed by filter.
+                    pass
                 else:
+                    # Request allowed by filter.
                     if filter.max_depth == None:
-                        request.depth = 0 # reset depth
+                        # Reset depth.
+                        request.depth = 0
 
-                    yield request # allow request
+                    yield request
 
