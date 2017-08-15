@@ -22,10 +22,11 @@ def main(path):
     for domain, urls in groups.items():
 
         # Args for crawl function.
+        args = ('osp_scraper_spider',)
         kwargs = dict(start_urls=urls, ignore_robots_txt=True)
 
         # Queue the job with 24h timeout.
-        queue.enqueue(crawl, kwargs=kwargs, timeout=86400)
+        queue.enqueue(crawl, args=args, kwargs=kwargs, timeout=86400)
         log.info(f'{len(urls)} URLs for {domain}')
 
 
