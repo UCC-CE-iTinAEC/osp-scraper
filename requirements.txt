@@ -49,6 +49,7 @@ w3lib==1.17.0
 wcwidth==0.1.7
 Werkzeug==0.12.2
 zope.interface==4.4.1
+botocore==1.6.2
 
 -e git+ssh://git@github.com/opensyllabus/osp-site-scrapers.git#egg=osp_site_scrapers
 git+https://github.com/wearpants/warc3
