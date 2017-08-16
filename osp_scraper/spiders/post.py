@@ -12,12 +12,6 @@ class PostSpider(FilterSpider):
     """
     name = "post"
 
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        kwargs['start_urls'] = kwargs['database_urls']
-        spider = super().from_crawler(crawler, *args, **kwargs)
-        return spider
-
     def start_requests(self):
         for start_url in self.database_urls:
             url, body = start_url.split("?POST_BODY=", 1)
