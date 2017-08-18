@@ -61,9 +61,8 @@ class FilterSpider(OSPSpider):
     `source_anchor` are implemented this way).
 
     The `meta` dictionary is also used for depth tracking - the `depth` item
-    keeps track of the depth of the crawl. Depths are incremented in
-    `process_text_url` and checked / reset by the spider & downloader
-    middlewares for Filters with infinite depth.
+    keeps track of the depth of the crawl. Depths are checked / reset by the
+    spider & downloader middlewares for Filters with infinite depth.
 
     Attributes
     ==========
