@@ -110,6 +110,10 @@ SPIDER_MIDDLEWARES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+# Templates
+# XXX: Is there a clean way to avoid this import?
+import osp_scraper
+TEMPLATES_DIR = os.path.join(osp_scraper.__path__[0], 'templates')
 
 # ENV
 
