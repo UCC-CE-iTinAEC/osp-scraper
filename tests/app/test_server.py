@@ -5,6 +5,16 @@ app = Flask(__name__)
 def index():
     return "This is a test server"
 
+@app.route("/start_path/")
+def start():
+    return render_template(
+        "template.html",
+        title="start page",
+        links=[
+            "/"
+        ]
+    )
+
 @app.route("/infinite/<page>")
 def infinite(page):
     page_num = int(page)
