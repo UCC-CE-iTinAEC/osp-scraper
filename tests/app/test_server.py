@@ -12,7 +12,7 @@ def infinite(page):
         "template.html",
         title=f"infinite page {page}",
         links=[
-            (f"/infinite/{page_num+1}", f"link to infinite page {page_num+1}")
+            "/infinite/{page_num+1}"
         ]
     )
 
