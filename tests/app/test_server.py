@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, send_from_directory
 app = Flask(__name__)
 
 @app.route("/")
@@ -30,6 +30,10 @@ def infinite(page):
 def redirect_to():
     path = request.args.get('path', "/")
     return redirect(path)
+
+@app.route("/file/<filename>")
+def file(filename):
+    return send_from_directory("files", filename)
 
 if __name__ == "__main__":
     app.run(debug=True)
