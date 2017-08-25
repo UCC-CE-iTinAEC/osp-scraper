@@ -5,7 +5,7 @@ import logging
 
 import click
 
-from osp_scraper.tasks import crawl
+from osp_scraper.tasks import crawl, get_crawl_job
 from osp_scraper.utils import extract_urls
 
 
@@ -16,7 +16,7 @@ log = logging.getLogger('edu_repo_crawler')
 @click.option('--local', default=False, is_flag=True, help='Run one spider locally instead of queueing it')
 @click.option('--institution', default=None, help='Only run spiders for the institution with this ID')
 def main(csv_file, local, institution):
-    crawl_func = crawl if local else crawl.delay
+    crawl_func = crawl if local else get_crawl_job("168h")
 
     with open(csv_file) as f:
         for row in csv.DictReader(f):
