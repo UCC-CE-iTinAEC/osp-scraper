@@ -14,8 +14,6 @@ from .spiders import FilterSpider
 from .filterware import Filter
 from .services import redis_conn
 
-# Run crawls for 1 day max.
-@job('default', connection=redis_conn, timeout=86400)
 def crawl(spider, *args, **kwargs):
     """Run a spider.
 
