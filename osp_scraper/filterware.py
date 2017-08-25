@@ -143,7 +143,8 @@ class Filter:
         ret = True
 
         for name, regex in self._url_regexes.items():
-            if regex is not None and not regex.match(getattr(url, name) or ''):
+            attribute = str(getattr(url, name, ''))
+            if regex is not None and not regex.match(attribute):
                 ret = False
                 break
 
