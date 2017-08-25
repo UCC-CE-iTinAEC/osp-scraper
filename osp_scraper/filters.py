@@ -71,7 +71,8 @@ def make_filters(seed_urls):
                 pattern='regex',
                 hostname=hostname,
                 port=port,
-                path=prefix + ".*"
+                path=prefix + ".*",
+                max_hops_from_seed=1000
             )
         )
 

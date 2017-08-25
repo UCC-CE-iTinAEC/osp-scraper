@@ -83,6 +83,7 @@ class Filter:
     :ivar port: server port, as text
     :ivar source_anchor: anchor text from parent page, lower cased
     :ivar max_depth:  None for infinite depth, positive integer for a depth limit
+    :ivar max_hops_from_seed:  None for infinite depth, positive integer for a depth limit
     """
 
     # XXX it be nice to use slots here for performance, but we need
@@ -107,6 +108,7 @@ class Filter:
     source_anchor = attr.ib(validator=_optional_str, default=None)
     query = attr.ib(validator=attr.validators.optional(_dict_of_str_str), default=attr.Factory(dict))
     max_depth = attr.ib(validator=attr.validators.optional(_positive_int), default=None)
+    max_hops_from_seed = attr.ib(validator=attr.validators.optional(_positive_int), default=None)
 
     def asdict(self):
         """return a dict representation of the filter"""
@@ -153,6 +155,9 @@ class Filter:
                 not self._source_anchor_regex.match(request.meta['source_anchor'].lower())):
                 ret = False
             elif self.max_depth is not None and request.meta['depth'] > self.max_depth:
+                ret = False
+            elif self.max_hops_from_seed is not None\
+                    and request.meta['hops_from_seed'] > self.max_hops_from_seed:
                 ret = False
             else:
                 # test all regexes in query_regexes, ignoring unknown query args from URL
