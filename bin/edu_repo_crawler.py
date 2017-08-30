@@ -16,6 +16,24 @@ log = logging.getLogger('edu_repo_crawler')
 @click.option('--local', default=False, is_flag=True, help='Run one spider locally instead of queueing it')
 @click.option('--institution', default=None, help='Only run spiders for the institution with this ID')
 def main(csv_file, local, institution):
+    """
+    Runs crawls based on the information from an EDU-formatted CSV.  For each
+    row of the CSV, up to two types of crawls will be generated:
+
+        - Crawls made over URLs in the 'Database URLs', 'Doc URLs' and 'Mixed
+          URLs' columns by `osp_scraper_spider`
+
+        - Crawls made by a custom scraper with spider `name` specified in the
+          'Custom Scraper Name' column.
+
+    If a row has an entry in the 'Custom Scraper Name' column, any URLs in the
+    'Database URLs' column will be fed as an extra parameter to the custom
+    scraper and will not be crawled by `osp_scraper_spider`.
+
+    If a row contains the word "ignore" in the `robots.txt` column, the
+    robots.txt of any domains being crawled by `osp_scraper_spider` will be
+    ignored.
+    """
     crawl_func = crawl if local else crawl.delay
 
     with open(csv_file) as f:
