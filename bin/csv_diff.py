@@ -11,7 +11,9 @@ from osp_scraper.utils import extract_urls
 @click.argument('new_csv_file', type=click.Path(exists=True))
 @click.argument('out_csv', type=click.File('w'))
 @click.option(
-    '--diff_custom_scrapers', default=False, is_flag=True,
+    '--diff_custom_scrapers',
+    default=False,
+    is_flag=True,
     help=("Consider custom scrapers as part of the diff.  Without this flag, "
           "rows containing 'Custom Scraper Name's are always included in "
           "OUT_CSV."))
