@@ -11,6 +11,9 @@ log = logging.getLogger('edu_repo_crawler')
 @click.command()
 @click.argument('url')
 def main(url):
+    """
+    Run `osp_scraper_spider` over a single URL.
+    """
     params = {
         'start_urls': [url]
     }
