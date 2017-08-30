@@ -13,8 +13,8 @@ log = logging.getLogger('edu_repo_crawler')
 
 @click.command()
 @click.argument('csv_file', type=click.Path(exists=True))
-@click.option('--local', default=False, is_flag=True, help='Run one spider locally instead of queueing it')
-@click.option('--institution', default=None, help='Only run spiders for the institution with this ID')
+@click.option('--local', default=False, is_flag=True, help='Run one spider locally instead of queueing it.')
+@click.option('--institution', default=None, help='Only run spiders for the institution with this ID.')
 def main(csv_file, local, institution):
     """
     Runs crawls based on the information from an EDU-formatted CSV.  For each
