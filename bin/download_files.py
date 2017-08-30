@@ -14,7 +14,7 @@ log = logging.getLogger('file_crawler')
     '--local',
     default=False,
     is_flag=True,
-    help="Run spiders locally instead of queueing them"
+    help="Run spiders locally instead of queueing them."
 )
 def main(csv_file, local):
     """
