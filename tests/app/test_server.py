@@ -17,12 +17,12 @@ def start():
 
 @app.route("/infinite/<page>")
 def infinite(page):
-    page_num = int(page)
+    next_page = int(page) + 1
     return render_template(
         "template.html",
         title=f"infinite page {page}",
         links=[
-            "/infinite/{page_num+1}"
+            f"/infinite/{next_page}"
         ]
     )
 
