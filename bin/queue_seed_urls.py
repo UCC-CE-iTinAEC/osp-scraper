@@ -14,13 +14,20 @@ log = logging.getLogger('seed_url_crawler')
 
 @click.command()
 @click.argument('path', type=click.Path(exists=True))
-def main(path):
+@click.option('--timeout', default="24h", help="Maximum runtime of the jobs")
+def main(path, timeout):
+    """Starts spiders for individual URLs in a text file.
+
+    Takes one input file, which should contain a URL on each line.
+    This script groups the URLs by domain and queues a spider job
+    for each domain.
+    """
     groups = defaultdict(list)
     for url in open(path):
         domain = urlparse(url.strip()).netloc
         groups[domain].append(url.strip())
 
-    queue_crawl = get_crawl_job(timeout='24h')
+    queue_crawl = get_crawl_job(timeout=timeout)
     for domain, urls in groups.items():
         queue_crawl(
             'osp_scraper_spider',
