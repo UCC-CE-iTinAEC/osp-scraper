@@ -3,6 +3,7 @@ arrow==0.10.0
 asn1crypto==0.22.0
 attrs==17.2.0
 Automat==0.6.0
+botocore==1.6.2
 cffi==1.10.0
 click==6.7
 constantly==15.1.0
@@ -49,7 +50,6 @@ w3lib==1.17.0
 wcwidth==0.1.7
 Werkzeug==0.12.2
 zope.interface==4.4.1
-botocore==1.6.2
 
 -e git+ssh://git@github.com/opensyllabus/osp-site-scrapers.git#egg=osp_site_scrapers
 git+https://github.com/wearpants/warc3

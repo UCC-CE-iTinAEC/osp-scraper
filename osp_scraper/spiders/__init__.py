@@ -61,9 +61,8 @@ class FilterSpider(OSPSpider):
     `source_anchor` are implemented this way).
 
     The `meta` dictionary is also used for depth tracking - the `depth` item
-    keeps track of the depth of the crawl. Depths are incremented in
-    `process_text_url` and checked / reset by the spider & downloader
-    middlewares for Filters with infinite depth.
+    keeps track of the depth of the crawl. Depths are checked / reset by the
+    spider & downloader middlewares for Filters with infinite depth.
 
     Attributes
     ==========
@@ -119,15 +118,18 @@ class FilterSpider(OSPSpider):
         file_urls = []
 
         for url, anchor in self.extract_links(response):
+            meta = {
+                'source_url': response.url,
+                'source_anchor': anchor,
+                'depth': response.meta['depth'] + 1,
+                'hops_from_seed': response.meta['hops_from_seed'] + 1
+            }
+
             # if path ends with a known binary file extension download it, otherwise crawl it
             if os.path.splitext(url)[-1][1:].lower() in self.allowed_file_types:
-                meta = self.process_file_url(response, url, anchor)
-                if meta:
-                    file_urls.append((url, meta))
+                file_urls.append((url, meta))
             else:
-                meta = self.process_text_url(response, url, anchor)
-                if meta:
-                    yield scrapy.Request(url, meta=meta)
+                yield scrapy.Request(url, meta=meta)
 
         yield PageItem(
             url=response.url,
@@ -163,20 +165,3 @@ class FilterSpider(OSPSpider):
                 anchor = frame.css("::attr(name)").extract_first()
 
                 yield (url, anchor)
-
-
-    def process_file_url(self, response, url, anchor):
-        """return `Request.meta` for a file url, or None to skip"""
-        return {'source_url': response.url,
-                'source_anchor': anchor,
-                'depth': response.meta['depth'] + 1,
-                'hops_from_seed': response.meta['hops_from_seed'] + 1,
-                }
-
-    def process_text_url(self, response, url, anchor):
-        """return `Request.meta` for a text url, or None to skip"""
-        return {'source_url': response.url,
-                'source_anchor': anchor,
-                'depth': response.meta['depth'] + 1,
-                'hops_from_seed': response.meta['hops_from_seed'] + 1,
-                }

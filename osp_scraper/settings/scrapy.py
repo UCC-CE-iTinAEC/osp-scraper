@@ -17,7 +17,7 @@ import os
 BOT_NAME = 'osp_scraper'
 
 SPIDER_MODULES = ['osp_scraper.spiders', 'osp_site_scrapers']
-NEWSPIDER_MODULE = 'osp_scraper.spiders'
+NEWSPIDER_MODULE = 'osp_site_scrapers'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'osp_scraper (+http://www.yourdomain.com)'
@@ -110,6 +110,10 @@ SPIDER_MIDDLEWARES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+# Templates
+# XXX: Is there a clean way to avoid this import?
+import osp_scraper
+TEMPLATES_DIR = os.path.join(osp_scraper.__path__[0], 'templates')
 
 # ENV
 
