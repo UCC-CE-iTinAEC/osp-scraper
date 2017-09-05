@@ -65,9 +65,9 @@ DOWNLOAD_MAXSIZE = 128 * (1024 * 1024) # 128 MB
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
+EXTENSIONS = {
+   'scrapy.extensions.telnet.TelnetConsole': None,
+}
 
 # WARC Pipelines are added at the scraper level
 ITEM_PIPELINES = {}
