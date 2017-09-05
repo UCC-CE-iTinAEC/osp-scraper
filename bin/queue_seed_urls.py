@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import csv
+from collections import defaultdict
 import logging
+from urllib.parse import urlparse
+
 import click
 
-from osp_scraper.tasks import crawl
-from osp_scraper.seeds import SeedURLList
-from osp_scraper.services import queue
+from osp_scraper.tasks import get_crawl_job
 
 
 log = logging.getLogger('seed_url_crawler')
@@ -14,19 +14,27 @@ log = logging.getLogger('seed_url_crawler')
 
 @click.command()
 @click.argument('path', type=click.Path(exists=True))
-def main(path):
+@click.option('--timeout', default="24h", help="Maximum runtime of the jobs")
+def main(path, timeout):
+    """Starts spiders for individual URLs in a text file.
 
-    seeds = SeedURLList.from_file(path)
-    groups = seeds.group_by_domain()
+    Takes one input file, which should contain a URL on each line.
+    This script groups the URLs by domain and queues a spider job
+    for each domain.
+    """
+    groups = defaultdict(list)
+    for url in open(path):
+        domain = urlparse(url.strip()).netloc
+        groups[domain].append(url.strip())
 
+    queue_crawl = get_crawl_job(timeout=timeout)
     for domain, urls in groups.items():
+        queue_crawl(
+            'osp_scraper_spider',
+            start_urls=urls,
+            ignore_robots_txt=True
+        )
 
-        # Args for crawl function.
-        args = ('osp_scraper_spider',)
-        kwargs = dict(start_urls=urls, ignore_robots_txt=True)
-
-        # Queue the job with 24h timeout.
-        queue.enqueue(crawl, args=args, kwargs=kwargs, timeout=86400)
         log.info(f'{len(urls)} URLs for {domain}')
 
 

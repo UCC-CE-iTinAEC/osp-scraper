@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from osp_scraper.tasks import crawl
+from osp_scraper.tasks import crawl, get_crawl_job
 
 log = logging.getLogger('file_crawler')
 
@@ -17,7 +17,7 @@ log = logging.getLogger('file_crawler')
     help="Run spiders locally instead of queueing them"
 )
 def main(csv_file, local):
-    crawl_func = crawl if local else crawl.delay
+    crawl_func = crawl if local else get_crawl_job("168h")
 
     crawl_func("file_downloader", csv_file=csv_file)
 
