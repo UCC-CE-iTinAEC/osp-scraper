@@ -17,7 +17,7 @@ blacklist_domains = [
 ]
 
 
-def make_filters(seed_urls):
+def make_filters(seed_urls, max_hops_from_seed):
     """Generate filters for a spider from a list of URLs.
 
     * Allow paths with matching prefix to infinite depth
@@ -42,6 +42,14 @@ def make_filters(seed_urls):
             'deny',
             pattern='regex',
             hostname=blacklist_re
+        )
+    )
+
+    filters.append(
+        Filter.compile(
+            'deny',
+            max_hops_from_seed=max_hops_from_seed,
+            invert=True
         )
     )
 
