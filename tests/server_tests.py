@@ -1,7 +1,8 @@
 import os
+import shutil
 import urllib
 
-from twisted.trial import unittest
+import unittest
 import warc
 
 from osp_scraper.tasks import crawl
@@ -18,19 +19,29 @@ class ServerTestCase(unittest.TestCase):
         $ trial tests.server_tests
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.warc_metadata_by_path = {}
+    warc_metadata_by_path = {}
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        FILES_DIR = "_unittest_temp"
+        os.environ["FILES_STORE"] = f"file://{FILES_DIR}/"
+        os.environ["DOWNLOAD_DELAY"] = "0"
+        os.environ["LOG_LEVEL"] = "DEBUG"
+
+        if os.path.isdir(FILES_DIR):
+            shutil.rmtree(FILES_DIR)
+
         crawl(
             'osp_scraper_spider',
-            start_urls=["http://127.0.0.1:5000/start_path/"]
+            start_urls=[
+                "http://127.0.0.1:5000/start_path/",
+                "http://127.0.0.1:5000/infinite/0",
+            ]
         )
 
-        crawl_dir, = os.listdir("downloads/")
-        for filename in os.listdir("downloads/" + crawl_dir):
-            with warc.open(f"downloads/{crawl_dir}/{filename}") as warc_file:
+        crawl_dir, = os.listdir(FILES_DIR)
+        for filename in os.listdir(f"{FILES_DIR}/{crawl_dir}"):
+            with warc.open(f"{FILES_DIR}/{crawl_dir}/{filename}") as warc_file:
                 records = list(warc_file)
             if len(records) == 2:
                 response_record, metadata_record = records
@@ -48,9 +59,11 @@ class ServerTestCase(unittest.TestCase):
                     key, value = line.split(": ")
                     metadata[key] = value
 
-                self.warc_metadata_by_path[path] = metadata
+                cls.warc_metadata_by_path[path] = metadata
 
     def test_start_url(self):
+        self.assertIn("/start_path/", self.warc_metadata_by_path)
+
         metadata = self.warc_metadata_by_path["/start_path/"]
 
         self.assertEqual(metadata["X-Crawl-Depth"], "0")

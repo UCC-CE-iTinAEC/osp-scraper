@@ -44,7 +44,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
-_trial_temp/
+_unittest_temp/
 
 # Translations
 *.mo
