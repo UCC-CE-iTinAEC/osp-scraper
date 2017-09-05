@@ -74,7 +74,7 @@ def make_filters(seed_urls):
                 hostname=hostname,
                 port=port,
                 path=prefix + ".*",
-                max_hops_from_seed=1000
+                max_hops_from_seed=2000
             )
         )
 
