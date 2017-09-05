@@ -36,7 +36,8 @@ class ServerTestCase(unittest.TestCase):
             start_urls=[
                 "http://127.0.0.1:5000/start_path/",
                 "http://127.0.0.1:5000/infinite/0",
-            ]
+            ],
+            max_hops_from_seed=10
         )
 
         crawl_dir, = os.listdir(FILES_DIR)
@@ -70,3 +71,8 @@ class ServerTestCase(unittest.TestCase):
         self.assertEqual(metadata["Hopsfromseed"], "0")
         self.assertEqual(metadata["X-Source-Anchor"], "None")
         self.assertEqual(metadata["X-Source-Url"], "None")
+
+    def test_max_hops_from_seed(self):
+        self.assertIn("/infinite/0", self.warc_metadata_by_path)
+        self.assertIn("/infinite/10", self.warc_metadata_by_path)
+        self.assertNotIn("/infinite/11", self.warc_metadata_by_path)
