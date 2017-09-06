@@ -72,7 +72,41 @@ class ServerTestCase(unittest.TestCase):
         self.assertEqual(metadata["X-Source-Anchor"], "None")
         self.assertEqual(metadata["X-Source-Url"], "None")
 
+    def test_on_path_page(self):
+        pass
+
+    def test_pdf_file(self):
+        pass
+
+    def test_doc_file(self):
+        pass
+
+    def test_docx_file(self):
+        pass
+
+    def test_rtf_file(self):
+        pass
+
     def test_max_hops_from_seed(self):
         self.assertIn("/infinite/0", self.warc_metadata_by_path)
         self.assertIn("/infinite/10", self.warc_metadata_by_path)
         self.assertNotIn("/infinite/11", self.warc_metadata_by_path)
+
+    def test_redirected_page(self):
+        pass
+
+    def test_double_redirected_page(self):
+        pass
+
+    def test_redirected_file(self):
+        pass
+
+    def test_redirect_to_off_path_page(self):
+        pass
+
+    def test_redirect_to_on_path_page(self):
+        pass
+
+    def test_iframe(self):
+        pass
+
