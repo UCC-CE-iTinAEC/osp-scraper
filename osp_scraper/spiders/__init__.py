@@ -78,12 +78,6 @@ class FilterSpider(OSPSpider):
         )
         return spider
 
-    def start_requests(self):
-        for r in super().start_requests():
-            r.meta['depth'] = 0
-            r.meta['hops_from_seed'] = 0
-            yield r
-
     def parse(self, response):
         # we may end up with a binary response here (instead of in `file_urls`) if
         # we are redirected from a `/plain` URL to a binary blob like `/plain.pdf`
@@ -107,8 +101,6 @@ class FilterSpider(OSPSpider):
                 status=response.status,
                 source_url=response.meta.get('source_url'),
                 source_anchor=response.meta.get('source_anchor'),
-                depth = response.meta.get('depth'),
-                hops_from_seed = response.meta.get('hops_from_seed'),
             )
 
     def parse_text(self, response):
@@ -119,8 +111,6 @@ class FilterSpider(OSPSpider):
             meta = {
                 'source_url': response.url,
                 'source_anchor': anchor,
-                'depth': response.meta['depth'] + 1,
-                'hops_from_seed': response.meta['hops_from_seed'] + 1
             }
 
             # if path ends with a known binary file extension download it, otherwise crawl it
@@ -136,8 +126,6 @@ class FilterSpider(OSPSpider):
             status=response.status,
             source_url=response.meta.get('source_url'),
             source_anchor=response.meta.get('source_anchor'),
-            depth = response.meta.get('depth'),
-            hops_from_seed = response.meta.get('hops_from_seed'),
             file_urls = file_urls,
         )
 

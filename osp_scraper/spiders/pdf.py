@@ -19,8 +19,6 @@ class PDFSpider(CustomSpider):
             yield scrapy.Request(
                 start_url,
                 meta={
-                    'depth': 0,
-                    'hops_from_seed': 0,
                     'source_url': start_url,
                     'source_anchor': start_url
                 },
