@@ -80,9 +80,9 @@ DOWNLOADER_MIDDLEWARES = {
 SPIDER_MIDDLEWARES = {
     # disable builtin middlewares
     'scrapy.spidermiddlewares.offsite.OffsiteMiddleware': None,
-    'scrapy.spidermiddlewares.depth.DepthMiddleware': None,
 
     # use our middlewares instead
+    "osp_scraper.spidermiddlewares.DepthMiddleware": 901,
     'osp_scraper.spidermiddlewares.FilterMiddleware': 500,
 }
 
