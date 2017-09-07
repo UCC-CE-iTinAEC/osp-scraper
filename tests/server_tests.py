@@ -7,6 +7,8 @@ import warc
 
 from osp_scraper.tasks import crawl
 
+HOST = "http://127.0.0.1:5000"
+
 class ServerTestCase(unittest.TestCase):
     """Tests the osp_scraper_spider by running it on a test server.
 
@@ -34,8 +36,8 @@ class ServerTestCase(unittest.TestCase):
         crawl(
             'osp_scraper_spider',
             start_urls=[
-                "http://127.0.0.1:5000/start_path/",
-                "http://127.0.0.1:5000/infinite/0",
+                f"{HOST}/path/0/",
+                f"{HOST}/start_path/",
             ],
             max_hops_from_seed=10
         )
@@ -48,8 +50,7 @@ class ServerTestCase(unittest.TestCase):
                 response_record, metadata_record = records
 
                 url = response_record['WARC-Target-URI']
-                u = urllib.parse.urlparse(url)
-                path = u.path
+                relative_url = url.replace(HOST, "")
 
                 metadata_payload = metadata_record.payload.getvalue()\
                     .decode("utf-8")\
@@ -60,7 +61,7 @@ class ServerTestCase(unittest.TestCase):
                     key, value = line.split(": ")
                     metadata[key] = value
 
-                cls.warc_metadata_by_path[path] = metadata
+                cls.warc_metadata_by_path[relative_url] = metadata
 
     def test_start_url(self):
         self.assertIn("/start_path/", self.warc_metadata_by_path)
@@ -72,41 +73,92 @@ class ServerTestCase(unittest.TestCase):
         self.assertEqual(metadata["X-Source-Anchor"], "None")
         self.assertEqual(metadata["X-Source-Url"], "None")
 
-    def test_on_path_page(self):
-        pass
+    def test_anchor(self):
+        metadata = self.warc_metadata_by_path["/"]
+        self.assertEqual(metadata["X-Source-Anchor"], "link to /")
+
+    def test_source_url(self):
+        metadata = self.warc_metadata_by_path["/"]
+        self.assertEqual(metadata["X-Source-Url"], f"{HOST}/start_path/")
+
+    def test_depth_on_path(self):
+        self.assertEqual(
+            self.warc_metadata_by_path["/path/0/infinite/1"]["X-Crawl-Depth"],
+            "0"
+        )
+        self.assertEqual(
+            self.warc_metadata_by_path["/path/0/infinite/10"]["X-Crawl-Depth"],
+            "0"
+        )
+
+    def test_depth_off_path(self):
+        self.assertEqual(
+            self.warc_metadata_by_path["/path/1/"]["X-Crawl-Depth"],
+            "1"
+        )
+        self.assertEqual(
+            self.warc_metadata_by_path["/path/2/"]["X-Crawl-Depth"],
+            "2"
+        )
 
     def test_pdf_file(self):
-        pass
+        self.assertIn("/path/0/file/fileA.pdf", self.warc_metadata_by_path)
 
     def test_doc_file(self):
-        pass
+        self.assertIn("/path/0/file/fileA.doc", self.warc_metadata_by_path)
 
     def test_docx_file(self):
-        pass
+        self.assertIn("/path/0/file/fileA.docx", self.warc_metadata_by_path)
 
     def test_rtf_file(self):
-        pass
+        self.assertIn("/path/0/file/fileA.rtf", self.warc_metadata_by_path)
+
+    def test_max_depth(self):
+        self.assertIn("/path/2/", self.warc_metadata_by_path)
+        self.assertNotIn("/path/3/", self.warc_metadata_by_path)
 
     def test_max_hops_from_seed(self):
-        self.assertIn("/infinite/0", self.warc_metadata_by_path)
-        self.assertIn("/infinite/10", self.warc_metadata_by_path)
-        self.assertNotIn("/infinite/11", self.warc_metadata_by_path)
+        self.assertIn("/path/0/infinite/1", self.warc_metadata_by_path)
 
-    def test_redirected_page(self):
-        pass
-
-    def test_double_redirected_page(self):
-        pass
+        self.assertIn("/path/0/infinite/10", self.warc_metadata_by_path)
+        self.assertNotIn("/path/0/infinite/11", self.warc_metadata_by_path)
 
     def test_redirected_file(self):
-        pass
+        path = "/path/0/redirect?url=/path/0/file/redirected_file.pdf"
+        self.assertIn(path, self.warc_metadata_by_path)
+        metadata = self.warc_metadata_by_path[path]
+        self.assertEqual(metadata["X-Crawl-Depth"], "0")
+        self.assertEqual(metadata["Hopsfromseed"], "1")
 
     def test_redirect_to_off_path_page(self):
-        pass
+        path = "/off_path/0/redirected?redirected_from=on_path"
+        self.assertIn(path, self.warc_metadata_by_path)
+        metadata = self.warc_metadata_by_path[path]
+        self.assertEqual(metadata["X-Crawl-Depth"], "0")
+        self.assertEqual(metadata["Hopsfromseed"], "1")
 
     def test_redirect_to_on_path_page(self):
-        pass
+        path = "/path/0/redirected?redirected_from=on_path"
+        self.assertIn(path, self.warc_metadata_by_path)
+        metadata = self.warc_metadata_by_path[path]
+        self.assertEqual(metadata["X-Crawl-Depth"], "0")
+        self.assertEqual(metadata["Hopsfromseed"], "1")
 
     def test_iframe(self):
-        pass
+        self.assertIn(
+            "/path/0/iframe?url=/path/0/embedded",
+            self.warc_metadata_by_path
+        )
+        self.assertIn("/path/0/embedded", self.warc_metadata_by_path)
+
+    def test_off_domain_depth(self):
+        self.assertIn(
+            "http://httpbin.org/html?source_path=0",
+            self.warc_metadata_by_path
+        )
+
+        self.assertNotIn(
+            "http://httpbin.org/html?source_path=1",
+            self.warc_metadata_by_path
+        )
 
