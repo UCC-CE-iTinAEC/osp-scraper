@@ -1,4 +1,3 @@
-import re
 import logging
 
 from scrapy import Request
@@ -7,6 +6,7 @@ from scrapy.exceptions import IgnoreRequest
 from .filterware import check_filters
 
 logger = logging.getLogger(__name__)
+
 
 class FilterMiddleware(object):
     """Middleware to support filters in the downloading layer."""

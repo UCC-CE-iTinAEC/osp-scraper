@@ -1,6 +1,3 @@
-
-# -*- coding: utf-8 -*-
-
 # Scrapy settings for osp_scraper project
 #
 # For simplicity, this file contains only settings considered important or
@@ -10,9 +7,7 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-
 import os
-
 
 BOT_NAME = 'osp_scraper'
 

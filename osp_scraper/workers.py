@@ -1,5 +1,3 @@
-
-
 from rq import Worker
 
 

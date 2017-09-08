@@ -1,18 +1,9 @@
-
-
-from __future__ import absolute_import
-
-import re
-import urllib.parse
-import os
-
+from rq.decorators import job
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-from rq.decorators import job
 
-from .spiders import FilterSpider
-from .filterware import Filter
 from .services import redis_conn
+
 
 def crawl(spider, *args, **kwargs):
     """Run a spider.
@@ -27,6 +18,7 @@ def crawl(spider, *args, **kwargs):
     proc = CrawlerProcess(settings)
     proc.crawl(spider, *args, **kwargs)
     proc.start()
+
 
 def get_crawl_job(timeout='24h'):
     """Returns a function that will add a crawl call to the Redis queue

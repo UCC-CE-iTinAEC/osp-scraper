@@ -1,11 +1,11 @@
 import logging
-import re
 
 from scrapy import Request
 
 from .filterware import check_filters
 
 logger = logging.getLogger(__name__)
+
 
 class FilterMiddleware(object):
     """Middleware to support filters in the spider layer

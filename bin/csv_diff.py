@@ -6,6 +6,7 @@ import click
 
 from osp_scraper.utils import extract_urls
 
+
 @click.command()
 @click.argument('old_csv_file', type=click.Path(exists=True))
 @click.argument('new_csv_file', type=click.Path(exists=True))
@@ -64,6 +65,7 @@ def main(old_csv_file, new_csv_file, out_csv, diff_custom_scrapers):
                     or diff_row['Doc URLs']
                     or diff_row['Mixed URLs']):
                 writer.writerow(diff_row)
+
 
 if __name__ == '__main__':
     main()

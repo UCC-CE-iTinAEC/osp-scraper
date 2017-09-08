@@ -4,6 +4,7 @@ import csv
 
 import click
 
+
 @click.command()
 @click.argument('in_csv_file', type=click.File('r'))
 @click.argument('out_csv', type=click.File('w'))
@@ -26,6 +27,7 @@ def main(in_csv_file, out_csv, scraper_names, only_database):
                 row['Mixed URLs'] = ""
 
             writer.writerow(row)
+
 
 if __name__ == '__main__':
     main()

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-
-from . import OSPSpider, ALLOWED_FILE_TYPES
 from ..filterware import Filter
 from ..items import PageItem
+from . import ALLOWED_FILE_TYPES, OSPSpider
+
 
 class CustomSpider(OSPSpider):
     custom_settings = {

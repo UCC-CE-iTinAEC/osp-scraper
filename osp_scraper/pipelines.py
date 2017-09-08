@@ -1,30 +1,28 @@
-# -*- coding: utf-8 -*-
-
-import scrapy
-from scrapy.pipelines.files import FilesPipeline
-from scrapy.utils.python import to_bytes
-from scrapy.utils.misc import md5sum
-
-import warc
-import httpstatus
-
-import socket
-import uuid
-import logging
-import os.path
-import time
-import json
 import itertools
 from io import BytesIO
+import json
+import logging
+import os.path
+import socket
+import time
+import uuid
 from urllib.parse import urlparse
+
+import httpstatus
+import scrapy
+from scrapy.pipelines.files import FilesPipeline
+from scrapy.utils.misc import md5sum
+import warc
 
 from . import items
 from .version import git_revision
+
 
 def path_from_warc(record, prefix=""):
     """return a path from the Record ID of a WARC"""
     path = "%s.warc" % record.header.record_id[10:-1]
     return os.path.join(prefix, path)
+
 
 def new_warc(kind):
     """return a new WARCRecord
@@ -43,6 +41,7 @@ def new_warc(kind):
 
     return warc.WARCRecord(header=warc.WARCHeader(headers, defaults=False),
                            defaults=False)
+
 
 def update_warc_info_from_spider(record, spider):
     """update a WARC warcinfo record from a scrapy Spider"""
@@ -84,6 +83,7 @@ def update_warc_response_from_item(record, item):
                                                        (item['content'], )
                                                        )))
 
+
 def update_warc_metadata_from_item(record, item):
     """update a WARC metadata record from a scrapy Item"""
 
@@ -98,6 +98,7 @@ def update_warc_metadata_from_item(record, item):
     buf = BytesIO()
     fields.write_to(buf, version_line=False, extra_crlf=False)
     record.update_payload(buf.getvalue())
+
 
 class WarcStorePipeline(object):
     """Stores web pages in WARC files, similar to `FilesPipeline`.
@@ -168,6 +169,7 @@ class WarcStorePipeline(object):
         metadata.write_to(buf)
         self.store.persist_file(path, buf, None)
         return item
+
 
 class WarcFilesPipeline(FilesPipeline):
     """A customized `FilesPipeline`
