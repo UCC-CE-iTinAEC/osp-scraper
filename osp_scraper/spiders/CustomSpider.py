@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+import signal
+
+from scrapy.shell import inspect_response
 
 from . import OSPSpider, ALLOWED_FILE_TYPES
 from ..filterware import Filter
@@ -89,3 +91,9 @@ class CustomSpider(OSPSpider):
         space and removes leading and trailing whitespace.
         """
         return " ".join(s.split())
+
+    def inspect_response(self, response):
+        sigint_handler = signal.getsignal(signal.SIGINT)
+        inspect_response(response, self)
+        signal.signal(signal.SIGINT, sigint_handler)
+
