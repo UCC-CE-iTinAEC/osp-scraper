@@ -76,7 +76,8 @@ class FilterSpider(OSPSpider):
         spider = super().from_crawler(crawler, *args, **kwargs)
         spider.allowed_file_types = ALLOWED_FILE_TYPES
         spider.filters = make_filters(
-            getattr(cls, 'start_urls', []) + kwargs.get('start_urls', [])
+            getattr(cls, 'start_urls', []) + kwargs.get('start_urls', []),
+            max_hops_from_seed=kwargs.get('max_hops_from_seed', 2000)
         )
         return spider
 

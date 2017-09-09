@@ -156,8 +156,8 @@ class Filter:
                 ret = False
             elif self.max_depth is not None and request.meta['depth'] > self.max_depth:
                 ret = False
-            elif self.max_hops_from_seed is not None\
-                    and request.meta['hops_from_seed'] > self.max_hops_from_seed:
+            elif (self.max_hops_from_seed is not None and
+                  request.meta['hops_from_seed'] > self.max_hops_from_seed):
                 ret = False
             else:
                 # test all regexes in query_regexes, ignoring unknown query args from URL
