@@ -18,7 +18,7 @@ class ServerTestCase(unittest.TestCase):
     To run it, first start the Flask server with:
         $ python tests/app/test_server.py
     Then run the tests with:
-        $ trial tests.server_tests
+        $ python -m unittest tests/server_tests.py
     """
 
     warc_metadata_by_path = {}
