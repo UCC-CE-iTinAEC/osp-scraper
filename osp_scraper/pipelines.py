@@ -2,8 +2,6 @@
 
 import scrapy
 from scrapy.pipelines.files import FilesPipeline
-from scrapy.utils.python import to_bytes
-from scrapy.utils.misc import md5sum
 
 import warc
 import httpstatus
@@ -168,96 +166,3 @@ class WarcStorePipeline(object):
         metadata.write_to(buf)
         self.store.persist_file(path, buf, None)
         return item
-
-class WarcFilesPipeline(FilesPipeline):
-    """A customized `FilesPipeline`
-
-    Saves to a filesystem or S3 path specified in the `FILES_STORE` setting.
-    Pages will be named `<spider>run_id>/<warc-id>.warc`, with a `response`
-    and `metadata` records.
-
-    This subclass effectively bypasses the `FILES_EXPIRES` setting; files
-    will be downloaded anew each time they are encountered.
-
-    `FILES_URLS_FIELD` should be a list of 2 tuples of `(url, meta)`, where
-    the second item is a dict to pass as metadata to `scrapy.Request`.
-    """
-
-    logger = logging.getLogger(__name__)
-
-    def get_media_requests(self, item, info):
-        # hook to generate requests. We expect files_urls_field to be a list of 2 tuples of (url, meta)
-        return [scrapy.Request(url, meta=meta) for url, meta in item.get(self.files_urls_field, [])]
-
-    def file_downloaded(self, response, request, info):
-        # hook called to write bytes
-        path = self.file_path(request, response=response, info=info)
-
-        # build a a scrapy Item for this file
-        i = items.PageItem()
-        i["url"] = request.url
-        i["retrieved"] = int(time.time())
-        i["content"] = response.body
-        i["length"] = len(response.body)
-        i["headers"] = response.headers
-        i["status"] = response.status
-        i["source_anchor"] = response.meta["source_anchor"]
-        i["source_url"] = response.meta["source_url"]
-        i["depth"] = response.meta["depth"]
-        i["hops_from_seed"] = response.meta["hops_from_seed"]
-        i["spider_name"] = info.spider.name
-        i["spider_revision"] = git_revision
-        i["spider_parameters"] = info.spider.get_parameters()
-        i["spider_run_id"] = info.spider.run_id
-
-        # update WARC record
-        record = response.meta["warc_record"]
-        update_warc_response_from_item(record, i)
-
-        # make a WARC metadata
-        metadata = new_warc('metadata')
-        update_warc_metadata_from_item(metadata, i)
-        metadata.header['WARC-Concurrent-To'] = record.header.record_id
-
-        # write it all out
-        buf = BytesIO()
-        record.write_to(buf)
-        metadata.write_to(buf)
-        checksum = md5sum(buf)
-        buf.seek(0)
-        self.store.persist_file(path, buf, info)
-        return checksum
-
-    def file_path(self, request, response=None, info=None):
-        # hook to generate file name. This does something slightly evil - by
-        # generating a unique filename, we force the file to be downloaded
-        # anew each time because the call to `FilesStore.stat_file(..)` will
-        # 404.
-
-        # Make a WARC Record *here*, and use it's `header.record_id` for the file_path
-        # Stuff record on the response object, pull it off in file_downloaded. I'm sorry.
-
-        assert info is not None
-
-        if response is None:
-            # this happens in FilesPipeline.media_to_download to check if
-            # file already exists in storage. We just generate a throwaway
-            # path, forcing it to always be downloaded
-            record = new_warc('response')
-        elif 'warc_record' not in response.meta:
-            # first time file_path has been called for this response
-            record = new_warc('response')
-            response.meta['warc_record'] = record
-        else:
-            # we've been called before for this response, returing existing record
-            record = response.meta['warc_record']
-
-        return path_from_warc(record, info.spider.run_id)
-
-    def _check_media_to_download(self, result, request, info):
-        # By default, scrapy will not follow redirects when downloading files.
-        # This allows the file pipeline to follow redirects instead of just giving a
-        # warning and not downloading the file.
-        x = super()._check_media_to_download(result, request, info)
-        request.meta['handle_httpstatus_all'] = False
-        return x

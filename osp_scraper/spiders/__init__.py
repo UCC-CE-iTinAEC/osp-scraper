@@ -23,7 +23,6 @@ class OSPSpider(scrapy.spiders.Spider):
     # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
     custom_settings = {
         'ITEM_PIPELINES': {
-            "osp_scraper.pipelines.WarcFilesPipeline": 300,
             "osp_scraper.pipelines.WarcStorePipeline": 301
         }
     }
@@ -88,8 +87,6 @@ class FilterSpider(OSPSpider):
             yield r
 
     def parse(self, response):
-        # we may end up with a binary response here (instead of in `file_urls`) if
-        # we are redirected from a `/plain` URL to a binary blob like `/plain.pdf`
         if isinstance(response, scrapy.http.TextResponse):
             return self.parse_text(response)
         else:
@@ -116,8 +113,6 @@ class FilterSpider(OSPSpider):
 
     def parse_text(self, response):
         """handler for text-based responses"""
-        file_urls = []
-
         for url, anchor in self.extract_links(response):
             meta = {
                 'source_url': response.url,
@@ -126,11 +121,7 @@ class FilterSpider(OSPSpider):
                 'hops_from_seed': response.meta['hops_from_seed'] + 1
             }
 
-            # if path ends with a known binary file extension download it, otherwise crawl it
-            if os.path.splitext(url)[-1][1:].lower() in self.allowed_file_types:
-                file_urls.append((url, meta))
-            else:
-                yield scrapy.Request(url, meta=meta)
+            yield scrapy.Request(url, meta=meta)
 
         yield PageItem(
             url=response.url,
@@ -141,7 +132,6 @@ class FilterSpider(OSPSpider):
             source_anchor=response.meta.get('source_anchor'),
             depth = response.meta.get('depth'),
             hops_from_seed = response.meta.get('hops_from_seed'),
-            file_urls = file_urls,
         )
 
     def extract_links(self, response):
