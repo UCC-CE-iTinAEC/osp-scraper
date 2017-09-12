@@ -15,8 +15,11 @@ log = logging.getLogger('edu_repo_crawler')
 @click.argument('csv_file', type=click.Path(exists=True))
 @click.option('--local', default=False, is_flag=True, help='Run one spider locally instead of queueing it')
 @click.option('--institution', default=None, help='Only run spiders for the institution with this ID')
-def main(csv_file, local, institution):
-    crawl_func = crawl if local else get_crawl_job("168h")
+@click.option(
+    '--timeout', default="168h", show_defaults=True,
+    help="Maximum runtime of the jobs")
+def main(csv_file, local, institution, timeout):
+    crawl_func = crawl if local else get_crawl_job(timeout=timeout)
 
     with open(csv_file) as f:
         for row in csv.DictReader(f):
