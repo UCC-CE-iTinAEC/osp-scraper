@@ -16,7 +16,7 @@ log = logging.getLogger('edu_repo_crawler')
 @click.option('--local', default=False, is_flag=True, help='Run one spider locally instead of queueing it')
 @click.option('--institution', default=None, help='Only run spiders for the institution with this ID')
 @click.option(
-    '--timeout', default="168h", show_defaults=True,
+    '--timeout', default="168h", show_default=True,
     help="Maximum runtime of the jobs")
 def main(csv_file, local, institution, timeout):
     crawl_func = crawl if local else get_crawl_job(timeout=timeout)
