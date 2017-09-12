@@ -1,3 +1,4 @@
+import http
 import itertools
 from io import BytesIO
 import json
@@ -8,7 +9,6 @@ import time
 import uuid
 from urllib.parse import urlparse
 
-import httpstatus
 import scrapy
 from scrapy.pipelines.files import FilesPipeline
 from scrapy.utils.misc import md5sum
@@ -74,7 +74,7 @@ def update_warc_response_from_item(record, item):
 
     # XXX scrapy doesn't provide human-readable status string
     status = "HTTP/1.1 {} {}".format(item['status'],
-                                     httpstatus.HTTPStatus(item['status']).name).encode()
+                                     http.HTTPStatus(item['status']).name).encode()
     headers = [b': '.join((k, v)) for k, l in item['headers'].iteritems() for v in l]
 
     record.update_payload(b"\r\n".join(itertools.chain((status, ),
@@ -258,7 +258,7 @@ class WarcFilesPipeline(FilesPipeline):
 
     def _check_media_to_download(self, result, request, info):
         # By default, scrapy will not follow redirects when downloading files.
-        # This allows the file pipeline to follow redirects instead of just giving a 
+        # This allows the file pipeline to follow redirects instead of just giving a
         # warning and not downloading the file.
         x = super()._check_media_to_download(result, request, info)
         request.meta['handle_httpstatus_all'] = False
