@@ -20,12 +20,12 @@ class FilterMiddleware(object):
 
     def process_request(self, request, spider):
         # some requests for files come from scrapy itself (robots.txt, etc.)
-        if 'depth' not in request.meta or request.dont_filter:
+        if 'depth' not in request.meta:
             return
 
         allowed, filter = check_filters(spider.filters, request)
 
-        if not allowed:
+        if not allowed and not request.dont_filter:
             raise IgnoreRequest
 
         if filter.max_depth is None:
