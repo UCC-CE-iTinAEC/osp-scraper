@@ -9,6 +9,8 @@
 
 import os
 
+from .. import templates
+
 BOT_NAME = 'osp_scraper'
 
 SPIDER_MODULES = ['osp_scraper.spiders', 'osp_site_scrapers']
@@ -106,9 +108,7 @@ SPIDER_MIDDLEWARES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 # Templates
-# XXX: Is there a clean way to avoid this import?
-import osp_scraper
-TEMPLATES_DIR = os.path.join(osp_scraper.__path__[0], 'templates')
+TEMPLATES_DIR = templates.__path__._path[0]
 
 # ENV
 
