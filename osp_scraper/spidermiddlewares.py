@@ -26,7 +26,6 @@ class DepthMiddleware(object):
         hops_from_seed = response.meta.get('hops_from_seed', 0)
 
         for obj in result:
-            print("result:", obj)
             if isinstance(obj, PageItem):
                 obj['depth'] = depth
                 obj['hops_from_seed'] = hops_from_seed
