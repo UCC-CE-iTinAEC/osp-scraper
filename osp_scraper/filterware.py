@@ -1,15 +1,15 @@
-import logging
 import fnmatch
+import logging
 import re
 import urllib.parse
-import attr
-import os
 
+import attr
 from scrapy import signals
 from scrapy.http import Request
 from scrapy.utils.httpobj import urlparse_cached
 
 logger = logging.getLogger(__name__)
+
 
 def check_filters(filters, request):
     """Check a list of filters
@@ -32,10 +32,12 @@ def check_filters(filters, request):
 
 ## attr validators for internal use in Filter
 
+
 def _positive_int(instance, attribute, value):
     """attr validator that accepts positive ints"""
     if not isinstance(value, int) or value <= 0:
         raise ValueError('%s must be a strictly positive int' % attribute.name)
+
 
 def _one_of(allowed_values):
     """construct an attr validator that accepts only `allowed_values`"""
@@ -43,6 +45,7 @@ def _one_of(allowed_values):
     def _valid(instance, attribute, value):
         if value not in allowed_values:
             raise ValueError('%s must be one of %r' % (value, allowed_values))
+
 
 def _dict_of_str_str(instance, attribute, value):
     """attr validator that accepts dict of str => str"""
@@ -53,8 +56,10 @@ def _dict_of_str_str(instance, attribute, value):
         if not isinstance(k, str) or not isinstance(v, str):
             raise TypeError('%s must contain strings', attribute.name)
 
+
 # an optional string attr validator
 _optional_str = attr.validators.optional(attr.validators.instance_of(str))
+
 
 @attr.s(cmp=False)
 class Filter:

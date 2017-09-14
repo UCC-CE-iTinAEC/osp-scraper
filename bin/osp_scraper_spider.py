@@ -8,6 +8,7 @@ from osp_scraper.tasks import crawl
 
 log = logging.getLogger('edu_repo_crawler')
 
+
 @click.command()
 @click.argument('url')
 def main(url):
@@ -16,6 +17,7 @@ def main(url):
     }
 
     crawl('osp_scraper_spider', **params)
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

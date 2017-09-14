@@ -37,6 +37,7 @@ def main(path, timeout):
 
         log.info(f'{len(urls)} URLs for {domain}')
 
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     main()

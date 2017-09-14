@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import csv
 from itertools import groupby
 from operator import itemgetter
@@ -7,6 +5,7 @@ from operator import itemgetter
 import scrapy
 
 from ..spiders.CustomSpider import CustomSpider
+
 
 class FileDownloader(CustomSpider):
     name = "file_downloader"

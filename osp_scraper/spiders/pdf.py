@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-
 from io import BytesIO
 
 import PyPDF2 as pyPdf
 import scrapy
 
 from ..spiders.CustomSpider import CustomSpider
+
 
 class PDFSpider(CustomSpider):
     """

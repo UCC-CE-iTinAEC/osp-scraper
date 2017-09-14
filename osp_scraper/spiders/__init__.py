@@ -1,20 +1,17 @@
-import scrapy.spiders
-import scrapy.http
-from scrapy.utils.httpobj import urlparse_cached
-
-from urllib.parse import urlparse
 import os.path
 import re
 import uuid
 
+import scrapy.http
+from scrapy.utils.httpobj import urlparse_cached
+
+from ..filters import make_filters
 from ..items import PageItem
 from ..utils import guess_extension
-from .. import version
-from ..filterware import Filter
-from ..filters import make_filters
 
 # file types we download
 ALLOWED_FILE_TYPES = frozenset({'pdf', 'doc', 'docx', 'rtf'})
+
 
 class OSPSpider(scrapy.spiders.Spider):
     """Common base class for all syllascrape spiders"""

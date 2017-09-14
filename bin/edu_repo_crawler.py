@@ -8,8 +8,8 @@ import click
 from osp_scraper.tasks import crawl, get_crawl_job
 from osp_scraper.utils import extract_urls
 
-
 log = logging.getLogger('edu_repo_crawler')
+
 
 @click.command()
 @click.argument('csv_file', type=click.Path(exists=True))
@@ -53,6 +53,7 @@ def main(csv_file, local, institution):
 
                 if institution:
                     break
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
