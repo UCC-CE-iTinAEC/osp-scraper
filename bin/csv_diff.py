@@ -43,8 +43,16 @@ def main(old_csv_file, new_csv_file, out_csv, diff_custom_scrapers):
                 )
 
                 if diff_custom_scrapers:
-                    if new_row['Custom Scraper Name'] == old_row['Custom Scraper Name']:
-                        diff_row['Custom Scraper Name'] = ""
+                    old_names = map(
+                        str.strip, old_row['Custom Scraper Name'].split(","))
+                    new_names = map(
+                        str.strip, new_row['Custom Scraper Name'].split(","))
+                    diff_names = []
+                    for new_name in new_names:
+                        if new_name not in old_names:
+                            diff_names.append(new_name)
+
+                    diff_row['Custom Scraper Name'] = ",".join(diff_names)
 
                 # Always include un-diffed 'Database URLs' for rows that have a
                 # custom scraper in case those 'Database URLs' are used by that
