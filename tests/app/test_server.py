@@ -33,7 +33,8 @@ def path_root(path_num):
             f"/path/{path_num}/file/fileA.pdf",
             f"/path/{path_num}/file/fileA.rtf",
             f"/path/{path_num}/redirect?url=/path/{path_num}/file/redirected_file.pdf",
-            f"/path/{path_num}/iframe?url=/path/{path_num}/embedded",
+            f"/path/{path_num}/iframe?url=/path/{path_num}/iframe_embedded",
+            f"/path/{path_num}/frame?url=/path/{path_num}/frame_embedded",
             f"http://httpbin.org/html?source_path={path_num}",
         ]
     )
@@ -73,6 +74,15 @@ def iframe(path_num):
     return render_template(
         "iframe.html",
         title="iframe",
+        url=url
+    )
+
+@app.route("/path/<path_num>/frame")
+def frame(path_num):
+    url = request.args.get('url', "/")
+    return render_template(
+        "frame.html",
+        title="frame",
         url=url
     )
 
