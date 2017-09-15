@@ -159,10 +159,11 @@ class ServerTestCase(unittest.TestCase):
         self.assertIn("/path/0/frame_embedded", self.warc_metadata_by_path)
 
     def test_off_domain_depth(self):
-        self.assertIn(
-            "http://httpbin.org/html?source_path=0",
-            self.warc_metadata_by_path
-        )
+        path = "http://httpbin.org/html?source_path=0"
+        self.assertIn(path, self.warc_metadata_by_path)
+        metadata = self.warc_metadata_by_path[path]
+        self.assertEqual(metadata["X-Crawl-Depth"], "1")
+        self.assertEqual(metadata["Hopsfromseed"], "1")
 
         self.assertNotIn(
             "http://httpbin.org/html?source_path=1",
