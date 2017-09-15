@@ -1,9 +1,11 @@
 from flask import Flask, render_template, redirect, request, send_from_directory
 app = Flask(__name__)
 
+
 @app.route("/")
 def index():
     return "This is a test server"
+
 
 @app.route("/start_path/")
 def start():
@@ -14,6 +16,7 @@ def start():
             "/"
         ]
     )
+
 
 @app.route("/path/<path_num>/")
 def path_root(path_num):
@@ -39,6 +42,7 @@ def path_root(path_num):
         ]
     )
 
+
 @app.route("/path/<path_num>/infinite/<page>")
 def infinite(path_num, page):
     next_page = int(page) + 1
@@ -50,15 +54,18 @@ def infinite(path_num, page):
         ]
     )
 
+
 @app.route("/redirect")
 def redirect_to():
     url = request.args.get('url', "/")
     return redirect(url)
 
+
 @app.route("/path/<path_num>/redirect")
 def on_path_redirect(path_num):
     url = request.args.get('url', "/")
     return redirect(url)
+
 
 @app.route("/path/<path_num>/<page_name>")
 def on_path_page(path_num, page_name):
@@ -67,6 +74,7 @@ def on_path_page(path_num, page_name):
         title=page_name,
         links=[]
     )
+
 
 @app.route("/path/<path_num>/iframe")
 def iframe(path_num):
@@ -77,6 +85,7 @@ def iframe(path_num):
         url=url
     )
 
+
 @app.route("/path/<path_num>/frame")
 def frame(path_num):
     url = request.args.get('url', "/")
@@ -86,6 +95,7 @@ def frame(path_num):
         url=url
     )
 
+
 @app.route("/off_path/<path_num>/<page_name>")
 def off_path_page(path_num, page_name):
     return render_template(
@@ -94,9 +104,11 @@ def off_path_page(path_num, page_name):
         links=[]
     )
 
+
 @app.route("/path/<path_num>/file/<filename>")
 def file(path_num, filename):
     return send_from_directory("files", filename)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
