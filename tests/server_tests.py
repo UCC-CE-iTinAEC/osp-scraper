@@ -146,10 +146,17 @@ class ServerTestCase(unittest.TestCase):
 
     def test_iframe(self):
         self.assertIn(
-            "/path/0/iframe?url=/path/0/embedded",
+            "/path/0/iframe?url=/path/0/iframe_embedded",
             self.warc_metadata_by_path
         )
-        self.assertIn("/path/0/embedded", self.warc_metadata_by_path)
+        self.assertIn("/path/0/iframe_embedded", self.warc_metadata_by_path)
+
+    def test_frame(self):
+        self.assertIn(
+            "/path/0/frame?url=/path/0/frame_embedded",
+            self.warc_metadata_by_path
+        )
+        self.assertIn("/path/0/frame_embedded", self.warc_metadata_by_path)
 
     def test_off_domain_depth(self):
         self.assertIn(
