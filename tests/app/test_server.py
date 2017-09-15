@@ -35,6 +35,7 @@ def path_root(path_num):
             f"/path/{path_num}/file/fileA.docx",
             f"/path/{path_num}/file/fileA.pdf",
             f"/path/{path_num}/file/fileA.rtf",
+            f"/path/{path_num}/file/fileA.zip",
             f"/path/{path_num}/redirect?url=/path/{path_num}/file/redirected_file.pdf",
             f"/path/{path_num}/iframe?url=/path/{path_num}/iframe_embedded",
             f"/path/{path_num}/frame?url=/path/{path_num}/frame_embedded",
