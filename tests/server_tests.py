@@ -113,6 +113,9 @@ class ServerTestCase(unittest.TestCase):
     def test_rtf_file(self):
         self.assertIn("/path/0/file/fileA.rtf", self.warc_metadata_by_path)
 
+    def test_zip_file(self):
+        self.assertNotIn("/path/0/file/fileA.zip", self.warc_metadata_by_path)
+
     def test_max_depth(self):
         self.assertIn("/path/2/", self.warc_metadata_by_path)
         self.assertNotIn("/path/3/", self.warc_metadata_by_path)
