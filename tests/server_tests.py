@@ -118,9 +118,9 @@ class ServerTestCase(unittest.TestCase):
         self.assertNotIn("/path/3/", self.warc_metadata_by_path)
 
     def test_max_hops_from_seed(self):
-        self.assertIn("/path/0/infinite/1", self.warc_metadata_by_path)
+        for i in range(1, 11):
+            self.assertIn(f"/path/0/infinite/{i}", self.warc_metadata_by_path)
 
-        self.assertIn("/path/0/infinite/10", self.warc_metadata_by_path)
         self.assertNotIn("/path/0/infinite/11", self.warc_metadata_by_path)
 
     def test_redirected_file(self):
