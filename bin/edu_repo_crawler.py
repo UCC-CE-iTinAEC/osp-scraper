@@ -4,11 +4,15 @@ import csv
 import logging
 
 import click
+from scrapy.utils.log import configure_logging
+from scrapy.utils.project import get_project_settings
 
 from osp_scraper.tasks import crawl, get_crawl_job
 from osp_scraper.utils import extract_urls
 
+
 log = logging.getLogger('edu_repo_crawler')
+configure_logging(get_project_settings())
 
 
 @click.command()
@@ -22,12 +26,14 @@ def main(csv_file, local, institution):
         for row in csv.DictReader(f):
             if not institution or institution == row['id']:
                 # Run custom scraper, but only if not running locally.
-                if not local and row['Custom Scraper Name']:
+                if row['Custom Scraper Name']:
                     # Create a parameter of database URLs that can be used by
                     # custom scrapers as needed.
+                    print('trigger')
                     params = {
                         "database_urls": extract_urls(row['Database URLs'])
                     }
+                    print(params)
                     crawl_func(row['Custom Scraper Name'], **params)
 
                 # Find comma-separated URLs in these columns.
@@ -56,5 +62,4 @@ def main(csv_file, local, institution):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     main()

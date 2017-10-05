@@ -6,8 +6,6 @@ import click
 
 from osp_scraper.tasks import crawl, get_crawl_job
 
-log = logging.getLogger('file_crawler')
-
 
 @click.command()
 @click.argument('csv_file', type=click.Path(exists=True))
@@ -24,5 +22,4 @@ def main(csv_file, local):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     main()

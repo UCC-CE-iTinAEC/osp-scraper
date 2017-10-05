@@ -5,11 +5,14 @@ import logging
 from urllib.parse import urlparse
 
 import click
+from scrapy.utils.log import configure_logging
+from scrapy.utils.project import get_project_settings
 
 from osp_scraper.tasks import get_crawl_job
 
 
 log = logging.getLogger('seed_url_crawler')
+configure_logging(get_project_settings())
 
 
 @click.command()
@@ -39,5 +42,4 @@ def main(path, timeout):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     main()
