@@ -16,6 +16,28 @@ blacklist_domains = [
     'wikipedia.org',
 ]
 
+# Common file extensions that are not followed if they occur in links
+# modified list from:
+# https://github.com/scrapy/scrapy/blob/dcb279bd6cc85cf1743b548e44b050edba6a2ed8/scrapy/linkextractors/__init__.py
+blacklist_extensions = [
+    # images
+    'mng', 'pct', 'bmp', 'gif', 'jpg', 'jpeg', 'png', 'pst', 'psp', 'tif',
+    'tiff', 'ai', 'drw', 'dxf', 'eps', 'ps', 'svg',
+
+    # audio
+    'mp3', 'wma', 'ogg', 'wav', 'ra', 'aac', 'mid', 'au', 'aiff',
+
+    # video
+    '3gp', 'asf', 'asx', 'avi', 'mov', 'mp4', 'mpg', 'qt', 'rm', 'swf', 'wmv',
+    'm4a',
+
+    # office suites
+    'xls', 'xlsx', 'ppt', 'pptx', 'pps', 'ods', 'odg', 'odp',
+
+    # other
+    'css', 'exe', 'bin', 'rss', 'zip', 'rar',
+]
+
 
 def make_filters(seed_urls, max_hops_from_seed):
     """Generate filters for a spider from a list of URLs.
@@ -32,7 +54,7 @@ def make_filters(seed_urls, max_hops_from_seed):
 
     filters = []
 
-    blacklist_re = r"(^.*\.)?({})$".format(
+    domain_blacklist_re = r"(^.*\.)?({})$".format(
         "|".join(map(re.escape, blacklist_domains))
     )
 
@@ -41,7 +63,20 @@ def make_filters(seed_urls, max_hops_from_seed):
         Filter.compile(
             'deny',
             pattern='regex',
-            hostname=blacklist_re
+            hostname=domain_blacklist_re
+        )
+    )
+
+    extension_blacklist_re = r"^.*\.({})$".format(
+        "|".join(blacklist_extensions)
+    )
+
+    # blacklist extentions
+    filters.append(
+        Filter.compile(
+            'deny',
+            pattern='regex',
+            path=extension_blacklist_re
         )
     )
 
