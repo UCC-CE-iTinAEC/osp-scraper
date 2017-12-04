@@ -19,8 +19,6 @@ class FileDownloader(CustomSpider):
                     yield scrapy.Request(
                         row.get('Document Url'),
                         meta={
-                            'depth': 0,
-                            'hops_from_seed': 0,
                             'source_url': source,
                             'source_anchor': ""
                         },

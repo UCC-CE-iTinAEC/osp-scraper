@@ -16,20 +16,6 @@ class CustomSpider(OSPSpider):
         spider.filters = [Filter.compile('allow')]
         return spider
 
-    def start_requests(self):
-        """
-        Override in subclass for each site when necessary.  Overriding
-        start_requests is not necessary when implementing parse.
-
-        By default, sets both the 'depth' and 'hops_from_seed' meta content to
-        0.  This can be useful when making calls to parse_for_files directly out
-        of parse.
-        """
-        for request in super().start_requests():
-            request.meta['depth'] = 0
-            request.meta['hops_from_seed'] = 0
-            yield request
-
     def parse(self, response):
         """
         Implement in subclass for each site when necessary.  Implementing parse
@@ -60,8 +46,6 @@ class CustomSpider(OSPSpider):
             meta = {
                 'source_url': response.url,
                 'source_anchor': self.clean_whitespace(anchor),
-                'depth': response.meta['depth'] + 1,
-                'hops_from_seed': response.meta['hops_from_seed'] + 1,
             }
 
             file_urls.append((response.urljoin(url), meta))
@@ -77,8 +61,6 @@ class CustomSpider(OSPSpider):
             status=response.status,
             source_url=response.meta['source_url'],
             source_anchor=self.clean_whitespace(response.meta['source_anchor']),
-            depth=response.meta['depth'],
-            hops_from_seed=response.meta['hops_from_seed'],
             file_urls=file_urls
         )
 
