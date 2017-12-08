@@ -5,7 +5,7 @@ import logging
 
 import click
 
-from osp_scraper.tasks import crawl, get_crawl_job
+from osp_scraper.tasks import get_crawl_job, LocalQueue
 from osp_scraper.utils import extract_urls
 
 log = logging.getLogger('edu_repo_crawler')
@@ -16,13 +16,12 @@ log = logging.getLogger('edu_repo_crawler')
 @click.option('--local', default=False, is_flag=True, help='Run one spider locally instead of queueing it')
 @click.option('--institution', default=None, help='Only run spiders for the institution with this ID')
 def main(csv_file, local, institution):
-    crawl_func = crawl if local else get_crawl_job("168h")
+    crawl_func = LocalQueue.enqueue if local else get_crawl_job("168h")
 
     with open(csv_file) as f:
         for row in csv.DictReader(f):
             if not institution or institution == row['id']:
-                # Run custom scraper, but only if not running locally.
-                if not local and row['Custom Scraper Name']:
+                if row['Custom Scraper Name']:
                     # Create a parameter of database URLs that can be used by
                     # custom scrapers as needed.
                     params = {
@@ -53,6 +52,8 @@ def main(csv_file, local, institution):
 
                 if institution:
                     break
+    if local:
+        LocalQueue.run()
 
 
 if __name__ == '__main__':
