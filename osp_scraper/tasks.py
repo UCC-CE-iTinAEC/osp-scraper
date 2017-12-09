@@ -1,9 +1,14 @@
+import logging
+
 from rq.decorators import job
 from scrapy.crawler import CrawlerProcess, CrawlerRunner
 from scrapy.utils.project import get_project_settings
 from twisted.internet import reactor, defer
 
 from .services import redis_conn
+
+
+logger = logging.getLogger(__name__)
 
 
 def crawl(spider, *args, **kwargs):
@@ -17,8 +22,15 @@ def crawl(spider, *args, **kwargs):
         settings.attributes.get('ROBOTSTXT_OBEY').value = False
 
     proc = CrawlerProcess(settings)
-    proc.crawl(spider, *args, **kwargs)
-    proc.start()
+    try:
+        proc.crawl(spider, *args, **kwargs)
+        proc.start()
+    except KeyError as err:
+        # Log a warning if the scraper name is invalid instead of
+        # causing the job to fail.
+        # NOTE: If there is any other type of error, the job will fail, and all
+        # the jobs that depend on it will fail as well.
+        logger.warning(err.args[0])
 
 
 def get_crawl_job(timeout='24h'):
@@ -44,8 +56,26 @@ class LocalQueue():
         @defer.inlineCallbacks
         def deferred_crawl():
             for spider, args, kwargs in cls.queue:
-                yield runner.crawl(spider, *args, **kwargs)
-            reactor.stop()
+                try:
+                    yield runner.crawl(spider, *args, **kwargs)
+                except KeyError as err:
+                    # Log a warning if the scraper name is invalid instead of
+                    # causing the job to fail.
+                    # NOTE: If there is any other type of error, the job will
+                    # fail, and all the jobs that depend on it will fail as
+                    # well.
+                    logger.warning(err.args[0])
+
+            # XXX: If all the names fail, then trying to run
+            # `reactor.stop()` will give an "Unhandled error in
+            # Deferred" complaint and hang.  It will also hang in
+            # general if no spiders have been run.  I assume there's
+            # some twisted-way to handle this, but for now, just log an
+            # error.
+            if reactor.running:
+                reactor.stop()
+            else:
+                logger.critical("LocalQueue: No valid scraper names found.")
 
         deferred_crawl()
         reactor.run()

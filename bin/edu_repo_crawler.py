@@ -21,13 +21,19 @@ def main(csv_file, local, institution):
     with open(csv_file) as f:
         for row in csv.DictReader(f):
             if not institution or institution == row['id']:
+                job = None
                 if row['Custom Scraper Name']:
                     # Create a parameter of database URLs that can be used by
                     # custom scrapers as needed.
                     params = {
                         "database_urls": extract_urls(row['Database URLs'])
                     }
-                    crawl_func(row['Custom Scraper Name'], **params)
+                    for scraper_name in row['Custom Scraper Name'].split(","):
+                        job = crawl_func(
+                            scraper_name.strip(),
+                            depends_on=job,
+                            **params
+                        )
 
                 # Find comma-separated URLs in these columns.
                 urls = extract_urls(row['Doc URLs'])
@@ -46,7 +52,7 @@ def main(csv_file, local, institution):
                         params['ignore_robots_txt'] = True
                         log.info("Ignoring robots.txt")
 
-                    crawl_func('osp_scraper_spider', **params)
+                    crawl_func('osp_scraper_spider', depends_on=job, **params)
                 else:
                     log.debug("No URLs found for %s", row['name'])
 
