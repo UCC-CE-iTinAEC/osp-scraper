@@ -60,7 +60,17 @@ class LocalQueue():
                     # Log a warning if the scraper name is invalid instead of
                     # causing the job to fail.
                     logger.warning(err.args[0])
-            reactor.stop()
+
+            # XXX: If all the names fail, then trying to run
+            # `reactor.stop()` will give an "Unhandled error in
+            # Deferred" complaint and hang.  It will also hang in
+            # general if no spiders have been run.  I assume there's
+            # some twisted-way to handle this, but for now, just log an
+            # error.
+            if reactor.running:
+                reactor.stop()
+            else:
+                logger.critical("LocalQueue: No valid scraper names found.")
 
         deferred_crawl()
         reactor.run()
