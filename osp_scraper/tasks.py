@@ -28,6 +28,8 @@ def crawl(spider, *args, **kwargs):
     except KeyError as err:
         # Log a warning if the scraper name is invalid instead of
         # causing the job to fail.
+        # NOTE: If there is any other type of error, the job will fail, and all
+        # the jobs that depend on it will fail as well.
         logger.warning(err.args[0])
 
 
@@ -59,6 +61,9 @@ class LocalQueue():
                 except KeyError as err:
                     # Log a warning if the scraper name is invalid instead of
                     # causing the job to fail.
+                    # NOTE: If there is any other type of error, the job will
+                    # fail, and all the jobs that depend on it will fail as
+                    # well.
                     logger.warning(err.args[0])
 
             # XXX: If all the names fail, then trying to run
