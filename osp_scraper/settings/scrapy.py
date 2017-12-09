@@ -81,9 +81,7 @@ SPIDER_MIDDLEWARES = {
     # disable builtin middlewares
     'scrapy.spidermiddlewares.offsite.OffsiteMiddleware': None,
 
-    # use our middlewares instead
     "osp_scraper.spidermiddlewares.DepthMiddleware": 901,
-    'osp_scraper.spidermiddlewares.FilterMiddleware': 500,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
