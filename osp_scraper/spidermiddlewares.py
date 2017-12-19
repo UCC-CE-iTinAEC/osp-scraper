@@ -7,6 +7,7 @@ from .filterware import check_filters
 
 logger = logging.getLogger(__name__)
 
+
 class DepthMiddleware(object):
     """Middleware to set depths and hops_from_seed
 
@@ -39,11 +40,3 @@ class DepthMiddleware(object):
                 obj.meta['hops_from_seed'] = hops_from_seed + 1
 
             yield obj
-
-    def process_spider_input(self, response, spider):
-        # This is only necessary for backwards compatibility in custom
-        # scrapers that expect depth and hops_from_seed in response.meta
-        if 'depth' not in response.meta:
-            response.meta['depth'] = 0
-        if 'hops_from_seed' not in response.meta:
-            response.meta['hops_from_seed'] = 0
