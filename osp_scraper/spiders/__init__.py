@@ -68,6 +68,13 @@ class FilterSpider(OSPSpider):
 
     name = "osp_scraper_spider"
 
+    custom_settings = {
+        **OSPSpider.custom_settings,
+        # Set download timeout to 1 minute (scrapy default is 3 minutes), which
+        # is more appropriate for broad crawls.
+        'DOWNLOAD_TIMEOUT': 60,
+    }
+
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super().from_crawler(crawler, *args, **kwargs)

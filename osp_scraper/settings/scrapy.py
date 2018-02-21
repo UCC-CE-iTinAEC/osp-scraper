@@ -16,14 +16,15 @@ BOT_NAME = 'osp_scraper'
 SPIDER_MODULES = ['osp_scraper.spiders', 'osp_site_scrapers']
 NEWSPIDER_MODULE = 'osp_site_scrapers'
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'osp_scraper (+http://www.yourdomain.com)'
+# NOTE: Add version number of 'osp-scraper'?
+USER_AGENT = "OSPScraper (+https://www.opensyllabusproject.org)"
 
-# Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+# Don't follow robots.txt.
+ROBOTSTXT_OBEY = False
 
-# Maximum file size to download
-DOWNLOAD_MAXSIZE = 128 * (1024 * 1024) # 128 MB
+# Maximum file size to download.  This value is currently three times the
+# largest known size of a syllabus in our collection.
+DOWNLOAD_MAXSIZE = 30 * (1024 * 1024) # 30 MiB
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
