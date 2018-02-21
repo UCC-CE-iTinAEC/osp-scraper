@@ -4,10 +4,6 @@ from . import ALLOWED_FILE_TYPES, OSPSpider
 
 
 class CustomSpider(OSPSpider):
-    custom_settings = {
-        **OSPSpider.custom_settings,
-        'ROBOTSTXT_OBEY': False
-    }
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
