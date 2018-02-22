@@ -48,10 +48,6 @@ def main(csv_file, local, institution):
                     }
                     log.debug("Params: %r", params)
 
-                    if row['robots.txt'].strip().lower() == "ignore":
-                        params['ignore_robots_txt'] = True
-                        log.info("Ignoring robots.txt")
-
                     crawl_func('osp_scraper_spider', depends_on=job, **params)
                 else:
                     log.debug("No URLs found for %s", row['name'])
