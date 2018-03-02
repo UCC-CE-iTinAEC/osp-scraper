@@ -1,0 +1,10 @@
+---
+
+dependencies:
+
+  - role: ec2-instance
+    ec2_name: "{{ lookup('env', 'OSP_CLUSTER_NS') }}_spark_worker"
+    ec2_tag: "{{ lookup('env', 'OSP_CLUSTER_NS') }}_spark_worker"
+    ec2_instance_type: r4.16xlarge
+    ec2_instance_count: 20
+    ec2_group: spark

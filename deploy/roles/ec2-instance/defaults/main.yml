@@ -1,0 +1,15 @@
+---
+
+# TODO: Update image after running docker-base.deploy.yml.
+ec2_image: ami-02b98778
+ec2_instance_count: 1
+
+# Secret
+ec2_subnet: null
+ec2_keypair: null
+
+# Role
+ec2_name: null
+ec2_tag: null
+ec2_instance_type: null
+ec2_group: null

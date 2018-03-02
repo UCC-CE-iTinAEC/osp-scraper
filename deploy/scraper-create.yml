@@ -1,0 +1,8 @@
+---
+
+- name: Provision a scraper cluster
+  hosts: localhost
+
+  roles:
+    - inventory/scraper/broker
+    - inventory/scraper/worker

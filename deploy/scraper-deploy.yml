@@ -1,0 +1,13 @@
+---
+
+- name: Deploy broker
+  become: yes
+  hosts: tag_Name_scraper_broker
+  roles:
+    - scraper/broker
+
+- name: Deploy workers
+  become: yes
+  hosts: tag_Name_scraper_worker
+  roles:
+    - scraper/worker

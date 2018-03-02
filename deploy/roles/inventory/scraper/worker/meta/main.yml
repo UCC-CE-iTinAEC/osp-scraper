@@ -1,0 +1,13 @@
+---
+
+dependencies:
+
+  - role: ec2-instance
+
+    ec2_name: scraper-worker
+    ec2_tag: scraper-worker
+
+    ec2_instance_type: c4.4xlarge
+    ec2_instance_count: 10
+
+    ec2_group: scraper-broker

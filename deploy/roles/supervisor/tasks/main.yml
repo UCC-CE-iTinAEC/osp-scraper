@@ -1,0 +1,31 @@
+---
+
+- name: Install Supervisor
+  apt:
+    pkg: supervisor
+    update_cache: yes
+    state: latest
+
+- name: Reset Supervisor configs
+  when: supervisor_reset_programs
+  shell: rm /etc/supervisor/conf.d/*.conf
+  ignore_errors: yes
+
+- name: Push the program configs
+  template:
+    src: program.conf.j2
+    dest: /etc/supervisor/conf.d/{{ item.name }}.conf
+  with_items: '{{ supervisor_programs }}'
+
+- name: Restart Supervisor
+  service:
+    name: supervisor
+    state: restarted
+    sleep: 3
+
+# Always restart at end, after downstream roles have populated code.
+- name: Trigger Supervisor restart
+  changed_when: true
+  notify: restart supervisor
+  debug:
+    msg: Supervisor restart

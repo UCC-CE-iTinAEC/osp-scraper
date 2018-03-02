@@ -1,0 +1,14 @@
+---
+
+- name: Get broker IP address
+  register: broker
+  ec2_remote_facts:
+    region: '{{ ec2_region }}'
+    filters:
+      instance-state-name: running
+      # FIXME: this isn't working?
+      'tag:Name': scraper-broker
+
+- name: Set the broker variable
+  set_fact:
+    scraper_broker_host: '{{ broker.instances[0].private_dns_name }}'

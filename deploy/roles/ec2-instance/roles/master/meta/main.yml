@@ -1,0 +1,9 @@
+---
+
+dependencies:
+
+  - role: ec2-instance
+    ec2_name: "{{ lookup('env', 'OSP_CLUSTER_NS') }}_spark_master"
+    ec2_tag: "{{ lookup('env', 'OSP_CLUSTER_NS') }}_spark_master"
+    ec2_instance_type: r3.xlarge
+    ec2_group: spark

@@ -1,0 +1,93 @@
+---
+
+- name: Push boto config
+  template:
+    src: boto.cfg.j2
+    dest: /etc/boto.cfg
+
+- name: Install boto3, for ec2_instance_facts
+  pip:
+    name: boto3
+
+- name: Use envvar for osp_cluster_ns
+  set_fact:
+    osp_cluster_ns: "{{ lookup('env', 'OSP_CLUSTER_NS') }}"
+    tag_spark_worker_label: "tag_mit_{{ lookup('env', 'OSP_CLUSTER_NS') }}_spark_worker"
+    tag_spark_master_label: "tag_mit_{{ lookup('env', 'OSP_CLUSTER_NS') }}_spark_master"
+
+- name: Get master facts
+  register: master
+  ec2_instance_facts:
+    region: '{{ ec2_region }}'
+    filters:
+      instance-state-name: running
+      'tag:mit': "{{ lookup('env', 'OSP_CLUSTER_NS') }}_spark_master"
+
+- name: Set master host
+  set_fact:
+    spark_master_host:
+      '{{ master.instances[0].private_dns_name }}'
+
+- name: Set worker count
+  set_fact:
+    spark_worker_count:
+      '{{ groups[tag_spark_worker_label] | length }}'
+
+- name: Set worker CPU count
+  set_fact:
+    spark_worker_vcpus:
+      '{{ hostvars[groups[tag_spark_worker_label][0]]
+      ["ansible_processor_vcpus"] }}'
+
+- name: Create config directory
+  file:
+    path: /etc/spark
+    state: directory
+
+- name: Render configs
+  template:
+    src: '{{ item }}.j2'
+    dest: /etc/spark/{{ item }}
+  with_items:
+    - spark-defaults.conf
+    - spark-env.sh
+
+# is this block below necessary to prevent a config error/instance error?
+# or is this simply because of virtualenv/which typical mishap with awscli? FIXME
+- name: Log in to Docker Hub
+  docker_login:
+    username: '{{ docker_username }}'
+    password: '{{ docker_password }}'
+    email: '{{ docker_email }}'
+
+#- name: Install Golang for Docker/ECR login helper
+#  shell: "sudo apt-get install -y golang-go"
+#- name: Install the Docker/ECR login helper
+#  shell: "go get -u github.com/awslabs/amazon-ecr-credential-helper/ecr-login/cli/docker-credential-ecr-login"
+#- name: Upgrade pip
+#  shell: "apt-get install --only-upgrade python-pip"
+- name: Install virtualenv for ECR login workaround
+  shell: "apt-get install -y python-virtualenv"
+- name: Create virtualenv for ECR login workaround
+  shell: "python -m virtualenv env"
+- name: One big happy giant login command
+  shell: ". env/bin/activate; pip install --upgrade awscli; $(aws ecr get-login --no-include-email --region us-east-1); deactivate; rm -rf env"
+- name: Pull image from ECR
+  shell: "docker pull 636774461479.dkr.ecr.us-east-1.amazonaws.com/osp-pipeline:latest"
+
+# The above and below may have to be combined into single command
+# because of the timeout that occurs on an AWS/ECR docker login...?
+
+- name: Start master
+  include_tasks: start.yml
+  when: 'tag_spark_master_label in group_names'
+  vars:
+    command: spark-class org.apache.spark.deploy.master.Master
+
+- name: Start workers
+  include_tasks: start.yml
+  when: 'tag_spark_worker_label in group_names'
+  vars:
+    command:
+      'spark-class org.apache.spark.deploy.worker.Worker
+      {{ spark_master_url }}'

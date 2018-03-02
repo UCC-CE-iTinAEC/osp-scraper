@@ -1,0 +1,20 @@
+
+[program:{{ item.name }}]
+
+command={{ item.command }}
+
+environment=
+  LC_ALL="C.UTF-8",
+  LANG="C.UTF-8",
+  {{ item.environment | default('') }}
+
+{% if item.numprocs is defined and item.numprocs > 1 %}
+numprocs={{ item.numprocs }}
+process_name=%(program_name)s_%(process_num)02d
+{% endif %}
+
+{% set config = item.config | default({}) %}
+
+{% for key, val in (supervisor_config | combine(config)).items() %}
+{{ key }}={{ val }}
+{% endfor %}

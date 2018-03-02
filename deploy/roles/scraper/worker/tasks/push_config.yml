@@ -1,0 +1,6 @@
+---
+
+- name: Push dotenv
+  template:
+    src: .env.j2
+    dest: '{{ scraper_src_dir }}/.env'

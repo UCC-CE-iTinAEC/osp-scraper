@@ -1,0 +1,12 @@
+---
+
+dependencies:
+
+  - role: ec2-instance
+
+    ec2_name: scraper-broker
+    ec2_tag: scraper-broker
+
+    ec2_instance_type: c4.4xlarge
+
+    ec2_group: scraper-broker

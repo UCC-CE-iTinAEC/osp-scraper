@@ -1,0 +1,16 @@
+---
+
+- name: Start container
+  docker_container:
+#    image: '{{ docker_image }}'
+    image: '636774461479.dkr.ecr.us-east-1.amazonaws.com/osp-pipeline:latest'
+    name: '{{ docker_name }}'
+    command: '{{ command }}'
+    state: started
+    network_mode: host
+    pull: true
+    restart: true
+    volumes:
+      - /etc/spark:/opt/spark-2.2.1/conf
+      - /mnt:/mnt
+      - /tmp/spark-logs:/opt/spark-2.2.1/work

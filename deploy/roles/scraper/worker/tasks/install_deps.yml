@@ -1,0 +1,10 @@
+---
+
+- name: Install system dependencies
+  apt:
+    pkg: '{{ item }}'
+    update_cache: yes
+    state: latest
+  with_items:
+    - git
+    - python-boto

@@ -1,0 +1,46 @@
+---
+
+- name: Update the source code
+  git:
+    repo: '{{ scraper_repo }}'
+    version: '{{ scraper_branch }}'
+    dest: '{{ scraper_src_dir }}'
+
+- name: Check if a virtualenv exists
+  register: env
+  stat:
+    path: '{{ scraper_src_dir }}/env'
+
+# pyvenv is broken on Ubuntu 14.04.
+- name: Create a Python 3 virtualenv, if necessary
+  when: env.stat.isdir is not defined
+  command: python -m venv env
+  args:
+    chdir: '{{ scraper_src_dir }}'
+
+- name: Update pip
+  command: env/bin/pip install --upgrade pip
+  args:
+    chdir: '{{ scraper_src_dir }}'
+
+- name: Copy the deploy key (for requirements/pip)
+  copy:
+    src: ~/.ssh/id_rsa_deploy
+    dest: ~/.ssh/
+    mode: 0600
+
+- name: Create SSH config (for requirements/pip)
+  shell: printf 'Host github.com\n
+     Hostname github.com\n
+     IdentityFile ~/.ssh/id_rsa_deploy\n
+    ' >> ~/.ssh/config
+
+- name: Install pip dependencies
+  command: env/bin/pip install -r requirements.txt
+  args:
+    chdir: '{{ scraper_src_dir }}'
+
+- name: Install the package
+  command: env/bin/python3 setup.py develop
+  args:
+    chdir: '{{ scraper_src_dir }}'

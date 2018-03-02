@@ -117,3 +117,51 @@ If you use a tool such as [OutWit](https://www.outwit.com/) to get file URLs,
 you can use the `bin/download_files.py` script to save these files as WARCs.  
 The spreadsheet must have `Source Url` and `Document Url` columns.
 
+## Deploying scraper cluster
+
+You need to set a "name" for the crawl that's about to be started, which is
+used as a path prefix for the WARCs produced by the crawl in the `syllascrape`
+bucket. By separating the crawls this way, we can easily choose which WARCs we
+ingest into the pipeline.
+
+1. Make sure you have `~/.ssh/id_rsa_deploy`; check pinned in `#devops` on
+   Slack
+
+1. In `roles/scraper/worker/defaults/main.yml`, set a new value for
+   `scraper_crawl_dir`. Use the format YYYY-MM-DD-<slug>, where the slug
+identifies the crawl in some kind of legible way. Eg, `2017-09-12-usa-can`.
+
+1. If necessary, the `osp-scraper` branch can also be customized by changing
+   the `scraper_branch` variable.
+
+1. By default, 11x c4.4xlarge nodes will be provisioned, one broker and 10
+   workers. To change the cluster size and instance types, edit variables in
+`roles/inventory/scraper`.
+
+1. Like with the Spark deployment, run the `create` and `deploy` playbooks,
+   refreshing the cache after the nodes are provisioned:
+
+    ```
+    ansible-playbook scraper-create.yml
+    ./ec2/ec2.py --refresh-cache
+    ansible-playbook scraper-deploy.yml
+    ```
+    If you get `ERROR! Attempting to decrypt but no vault secrets found` you
+    should use the `--ask-vault-pass` flag and provide the password which is
+    pinned in `#devops` on Slack. You won't need to do this every time.
+
+1. Once the cluster is up, the RQ queue dashboard application is served on port
+   80 by the broker node, under HTTP basic auth. (The username and password are
+set in the encrypted `group_vars/all/osp.vault.yml`, which can be opened with
+`ansible-value`.)
+
+1. SSH into the broker node in the cluster. The code gets deployed to
+   `/opt/scraper`. Change into this directory and activate the virtualenv.
+
+1. To kick off one of the general repository crawls, scp a copy of the CSV onto
+   the broker node. Then, from the scraper directory, run:
+
+    `./bin/edu_repo_crawler.py <path to CSV>
+
+    This will read the CSV and queue crawl jobs for each institution.
+

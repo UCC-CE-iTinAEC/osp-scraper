@@ -1,0 +1,40 @@
+---
+
+# https://github.com/pyenv/pyenv/wiki/Common-build-problems#requirements
+- name: Install system dependencies
+  apt:
+    pkg: '{{ item }}'
+    update_cache: yes
+    state: latest
+  with_items:
+
+    # Python
+    - build-essential
+    - libssl-dev
+    - zlib1g-dev
+    - libbz2-dev
+    - libsqlite3-dev
+    - libreadline-dev
+    - libxslt1-dev
+    - libffi-dev
+    - libxml2-dev
+
+    # Generic
+    - git
+    - htop
+
+- name: Check out pyenv
+  git:
+    repo: '{{ pyenv_repo }}'
+    dest: '{{ pyenv_src_dir }}'
+
+- name: Check if 3.6 is present
+  register: p36
+  stat:
+    path: /usr/local/bin/python3.6
+
+- name: Install 3.6 globally
+  when: p36.stat.exists == False
+  command: >
+    {{ pyenv_src_dir }}/plugins/python-build/bin/python-build
+    {{ python_version }} /usr/local

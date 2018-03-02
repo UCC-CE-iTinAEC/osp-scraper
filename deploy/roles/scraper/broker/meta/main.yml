@@ -1,0 +1,39 @@
+---
+
+dependencies:
+
+  - role: scraper/worker
+
+  - role: redis
+    redis_bind: 0.0.0.0
+
+  - role: supervisor
+
+    supervisor_programs:
+
+      - name: rq-dashboard
+
+        command: >
+          {{ scraper_src_dir }}/env/bin/rq-dashboard
+          --port {{ scraper_admin_port }}
+          --redis-url osp-scraper.xvuk8m.ng.0001.use1.cache.amazonaws.com
+
+        config:
+          directory: '{{ scraper_src_dir }}'
+          autostart: true
+
+  - role: nginx
+
+    nginx_sites:
+      default:
+
+        - listen 80
+        - server_name localhost
+
+        - location / {
+            proxy_set_header Host $http_host;
+            proxy_pass http://localhost:{{ scraper_admin_port }}/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+          }

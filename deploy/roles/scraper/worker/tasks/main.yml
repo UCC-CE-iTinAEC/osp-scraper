@@ -1,0 +1,12 @@
+---
+
+- include: install_deps.yml
+
+- include: init_env.yml
+
+- include: deploy_code.yml
+
+- include: set_broker.yml
+  when: '"ec2" in group_names'
+
+- include: push_config.yml

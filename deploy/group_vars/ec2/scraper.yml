@@ -1,0 +1,3 @@
+---
+
+scraper_files_store: s3://syllascrape/{{ scraper_crawl_dir }}/

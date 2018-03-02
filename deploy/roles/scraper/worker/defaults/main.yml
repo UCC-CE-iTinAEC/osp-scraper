@@ -1,0 +1,17 @@
+---
+
+scraper_repo: https://github.com/opensyllabus/osp-scraper.git
+scraper_branch: master
+
+scraper_src_dir: /opt/scraper
+
+scraper_worker_class: osp_scraper.workers.ScraperWorker
+
+scraper_broker_host: localhost
+scraper_redis_url: redis://osp-scraper.xvuk8m.ng.0001.use1.cache.amazonaws.com:6379/0
+scraper_concurrency: 60
+
+scraper_crawl_dir: 2018-03-02-lily
+scraper_files_store: /home/{{ ansible_ssh_user }}/{{ scraper_crawl_dir }}
+
+scraper_download_delay: 3

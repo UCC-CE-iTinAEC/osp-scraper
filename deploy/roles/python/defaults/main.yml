@@ -1,0 +1,6 @@
+---
+
+pyenv_repo: https://github.com/pyenv/pyenv.git
+pyenv_src_dir: /opt/pyenv
+
+python_version: 3.6.1

@@ -1,0 +1,29 @@
+---
+
+- name: Push the boto credentials
+  template:
+    src: boto.cfg.j2
+    dest: /etc/boto.cfg
+
+- name: Create the data directory
+  when: '"s3://" not in scraper_files_store'
+  file:
+    path: '{{ scraper_files_store }}'
+    owner: '{{ ansible_ssh_user }}'
+    state: directory
+
+# Add the (forwarded) GitHub host key to the global known hosts, which makes it
+# possible to clone private repos via pip.
+
+# TODO: Cleaner way to do this?
+
+- name: Get the GitHub host key
+  become: false
+  register: github
+  command: ssh-keyscan -t rsa github.com
+
+- name: Add the key to known hosts
+  lineinfile:
+    dest: /etc/ssh/ssh_known_hosts
+    line: '{{ github.stdout }}'
+    create: true

@@ -1,0 +1,7 @@
+
+ansible
+boto
+boto3
+docopt
+awscli
+slackclient
