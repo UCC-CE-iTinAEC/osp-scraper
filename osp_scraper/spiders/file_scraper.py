@@ -16,8 +16,11 @@ class FileDownloader(CustomSpider):
 
             for source, group in groupby(rows, itemgetter('Source Url')):
                 for row in group:
+                    # In OutWit CSVs, target URLs may be located in either the
+                    # 'Document Url' or 'Page Url' columns.
+                    url = row.get('Document Url') or row.get('Page Url')
                     yield scrapy.Request(
-                        row.get('Document Url'),
+                        url,
                         meta={
                             'source_url': source,
                             'source_anchor': ""
